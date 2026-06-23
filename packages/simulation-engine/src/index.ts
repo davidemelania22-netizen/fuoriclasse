@@ -27,3 +27,7 @@ export * from './match/team-strength';
 export * from './match/match-engine';
 export * from './match/standings';
 export * from './match/season';
+export * from './career/market-value';
+export * from './career/contract';
+export * from './career/transfer-ai';
+export * from './career/selection';

@@ -8,5 +8,6 @@ export * from './countries';
 export * from './world-config';
 export * from './progression-config';
 export * from './match-config';
+export * from './career-config';
 
 export const GAME_DATA_PACKAGE_NAME = '@football-life/game-data';
