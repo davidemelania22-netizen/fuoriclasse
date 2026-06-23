@@ -7,5 +7,6 @@ export * from './attributes';
 export * from './contracts';
 export * from './schemas';
 export * from './world-config';
+export * from './progression-config';
 
 export const SHARED_PACKAGE_NAME = '@football-life/shared';
