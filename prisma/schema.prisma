@@ -1,0 +1,490 @@
+// Football Life: Player Career Simulator — data model.
+//
+// SQLite notes:
+//  - SQLite has no native enums: every "enum" field is a String whose allowed
+//    values are defined and validated in @football-life/shared (Zod).
+//  - Decimal-like attributes use Float; money uses Int; structured blobs use Json.
+//  - All career-scoped rows carry saveGameId and cascade-delete with the save.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Static, license-free reference data (not tied to a save game).
+model Country {
+  id         String @id // stable code, e.g. "IT"
+  code       String @unique
+  name       String
+  reputation Int
+
+  @@map("countries")
+}
+
+model SaveGame {
+  id                String   @id @default(uuid())
+  name              String
+  seed              String
+  currentDate       DateTime
+  playerPersonId    String? // soft reference to the protagonist Person
+  simulationVersion String
+  isCompleted       Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  lastPlayedAt      DateTime @default(now())
+
+  persons        Person[]
+  players        Player[]
+  clubs          Club[]
+  competitions   Competition[]
+  seasons        Season[]
+  fixtures       Fixture[]
+  contracts      Contract[]
+  injuries       Injury[]
+  relationships  Relationship[]
+  events         GameEvent[]
+  eventCooldowns EventCooldown[]
+  transferOffers TransferOffer[]
+  transactions   FinancialTransaction[]
+  decisionLogs   DecisionLog[]
+  simulationLogs SimulationLog[]
+
+  @@index([lastPlayedAt])
+  @@index([playerPersonId])
+  @@map("save_games")
+}
+
+model Person {
+  id                     String   @id @default(uuid())
+  saveGameId             String
+  firstName              String
+  lastName               String
+  birthDate              DateTime
+  nationalityId          String // soft reference to Country.id
+  secondaryNationalityId String?
+  personType             String // PLAYER | COACH | AGENT | FAMILY | PARTNER | OTHER
+  personalityProfile     Json
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  saveGame              SaveGame       @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  player                Player?
+  relationshipsAsSource Relationship[] @relation("RelationshipSource")
+  relationshipsAsTarget Relationship[] @relation("RelationshipTarget")
+
+  @@index([saveGameId, personType])
+  @@index([saveGameId, birthDate])
+  @@map("persons")
+}
+
+model Player {
+  id                 String    @id @default(uuid())
+  personId           String    @unique
+  saveGameId         String
+  clubId             String?
+  primaryPosition    String // GK | DF | MF | FW | ...
+  secondaryPositions Json
+  preferredFoot      String // LEFT | RIGHT | BOTH
+  heightCm           Int
+  weightKg           Float
+  currentAbility     Float
+  potentialAbility   Float
+  reputation         Int
+  popularity         Int
+  marketValue        Int
+  condition          Float
+  fatigue            Float
+  morale             Float
+  form               Float
+  confidence         Float
+  motivation         Float
+  stress             Float
+  happiness          Float
+  mentalHealth       Float
+  careerStatus       String // YOUTH | ACTIVE | INJURED | RETIRED | UNEMPLOYED
+  retirementDate     DateTime?
+
+  saveGame       SaveGame               @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  person         Person                 @relation(fields: [personId], references: [id], onDelete: Cascade)
+  club           Club?                  @relation(fields: [clubId], references: [id], onDelete: SetNull)
+  attributes     PlayerAttribute[]
+  contracts      Contract[]
+  injuries       Injury[]
+  appearances    MatchAppearance[]
+  seasonStats    PlayerSeasonStats[]
+  transferOffers TransferOffer[]
+  transactions   FinancialTransaction[]
+  decisionLogs   DecisionLog[]
+
+  @@index([saveGameId])
+  @@index([clubId])
+  @@map("players")
+}
+
+model PlayerAttribute {
+  id           String   @id @default(uuid())
+  playerId     String
+  attributeKey String
+  value        Float
+  category     String // TECHNICAL | PHYSICAL | MENTAL | HIDDEN
+  updatedAt    DateTime @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, attributeKey])
+  @@map("player_attributes")
+}
+
+model Club {
+  id              String  @id @default(uuid())
+  saveGameId      String
+  staticClubKey   String?
+  name            String
+  shortName       String
+  countryId       String // soft reference to Country.id
+  competitionId   String?
+  reputation      Int
+  balance         Int
+  wageBudget      Int
+  transferBudget  Int
+  academyQuality  Int
+  trainingQuality Int
+  medicalQuality  Int
+  scoutingQuality Int
+  pressureLevel   Int
+  philosophy      Json
+
+  saveGame     SaveGame            @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  competition  Competition?        @relation(fields: [competitionId], references: [id], onDelete: SetNull)
+  players      Player[]
+  contracts    Contract[]
+  homeFixtures Fixture[]           @relation("HomeClub")
+  awayFixtures Fixture[]           @relation("AwayClub")
+  standings    Standing[]
+  appearances  MatchAppearance[]
+  seasonStats  PlayerSeasonStats[]
+  offersFrom   TransferOffer[]     @relation("OfferFromClub")
+  offersTo     TransferOffer[]     @relation("OfferToClub")
+
+  @@index([saveGameId])
+  @@index([competitionId])
+  @@map("clubs")
+}
+
+model Contract {
+  id              String   @id @default(uuid())
+  saveGameId      String
+  playerId        String
+  clubId          String
+  startDate       DateTime
+  endDate         DateTime
+  weeklyWage      Int
+  signingBonus    Int
+  appearanceBonus Int
+  goalBonus       Int
+  releaseClause   Int?
+  squadRole       String // KEY | FIRST_TEAM | ROTATION | BACKUP | PROSPECT
+  status          String // ACTIVE | EXPIRED | TERMINATED | PENDING
+  createdAt       DateTime @default(now())
+
+  saveGame SaveGame @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  player   Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  club     Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, status])
+  @@index([clubId, endDate])
+  @@map("contracts")
+}
+
+model Competition {
+  id          String   @id @default(uuid())
+  saveGameId  String
+  name        String
+  countryId   String? // soft reference to Country.id
+  type        String // LEAGUE | CUP | YOUTH_LEAGUE | INTERNATIONAL
+  tier        Int
+  reputation  Int
+  seasonStart DateTime
+  seasonEnd   DateTime
+  rules       Json
+
+  saveGame SaveGame @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  clubs    Club[]
+  seasons  Season[]
+
+  @@index([saveGameId])
+  @@map("competitions")
+}
+
+model Season {
+  id            String   @id @default(uuid())
+  saveGameId    String
+  competitionId String
+  label         String
+  startDate     DateTime
+  endDate       DateTime
+  status        String // SCHEDULED | IN_PROGRESS | COMPLETED
+
+  saveGame    SaveGame            @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  competition Competition         @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  fixtures    Fixture[]
+  standings   Standing[]
+  playerStats PlayerSeasonStats[]
+
+  @@index([saveGameId])
+  @@index([competitionId])
+  @@map("seasons")
+}
+
+model Fixture {
+  id             String   @id @default(uuid())
+  saveGameId     String
+  seasonId       String
+  homeClubId     String
+  awayClubId     String
+  scheduledAt    DateTime
+  status         String // SCHEDULED | PLAYED | POSTPONED
+  homeScore      Int?
+  awayScore      Int?
+  importance     Float
+  weather        Json?
+  simulationData Json?
+
+  saveGame    SaveGame          @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  season      Season            @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  homeClub    Club              @relation("HomeClub", fields: [homeClubId], references: [id], onDelete: Cascade)
+  awayClub    Club              @relation("AwayClub", fields: [awayClubId], references: [id], onDelete: Cascade)
+  appearances MatchAppearance[]
+
+  @@index([scheduledAt])
+  @@index([seasonId, status])
+  @@index([homeClubId, scheduledAt])
+  @@index([awayClubId, scheduledAt])
+  @@map("fixtures")
+}
+
+model MatchAppearance {
+  id            String  @id @default(uuid())
+  fixtureId     String
+  playerId      String
+  clubId        String
+  started       Boolean
+  minutesPlayed Int
+  position      String
+  rating        Float
+  goals         Int
+  assists       Int
+  yellowCards   Int
+  redCards      Int
+  statistics    Json
+
+  fixture Fixture @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  player  Player  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  club    Club    @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@unique([fixtureId, playerId])
+  @@map("match_appearances")
+}
+
+model Standing {
+  id           String @id @default(uuid())
+  seasonId     String
+  clubId       String
+  played       Int    @default(0)
+  won          Int    @default(0)
+  drawn        Int    @default(0)
+  lost         Int    @default(0)
+  goalsFor     Int    @default(0)
+  goalsAgainst Int    @default(0)
+  points       Int    @default(0)
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, clubId])
+  @@map("standings")
+}
+
+model Injury {
+  id              String    @id @default(uuid())
+  saveGameId      String
+  playerId        String
+  injuryTypeKey   String
+  startedAt       DateTime
+  expectedEndAt   DateTime
+  actualEndAt     DateTime?
+  severity        Int
+  recurrenceRisk  Float
+  status          String // ACTIVE | RECOVERING | HEALED
+  treatmentChoice String?
+  attributeImpact Json?
+
+  saveGame SaveGame @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  player   Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([saveGameId])
+  @@index([playerId, status])
+  @@map("injuries")
+}
+
+model Relationship {
+  id               String    @id @default(uuid())
+  saveGameId       String
+  sourcePersonId   String
+  targetPersonId   String
+  relationshipType String // FAMILY | TEAMMATE | COACH | AGENT | PARTNER | RIVAL | FRIEND
+  affinity         Int
+  trust            Int
+  conflict         Int
+  influence        Int
+  status           String // ACTIVE | ENDED
+  startedAt        DateTime
+  endedAt          DateTime?
+  metadata         Json?
+
+  saveGame SaveGame @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  source   Person   @relation("RelationshipSource", fields: [sourcePersonId], references: [id], onDelete: Cascade)
+  target   Person   @relation("RelationshipTarget", fields: [targetPersonId], references: [id], onDelete: Cascade)
+
+  @@unique([saveGameId, sourcePersonId, targetPersonId, relationshipType])
+  @@map("relationships")
+}
+
+model GameEvent {
+  id                String   @id @default(uuid())
+  saveGameId        String
+  definitionKey     String
+  category          String
+  occurredAt        DateTime
+  title             String
+  description       String
+  status            String // PENDING | RESOLVED | EXPIRED
+  selectedChoiceKey String?
+  subjects          Json
+  payload           Json
+  chainId           String?
+
+  saveGame SaveGame @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+
+  @@index([saveGameId, status])
+  @@index([saveGameId, occurredAt])
+  @@map("game_events")
+}
+
+model EventCooldown {
+  id              String   @id @default(uuid())
+  saveGameId      String
+  definitionKey   String
+  lastOccurredAt  DateTime
+  occurrenceCount Int      @default(0)
+  nextEligibleAt  DateTime
+
+  saveGame SaveGame @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+
+  @@unique([saveGameId, definitionKey])
+  @@map("event_cooldowns")
+}
+
+model TransferOffer {
+  id            String   @id @default(uuid())
+  saveGameId    String
+  playerId      String
+  fromClubId    String
+  toClubId      String
+  fee           Int
+  offeredWage   Int
+  contractYears Int
+  squadRole     String
+  status        String // PENDING | ACCEPTED | REJECTED | EXPIRED | WITHDRAWN
+  createdAt     DateTime @default(now())
+  expiresAt     DateTime
+
+  saveGame SaveGame @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  player   Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  fromClub Club     @relation("OfferFromClub", fields: [fromClubId], references: [id], onDelete: Cascade)
+  toClub   Club     @relation("OfferToClub", fields: [toClubId], references: [id], onDelete: Cascade)
+
+  @@index([saveGameId, status])
+  @@index([playerId])
+  @@map("transfer_offers")
+}
+
+model FinancialTransaction {
+  id            String   @id @default(uuid())
+  saveGameId    String
+  playerId      String
+  occurredAt    DateTime
+  type          String // WAGE | BONUS | SPONSOR | PURCHASE | INVESTMENT | TAX | OTHER
+  amount        Int
+  description   String
+  referenceType String?
+  referenceId   String?
+
+  saveGame SaveGame @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  player   Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([saveGameId])
+  @@index([playerId, occurredAt])
+  @@map("financial_transactions")
+}
+
+model PlayerSeasonStats {
+  id             String @id @default(uuid())
+  playerId       String
+  seasonId       String
+  clubId         String
+  appearances    Int    @default(0)
+  starts         Int    @default(0)
+  minutes        Int    @default(0)
+  goals          Int    @default(0)
+  assists        Int    @default(0)
+  yellowCards    Int    @default(0)
+  redCards       Int    @default(0)
+  averageRating  Float  @default(0)
+  cleanSheets    Int    @default(0)
+  aggregateStats Json
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, seasonId, clubId])
+  @@map("player_season_stats")
+}
+
+model DecisionLog {
+  id             String   @id @default(uuid())
+  saveGameId     String
+  playerId       String
+  occurredAt     DateTime
+  decisionType   String
+  selectedOption String
+  context        Json
+  consequences   Json
+
+  saveGame SaveGame @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+  player   Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([saveGameId])
+  @@index([playerId, occurredAt])
+  @@map("decision_logs")
+}
+
+model SimulationLog {
+  id         String   @id @default(uuid())
+  saveGameId String
+  occurredAt DateTime
+  system     String
+  level      String // DEBUG | INFO | WARN | ERROR
+  message    String
+  data       Json?
+
+  saveGame SaveGame @relation(fields: [saveGameId], references: [id], onDelete: Cascade)
+
+  @@index([saveGameId, occurredAt])
+  @@map("simulation_logs")
+}
