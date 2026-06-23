@@ -5,5 +5,6 @@
  * Milestone 3 onward.
  */
 export * from './countries';
+export * from './world-config';
 
 export const GAME_DATA_PACKAGE_NAME = '@football-life/game-data';
