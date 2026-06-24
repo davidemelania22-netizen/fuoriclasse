@@ -1,11 +1,22 @@
 import type { PrismaClient } from '@prisma/client';
-import type { AttributeCategory } from '@football-life/shared';
+import { InjuryStatus, type AttributeCategory } from '@football-life/shared';
 import type { AttributeValue } from '@football-life/simulation-engine';
 import type {
   ProgressionRepository,
   ProtagonistSnapshot,
   WeeklyUpdate,
 } from './progression-repository';
+
+const ACTIVE_INJURY_STATUSES = [InjuryStatus.Active, InjuryStatus.Recovering];
+const WEEK_MS = 7 * 86_400_000;
+
+function attributeValue(
+  attributes: readonly { key: string; value: number }[],
+  key: string,
+  fallback: number,
+): number {
+  return attributes.find((a) => a.key === key)?.value ?? fallback;
+}
 
 export class PrismaProgressionRepository implements ProgressionRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -37,8 +48,26 @@ export class PrismaProgressionRepository implements ProgressionRepository {
       category: attribute.category as AttributeCategory,
     }));
 
+    const injuryHistoryCount = await this.prisma.injury.count({
+      where: { playerId: player.id },
+    });
+    const active = await this.prisma.injury.findFirst({
+      where: { playerId: player.id, status: { in: ACTIVE_INJURY_STATUSES } },
+      orderBy: { expectedEndAt: 'desc' },
+    });
+    const weeksRemaining = active
+      ? Math.max(
+          0,
+          Math.ceil(
+            (active.expectedEndAt.getTime() - save.currentDate.getTime()) /
+              WEEK_MS,
+          ),
+        )
+      : 0;
+
     return {
       saveGameId,
+      seed: save.seed,
       playerId: player.id,
       currentDate: save.currentDate,
       birthDate: person.birthDate,
@@ -48,6 +77,19 @@ export class PrismaProgressionRepository implements ProgressionRepository {
       fatigue: player.fatigue,
       morale: player.morale,
       motivation: player.motivation,
+      stress: player.stress,
+      mentalHealth: player.mentalHealth,
+      careerStatus: player.careerStatus,
+      injuryProneness: attributeValue(attributes, 'injuryProneness', 30),
+      injuryHistoryCount,
+      activeInjury: active
+        ? {
+            id: active.id,
+            weeksRemaining,
+            severity: active.severity,
+            recurrenceRisk: active.recurrenceRisk,
+          }
+        : null,
       attributes,
       club: player.club
         ? {
@@ -68,6 +110,10 @@ export class PrismaProgressionRepository implements ProgressionRepository {
           condition: update.condition,
           fatigue: update.fatigue,
           motivation: update.motivation,
+          morale: update.morale,
+          stress: update.stress,
+          mentalHealth: update.mentalHealth,
+          careerStatus: update.careerStatus,
         },
       });
 
@@ -80,6 +126,32 @@ export class PrismaProgressionRepository implements ProgressionRepository {
             },
           },
           data: { value: attribute.value },
+        });
+      }
+
+      for (const injury of update.injuriesToCreate) {
+        await tx.injury.create({
+          data: {
+            saveGameId: update.saveGameId,
+            playerId: update.playerId,
+            injuryTypeKey: injury.typeKey,
+            startedAt: injury.startedAt,
+            expectedEndAt: injury.expectedEndAt,
+            actualEndAt: injury.actualEndAt,
+            severity: injury.severity,
+            recurrenceRisk: injury.recurrenceRisk,
+            status: injury.status,
+          },
+        });
+      }
+
+      for (const healed of update.healedInjuryIds) {
+        await tx.injury.update({
+          where: { id: healed.id },
+          data: {
+            status: InjuryStatus.Healed,
+            actualEndAt: healed.actualEndAt,
+          },
         });
       }
 

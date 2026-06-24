@@ -10,5 +10,6 @@ export * from './world-config';
 export * from './progression-config';
 export * from './match-config';
 export * from './career-config';
+export * from './wellbeing-config';
 
 export const SHARED_PACKAGE_NAME = '@football-life/shared';

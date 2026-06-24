@@ -31,3 +31,6 @@ export * from './career/market-value';
 export * from './career/contract';
 export * from './career/transfer-ai';
 export * from './career/selection';
+export * from './wellbeing/injury-system';
+export * from './wellbeing/morale-system';
+export * from './wellbeing/relationship-system';

@@ -1,6 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TrainingIntensity, type NewGameInput } from '@football-life/shared';
-import { DEFAULT_PROGRESSION_CONFIG } from '@football-life/game-data';
+import {
+  DEFAULT_PROGRESSION_CONFIG,
+  DEFAULT_WELLBEING_CONFIG,
+} from '@football-life/game-data';
 import { PrismaProgressionRepository } from '../repositories/prisma-progression-repository';
 import { PrismaSaveGameRepository } from '../repositories/prisma-save-game-repository';
 import { createTestDatabase, type TestDatabase } from '../test/test-db';
@@ -8,6 +11,12 @@ import { advanceWeeks } from './advance-week';
 import { createNewGame } from './create-new-game';
 
 const DAY_MS = 86_400_000;
+
+// Training-focused tests isolate progression by disabling injuries.
+const noInjuryWellbeing = {
+  ...DEFAULT_WELLBEING_CONFIG,
+  injury: { ...DEFAULT_WELLBEING_CONFIG.injury, weeklyBaseProbability: 0 },
+};
 
 const newGame: NewGameInput = {
   name: 'Progression Test',
@@ -39,7 +48,11 @@ describe('advanceWeeks', () => {
     const startDate = new Date(game.save.currentDate);
 
     const report = await advanceWeeks(
-      { repository: progressionRepo, config: DEFAULT_PROGRESSION_CONFIG },
+      {
+        repository: progressionRepo,
+        config: DEFAULT_PROGRESSION_CONFIG,
+        wellbeingConfig: noInjuryWellbeing,
+      },
       {
         saveGameId: game.save.id,
         weeks: 20,
@@ -86,7 +99,11 @@ describe('advanceWeeks', () => {
     expect(game.player.ageYears).toBe(14);
 
     const report = await advanceWeeks(
-      { repository: progressionRepo, config: DEFAULT_PROGRESSION_CONFIG },
+      {
+        repository: progressionRepo,
+        config: DEFAULT_PROGRESSION_CONFIG,
+        wellbeingConfig: noInjuryWellbeing,
+      },
       {
         saveGameId: game.save.id,
         weeks: 60,
@@ -103,7 +120,11 @@ describe('advanceWeeks', () => {
   it('returns null for an unknown save', async () => {
     const progressionRepo = new PrismaProgressionRepository(db.prisma);
     const report = await advanceWeeks(
-      { repository: progressionRepo, config: DEFAULT_PROGRESSION_CONFIG },
+      {
+        repository: progressionRepo,
+        config: DEFAULT_PROGRESSION_CONFIG,
+        wellbeingConfig: noInjuryWellbeing,
+      },
       { saveGameId: 'nope', weeks: 1 },
     );
     expect(report).toBeNull();

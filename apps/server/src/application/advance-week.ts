@@ -1,6 +1,9 @@
 import {
+  CareerStatus,
+  InjuryStatus,
   type AttributeCategory,
   type ProgressionConfig,
+  type WellbeingConfig,
   TrainingIntensity,
 } from '@football-life/shared';
 import {
@@ -8,15 +11,29 @@ import {
   applySeasonalAging,
   applyWeeklyTraining,
   calendarAge,
+  clamp,
+  createRandomSource,
+  recoverInjuryWeek,
+  rollInjury,
   seasonIndexSince,
+  updateMentalHealth,
+  updateMorale,
+  updateStress,
   type PlayerProgressState,
 } from '@football-life/simulation-engine';
 import { GAME_START_DATE } from '../config';
-import type { ProgressionRepository } from '../repositories/progression-repository';
+import type {
+  InjuryToCreate,
+  ProgressionRepository,
+} from '../repositories/progression-repository';
+
+const FALLBACK_INJURY_TYPES = ['strain', 'sprain', 'knock'];
 
 export interface AdvanceWeeksDeps {
   repository: ProgressionRepository;
   config: ProgressionConfig;
+  wellbeingConfig: WellbeingConfig;
+  injuryTypeKeys?: readonly string[];
   difficultyModifier?: number;
 }
 
@@ -37,7 +54,19 @@ export interface WeeklyAdvanceReport {
   abilityAfter: number;
   fatigue: number;
   condition: number;
+  morale: number;
+  stress: number;
+  injured: boolean;
+  injuriesSustained: number;
   newCurrentDate: string;
+}
+
+interface TrackedInjury {
+  weeksRemaining: number;
+  /** Set when the injury pre-existed in the database. */
+  existingId: string | null;
+  /** Set when the injury was created during this advance. */
+  record: InjuryToCreate | null;
 }
 
 export async function advanceWeeks(
@@ -54,6 +83,10 @@ export async function advanceWeeks(
   const focus = input.focus ?? null;
   const usefulMinutes = input.usefulMinutes ?? 0;
   const difficultyModifier = deps.difficultyModifier ?? 1;
+  const injuryTypeKeys =
+    deps.injuryTypeKeys && deps.injuryTypeKeys.length > 0
+      ? deps.injuryTypeKeys
+      : FALLBACK_INJURY_TYPES;
   const club = snapshot.club ?? {
     trainingQuality: deps.config.defaultClubQuality.training,
     staffQuality: deps.config.defaultClubQuality.staff,
@@ -64,6 +97,9 @@ export async function advanceWeeks(
     snapshot.attributes.map((attribute) => [attribute.key, attribute.value]),
   );
   const ageBefore = calendarAge(snapshot.birthDate, snapshot.currentDate);
+  const rng = createRandomSource(
+    `${snapshot.seed}:wellbeing:${snapshot.playerId}:${snapshot.currentDate.toISOString()}`,
+  );
 
   let player: PlayerProgressState = {
     currentAbility: snapshot.currentAbility,
@@ -74,21 +110,105 @@ export async function advanceWeeks(
     morale: snapshot.morale,
     motivation: snapshot.motivation,
   };
+  let stress = snapshot.stress;
+  let mentalHealth = snapshot.mentalHealth;
   let currentDate = snapshot.currentDate;
   let seasonsCrossed = 0;
 
+  let injury: TrackedInjury | null = snapshot.activeInjury
+    ? {
+        weeksRemaining: snapshot.activeInjury.weeksRemaining,
+        existingId: snapshot.activeInjury.id,
+        record: null,
+      }
+    : null;
+  const injuriesToCreate: InjuryToCreate[] = [];
+  const healedInjuryIds: { id: string; actualEndAt: Date }[] = [];
+
   for (let week = 0; week < weeks; week += 1) {
     const age = calendarAge(snapshot.birthDate, currentDate);
-    player = applyWeeklyTraining({
-      player,
-      age,
-      club,
-      intensity,
-      focus,
-      usefulMinutes,
-      difficultyModifier,
-      config: deps.config,
-    }).player;
+
+    if (injury) {
+      const step = recoverInjuryWeek(injury.weeksRemaining);
+      injury.weeksRemaining = step.weeksRemaining;
+      // An injured player rests: fatigue recedes, no training growth.
+      player = {
+        ...player,
+        fatigue: clamp(player.fatigue - 8, 0, 100),
+      };
+      player.condition = clamp(100 - 0.9 * player.fatigue, 10, 100);
+      if (step.healed) {
+        if (injury.existingId) {
+          healedInjuryIds.push({
+            id: injury.existingId,
+            actualEndAt: currentDate,
+          });
+        } else if (injury.record) {
+          injury.record.status = InjuryStatus.Healed;
+          injury.record.actualEndAt = currentDate;
+        }
+        injury = null;
+      }
+    } else {
+      player = applyWeeklyTraining({
+        player,
+        age,
+        club,
+        intensity,
+        focus,
+        usefulMinutes,
+        difficultyModifier,
+        config: deps.config,
+      }).player;
+
+      const roll = rollInjury(
+        {
+          injuryProneness: snapshot.injuryProneness,
+          fatigue: player.fatigue,
+          recentLoad: player.fatigue,
+          age,
+          injuryHistoryCount:
+            snapshot.injuryHistoryCount + injuriesToCreate.length,
+          intensity,
+          medicalQuality: club.medicalQuality,
+        },
+        injuryTypeKeys,
+        deps.wellbeingConfig,
+        rng,
+      );
+      if (roll) {
+        const record: InjuryToCreate = {
+          typeKey: roll.typeKey,
+          startedAt: currentDate,
+          expectedEndAt: addDays(currentDate, roll.durationWeeks * 7),
+          actualEndAt: null,
+          severity: roll.severity,
+          recurrenceRisk: roll.recurrenceRisk,
+          status: InjuryStatus.Active,
+        };
+        injuriesToCreate.push(record);
+        injury = {
+          weeksRemaining: roll.durationWeeks,
+          existingId: null,
+          record,
+        };
+      }
+    }
+
+    const isInjured = injury !== null;
+    player.morale = updateMorale(
+      { morale: player.morale, injured: isInjured, stress },
+      deps.wellbeingConfig,
+    );
+    stress = updateStress(
+      { stress, injured: isInjured, intensity },
+      deps.wellbeingConfig,
+    );
+    mentalHealth = updateMentalHealth(
+      mentalHealth,
+      stress,
+      deps.wellbeingConfig,
+    );
 
     const seasonBefore = seasonIndexSince(GAME_START_DATE, currentDate);
     currentDate = addDays(currentDate, 7);
@@ -107,6 +227,12 @@ export async function advanceWeeks(
     .filter((attribute) => initialValues.get(attribute.key) !== attribute.value)
     .map((attribute) => ({ key: attribute.key, value: attribute.value }));
 
+  const careerStatus = injury
+    ? CareerStatus.Injured
+    : snapshot.careerStatus === CareerStatus.Injured
+      ? CareerStatus.Active
+      : snapshot.careerStatus;
+
   await deps.repository.applyWeeklyUpdate({
     saveGameId: snapshot.saveGameId,
     playerId: snapshot.playerId,
@@ -115,7 +241,13 @@ export async function advanceWeeks(
     condition: player.condition,
     fatigue: player.fatigue,
     motivation: player.motivation,
+    morale: player.morale,
+    stress,
+    mentalHealth,
+    careerStatus,
     attributeValues,
+    injuriesToCreate,
+    healedInjuryIds,
   });
 
   return {
@@ -127,6 +259,10 @@ export async function advanceWeeks(
     abilityAfter: player.currentAbility,
     fatigue: player.fatigue,
     condition: player.condition,
+    morale: player.morale,
+    stress,
+    injured: injury !== null,
+    injuriesSustained: injuriesToCreate.length,
     newCurrentDate: currentDate.toISOString(),
   };
 }
