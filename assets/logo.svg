@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#27c06a"/>
+      <stop offset="0.55" stop-color="#129a4d"/>
+      <stop offset="1" stop-color="#0a3d22"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.34" r="0.7">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffd54a"/>
+      <stop offset="1" stop-color="#ff9d2e"/>
+    </linearGradient>
+    <radialGradient id="ball" cx="0.42" cy="0.36" r="0.75">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#d7e4dc"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="40" y="40" width="944" height="944" rx="224" fill="url(#bg)"/>
+  <rect x="40" y="40" width="944" height="944" rx="224" fill="url(#glow)"/>
+
+  <!-- rising career arc -->
+  <path d="M 196 812 C 360 720 470 470 596 300 L 700 232 L 612 360 C 520 520 420 720 256 856 Z"
+        fill="url(#gold)" opacity="0.92"/>
+  <!-- sparkle -->
+  <g fill="#fff3c9">
+    <path d="M 742 196 L 760 244 L 808 262 L 760 280 L 742 328 L 724 280 L 676 262 L 724 244 Z"/>
+  </g>
+
+  <!-- football -->
+  <circle cx="512" cy="486" r="308" fill="#0a3320" opacity="0.35"/>
+  <circle cx="512" cy="486" r="300" fill="url(#ball)" stroke="#16221c" stroke-width="6"/>
+  <g fill="#16221c">
+      <polygon points="512.0,378.0 614.7,452.6 575.5,573.4 448.5,573.4 409.3,452.6" />
+      <polygon points="523.4,362.3 626.1,436.9 728.8,362.3 689.6,241.5 562.6,241.5" />
+      <polygon points="760.1,458.6 633.2,458.6 593.9,579.4 696.7,654.0 799.4,579.4" />
+      <polygon points="512.0,788.2 614.7,713.5 575.5,592.8 448.5,592.8 409.3,713.5" />
+      <polygon points="263.9,458.6 224.6,579.4 327.3,654.0 430.1,579.4 390.8,458.6" />
+      <polygon points="500.6,362.3 461.4,241.5 334.4,241.5 295.2,362.3 397.9,436.9" />
+  </g>
+</svg>
