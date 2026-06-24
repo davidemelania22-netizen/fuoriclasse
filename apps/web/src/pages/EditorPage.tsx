@@ -3,23 +3,29 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { EditablePlayer, PlayerEditInput } from '@football-life/shared';
 import { api } from '../api/client';
 import { useGameStore } from '../stores/useGameStore';
+import {
+  attributeCategoryLabels,
+  attributeLabels,
+  careerStatusLabels,
+  label,
+} from '../i18n';
 
 interface EditorPageProps {
   saveId: string;
 }
 
 const STAT_FIELDS = [
-  ['currentAbility', 'Current ability'],
-  ['potentialAbility', 'Potential'],
-  ['condition', 'Condition'],
-  ['fatigue', 'Fatigue'],
+  ['currentAbility', 'Abilità attuale'],
+  ['potentialAbility', 'Potenziale'],
+  ['condition', 'Condizione'],
+  ['fatigue', 'Stanchezza'],
   ['morale', 'Morale'],
-  ['form', 'Form'],
+  ['form', 'Forma'],
   ['stress', 'Stress'],
-  ['motivation', 'Motivation'],
-  ['reputation', 'Reputation'],
-  ['popularity', 'Popularity'],
-  ['marketValue', 'Market value'],
+  ['motivation', 'Motivazione'],
+  ['reputation', 'Reputazione'],
+  ['popularity', 'Popolarità'],
+  ['marketValue', 'Valore di mercato'],
 ] as const;
 
 type StatKey = (typeof STAT_FIELDS)[number][0];
@@ -84,12 +90,12 @@ function EditorForm({
     >
       <section className="card">
         <h2>
-          Editing {player.firstName} {player.lastName}
+          Modifica di {player.firstName} {player.lastName}
         </h2>
         <div className="grid">
-          {STAT_FIELDS.map(([key, label]) => (
+          {STAT_FIELDS.map(([key, text]) => (
             <label key={key}>
-              {label}
+              {text}
               <input
                 type="number"
                 value={stats[key]}
@@ -103,14 +109,14 @@ function EditorForm({
             </label>
           ))}
           <label>
-            Career status
+            Stato di carriera
             <select
               value={careerStatus}
               onChange={(e) => setCareerStatus(e.target.value)}
             >
               {CAREER_STATUSES.map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {label(careerStatusLabels, value)}
                 </option>
               ))}
             </select>
@@ -120,13 +126,13 @@ function EditorForm({
 
       {categories.map((category) => (
         <section className="card" key={category}>
-          <h3>{category}</h3>
+          <h3>{label(attributeCategoryLabels, category)}</h3>
           <div className="grid">
             {player.attributes
               .filter((a) => a.category === category)
               .map((a) => (
                 <label key={a.key}>
-                  {a.key}
+                  {label(attributeLabels, a.key)}
                   <input
                     type="number"
                     value={attrs[a.key] ?? a.value}
@@ -145,12 +151,14 @@ function EditorForm({
 
       <div className="controls">
         <button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Saving…' : 'Save changes'}
+          {mutation.isPending ? 'Salvataggio…' : 'Salva modifiche'}
         </button>
         <button type="button" onClick={closeEditor}>
-          Cancel
+          Annulla
         </button>
-        {mutation.isError && <span className="error">Could not save.</span>}
+        {mutation.isError && (
+          <span className="error">Impossibile salvare.</span>
+        )}
       </div>
     </form>
   );
@@ -167,12 +175,14 @@ export function EditorPage({ saveId }: EditorPageProps) {
     <div className="page">
       <div className="topbar">
         <button type="button" onClick={closeEditor}>
-          ← Back
+          ← Indietro
         </button>
-        <strong>Player editor</strong>
+        <strong>Editor giocatore</strong>
       </div>
-      {query.isLoading && <p>Loading…</p>}
-      {query.isError && <p className="error">Could not load the player.</p>}
+      {query.isLoading && <p>Caricamento…</p>}
+      {query.isError && (
+        <p className="error">Impossibile caricare il giocatore.</p>
+      )}
       {query.data && <EditorForm saveId={saveId} player={query.data} />}
     </div>
   );

@@ -232,10 +232,10 @@ export function simulateMatch(input: SimulateMatchInput): MatchResult {
   buildAppearances(awayStarters, input.away.clubId, awayGoals, homeGoals);
 
   const commentary = [
-    `Final score: ${homeGoals}-${awayGoals} (xG ${roundTo(homeXg, 2)}-${roundTo(awayXg, 2)}).`,
+    `Risultato finale: ${homeGoals}-${awayGoals} (xG ${roundTo(homeXg, 2)}-${roundTo(awayXg, 2)}).`,
     ...events
       .filter((event) => event.type === 'GOAL')
-      .map((event) => `Goal for ${event.clubId}.`),
+      .map((event) => `Gol per ${event.clubId}.`),
   ];
 
   return {

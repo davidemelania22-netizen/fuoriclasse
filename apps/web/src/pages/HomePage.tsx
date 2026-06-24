@@ -9,6 +9,7 @@ import {
 import { api } from '../api/client';
 import { useGameStore } from '../stores/useGameStore';
 import { SavesList } from '../components/SavesList';
+import { countryLabels, footLabels, label, positionLabels } from '../i18n';
 
 export function HomePage() {
   const queryClient = useQueryClient();
@@ -16,7 +17,7 @@ export function HomePage() {
 
   const savesQuery = useQuery({ queryKey: ['saves'], queryFn: api.listSaves });
 
-  const [name, setName] = useState('My Career');
+  const [name, setName] = useState('La mia carriera');
   const [firstName, setFirstName] = useState('Alex');
   const [lastName, setLastName] = useState('Rossi');
   const [nationalityId, setNationalityId] = useState<string>('IT');
@@ -40,7 +41,7 @@ export function HomePage() {
       <h1>Football Life</h1>
 
       <section className="card">
-        <h2>New career</h2>
+        <h2>Nuova carriera</h2>
         <form
           className="form"
           onSubmit={(e) => {
@@ -58,75 +59,77 @@ export function HomePage() {
           }}
         >
           <label>
-            Save name
+            Nome del salvataggio
             <input value={name} onChange={(e) => setName(e.target.value)} />
           </label>
           <label>
-            First name
+            Nome
             <input
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
           </label>
           <label>
-            Last name
+            Cognome
             <input
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
             />
           </label>
           <label>
-            Nationality
+            Nazionalità
             <select
               value={nationalityId}
               onChange={(e) => setNationalityId(e.target.value)}
             >
               {COUNTRY_CODES.map((code) => (
                 <option key={code} value={code}>
-                  {code}
+                  {label(countryLabels, code)}
                 </option>
               ))}
             </select>
           </label>
           <label>
-            Position
+            Ruolo
             <select
               value={primaryPosition}
               onChange={(e) => setPrimaryPosition(e.target.value)}
             >
               {Object.values(PlayerPosition).map((p) => (
                 <option key={p} value={p}>
-                  {p}
+                  {label(positionLabels, p)}
                 </option>
               ))}
             </select>
           </label>
           <label>
-            Preferred foot
+            Piede preferito
             <select
               value={preferredFoot}
               onChange={(e) => setPreferredFoot(e.target.value)}
             >
               {Object.values(PreferredFoot).map((f) => (
                 <option key={f} value={f}>
-                  {f}
+                  {label(footLabels, f)}
                 </option>
               ))}
             </select>
           </label>
           <button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending ? 'Creating…' : 'Start career'}
+            {createMutation.isPending ? 'Creazione…' : 'Inizia carriera'}
           </button>
           {createMutation.isError && (
-            <p className="error">Could not create the career. Try again.</p>
+            <p className="error">Impossibile creare la carriera. Riprova.</p>
           )}
         </form>
       </section>
 
       <section className="card">
-        <h2>Continue</h2>
-        {savesQuery.isLoading && <p>Loading…</p>}
-        {savesQuery.isError && <p className="error">Could not load saves.</p>}
+        <h2>Continua</h2>
+        {savesQuery.isLoading && <p>Caricamento…</p>}
+        {savesQuery.isError && (
+          <p className="error">Impossibile caricare i salvataggi.</p>
+        )}
         {savesQuery.data && (
           <SavesList saves={savesQuery.data} onSelect={selectSave} />
         )}

@@ -82,7 +82,7 @@ export function generateWorld(input: WorldGenerationInput): GeneratedWorld {
     // Youth competition scaffolding (clubs/fixtures added in later milestones).
     competitions.push({
       key: `comp-${country.id}-youth`,
-      name: `${country.name} Youth League`,
+      name: `${country.name} — Settore Giovanile`,
       countryId: country.id,
       type: CompetitionType.YouthLeague,
       tier: 3,

@@ -1,17 +1,29 @@
 import type { WellbeingConfig } from '@football-life/shared';
 
-/** License-free injury catalogue (labels only; severity is rolled per event). */
+/** Catalogo infortuni license-free (etichette; la gravità è estratta per evento). */
 export const INJURY_TYPES = [
-  { key: 'hamstring', name: 'Hamstring strain', bodyArea: 'thigh' },
-  { key: 'ankle-sprain', name: 'Ankle sprain', bodyArea: 'ankle' },
-  { key: 'knee-ligament', name: 'Knee ligament', bodyArea: 'knee' },
-  { key: 'calf-strain', name: 'Calf strain', bodyArea: 'calf' },
-  { key: 'groin', name: 'Groin strain', bodyArea: 'groin' },
-  { key: 'bruise', name: 'Deep bruise', bodyArea: 'leg' },
-  { key: 'concussion', name: 'Concussion', bodyArea: 'head' },
-  { key: 'shoulder', name: 'Shoulder injury', bodyArea: 'shoulder' },
-  { key: 'foot-fracture', name: 'Foot fracture', bodyArea: 'foot' },
-  { key: 'back-strain', name: 'Back strain', bodyArea: 'back' },
+  { key: 'hamstring', name: 'Stiramento al flessore', bodyArea: 'coscia' },
+  {
+    key: 'ankle-sprain',
+    name: 'Distorsione alla caviglia',
+    bodyArea: 'caviglia',
+  },
+  {
+    key: 'knee-ligament',
+    name: 'Lesione ai legamenti del ginocchio',
+    bodyArea: 'ginocchio',
+  },
+  {
+    key: 'calf-strain',
+    name: 'Stiramento al polpaccio',
+    bodyArea: 'polpaccio',
+  },
+  { key: 'groin', name: 'Stiramento all’inguine', bodyArea: 'inguine' },
+  { key: 'bruise', name: 'Contusione profonda', bodyArea: 'gamba' },
+  { key: 'concussion', name: 'Commozione cerebrale', bodyArea: 'testa' },
+  { key: 'shoulder', name: 'Infortunio alla spalla', bodyArea: 'spalla' },
+  { key: 'foot-fracture', name: 'Frattura al piede', bodyArea: 'piede' },
+  { key: 'back-strain', name: 'Stiramento alla schiena', bodyArea: 'schiena' },
 ] as const;
 
 export type InjuryTypeKey = (typeof INJURY_TYPES)[number]['key'];

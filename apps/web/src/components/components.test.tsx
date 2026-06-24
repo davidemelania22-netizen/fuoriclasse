@@ -45,15 +45,15 @@ describe('PlayerCard', () => {
   it('renders the player profile', () => {
     render(<PlayerCard player={player} save={save} />);
     expect(screen.getByText('Alex Rossi')).toBeInTheDocument();
-    expect(screen.getByText('Free agent')).toBeInTheDocument();
-    expect(screen.getByText('YOUTH')).toBeInTheDocument();
+    expect(screen.getByText('Svincolato')).toBeInTheDocument();
+    expect(screen.getByText('Settore giovanile')).toBeInTheDocument();
   });
 });
 
 describe('SavesList', () => {
   it('shows an empty state when there are no saves', () => {
     render(<SavesList saves={[]} onSelect={() => undefined} />);
-    expect(screen.getByText(/No saved careers/i)).toBeInTheDocument();
+    expect(screen.getByText(/Nessuna carriera salvata/i)).toBeInTheDocument();
   });
 
   it('renders saves and reports a selection', () => {

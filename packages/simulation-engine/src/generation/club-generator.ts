@@ -4,12 +4,12 @@ import type { GeneratedClub, GeneratedCoach } from '../domain/world';
 import { clamp } from '../util/math';
 
 const CLUB_SUFFIXES = [
-  'FC',
-  'United',
-  'City',
-  'Athletic',
   'Calcio',
+  'FC',
+  'AC',
+  'US',
   'Sporting',
+  'Atletico',
 ] as const;
 
 const COACH_ARCHETYPES = [

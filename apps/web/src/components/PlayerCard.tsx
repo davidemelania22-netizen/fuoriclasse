@@ -1,4 +1,5 @@
 import type { PlayerSummary, SaveGameSummary } from '@football-life/shared';
+import { careerStatusLabels, footLabels, label, positionLabels } from '../i18n';
 import { StatBar } from './StatBar';
 
 interface PlayerCardProps {
@@ -8,47 +9,49 @@ interface PlayerCardProps {
 
 export function PlayerCard({ player, save }: PlayerCardProps) {
   return (
-    <section className="card" aria-label="Player profile">
+    <section className="card" aria-label="Profilo del giocatore">
       <header className="card-head">
         <h2>
           {player.firstName} {player.lastName}
         </h2>
-        <span className="badge">{player.careerStatus}</span>
+        <span className="badge">
+          {label(careerStatusLabels, player.careerStatus)}
+        </span>
       </header>
       <dl className="facts">
         <div>
-          <dt>Age</dt>
+          <dt>Età</dt>
           <dd>{player.ageYears}</dd>
         </div>
         <div>
-          <dt>Position</dt>
-          <dd>{player.primaryPosition}</dd>
+          <dt>Ruolo</dt>
+          <dd>{label(positionLabels, player.primaryPosition)}</dd>
         </div>
         <div>
-          <dt>Foot</dt>
-          <dd>{player.preferredFoot}</dd>
+          <dt>Piede</dt>
+          <dd>{label(footLabels, player.preferredFoot)}</dd>
         </div>
         <div>
-          <dt>Ability</dt>
+          <dt>Abilità</dt>
           <dd>
             {Math.round(player.currentAbility)} /{' '}
             {Math.round(player.potentialAbility)}
           </dd>
         </div>
         <div>
-          <dt>Club</dt>
-          <dd>{player.clubId ? 'Signed' : 'Free agent'}</dd>
+          <dt>Squadra</dt>
+          <dd>{player.clubId ? 'Sotto contratto' : 'Svincolato'}</dd>
         </div>
         <div>
-          <dt>Date</dt>
+          <dt>Data</dt>
           <dd>{save.currentDate.slice(0, 10)}</dd>
         </div>
       </dl>
       <div className="bars">
-        <StatBar label="Condition" value={player.condition} />
-        <StatBar label="Fatigue" value={player.fatigue} />
+        <StatBar label="Condizione" value={player.condition} />
+        <StatBar label="Stanchezza" value={player.fatigue} />
         <StatBar label="Morale" value={player.morale} />
-        <StatBar label="Form" value={player.form} />
+        <StatBar label="Forma" value={player.form} />
         <StatBar label="Stress" value={player.stress} />
       </div>
     </section>

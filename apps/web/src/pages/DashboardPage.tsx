@@ -5,6 +5,7 @@ import { api, type AdvanceResponse, type AdvanceWeekBody } from '../api/client';
 import { useGameStore } from '../stores/useGameStore';
 import { PlayerCard } from '../components/PlayerCard';
 import { EventCard } from '../components/EventCard';
+import { intensityLabels, label } from '../i18n';
 
 interface DashboardPageProps {
   saveId: string;
@@ -46,14 +47,14 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
   });
 
   if (dashboardQuery.isLoading) {
-    return <p className="page">Loading career…</p>;
+    return <p className="page">Caricamento carriera…</p>;
   }
   if (dashboardQuery.isError || !dashboardQuery.data) {
     return (
       <div className="page">
-        <p className="error">Could not load this career.</p>
+        <p className="error">Impossibile caricare questa carriera.</p>
         <button type="button" onClick={clearSave}>
-          Back
+          Indietro
         </button>
       </div>
     );
@@ -65,28 +66,28 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
     <div className="page">
       <div className="topbar">
         <button type="button" onClick={clearSave}>
-          ← Saves
+          ← Salvataggi
         </button>
         <strong>{save.name}</strong>
         <button type="button" className="ghost" onClick={openEditor}>
-          Edit player
+          Modifica giocatore
         </button>
       </div>
 
       <PlayerCard player={player} save={save} />
 
       <section className="card">
-        <h2>Week</h2>
+        <h2>Settimana</h2>
         <div className="controls">
           <label>
-            Training
+            Allenamento
             <select
               value={intensity}
               onChange={(e) => setIntensity(e.target.value)}
             >
               {Object.values(TrainingIntensity).map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {label(intensityLabels, value)}
                 </option>
               ))}
             </select>
@@ -101,25 +102,25 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
               })
             }
           >
-            {advanceMutation.isPending ? 'Advancing…' : 'Advance week'}
+            {advanceMutation.isPending ? 'Avanzamento…' : 'Avanza settimana'}
           </button>
         </div>
         {lastReport && (
           <p className="report">
-            Ability {lastReport.abilityBefore.toFixed(1)} →{' '}
-            {lastReport.abilityAfter.toFixed(1)} · fatigue{' '}
+            Abilità {lastReport.abilityBefore.toFixed(1)} →{' '}
+            {lastReport.abilityAfter.toFixed(1)} · stanchezza{' '}
             {Math.round(lastReport.fatigue)} ·{' '}
-            {lastReport.injured ? 'injured' : 'fit'}
+            {lastReport.injured ? 'infortunato' : 'in forma'}
             {lastReport.injuriesSustained > 0 &&
-              ` · ${lastReport.injuriesSustained} new injury`}
+              ` · ${lastReport.injuriesSustained} nuovo infortunio`}
           </p>
         )}
       </section>
 
       <section className="card">
-        <h2>Events</h2>
+        <h2>Eventi</h2>
         {pendingEvents.length === 0 ? (
-          <p className="empty">No decisions pending.</p>
+          <p className="empty">Nessuna decisione in sospeso.</p>
         ) : (
           <div className="events">
             {pendingEvents.map((event) => (

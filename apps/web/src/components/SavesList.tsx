@@ -7,7 +7,7 @@ interface SavesListProps {
 
 export function SavesList({ saves, onSelect }: SavesListProps) {
   if (saves.length === 0) {
-    return <p className="empty">No saved careers yet. Start a new one.</p>;
+    return <p className="empty">Nessuna carriera salvata. Inizia una nuova.</p>;
   }
   return (
     <ul className="saves">
