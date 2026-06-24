@@ -174,4 +174,36 @@ describe('HTTP API', () => {
     });
     expect(response.statusCode).toBe(404);
   });
+
+  it('reads and adjusts the balance (external editor / money)', async () => {
+    const id = await createSave();
+
+    const initial = await app.inject({
+      method: 'GET',
+      url: `/api/saves/${id}/finance`,
+    });
+    expect(initial.statusCode).toBe(200);
+    expect(initial.json().balance).toBe(0);
+
+    const grant = await app.inject({
+      method: 'POST',
+      url: `/api/saves/${id}/finance`,
+      payload: { amount: 1_000_000, description: 'Editor grant' },
+    });
+    expect(grant.statusCode).toBe(200);
+    expect(grant.json().balance).toBe(1_000_000);
+
+    const deduct = await app.inject({
+      method: 'POST',
+      url: `/api/saves/${id}/finance`,
+      payload: { amount: -250_000 },
+    });
+    expect(deduct.json().balance).toBe(750_000);
+
+    const missing = await app.inject({
+      method: 'GET',
+      url: '/api/saves/nope/finance',
+    });
+    expect(missing.statusCode).toBe(404);
+  });
 });

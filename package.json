@@ -24,6 +24,7 @@
     "test:watch": "vitest",
     "test:statistical": "vitest run packages/simulation-engine/src/career/career-simulator.test.ts packages/simulation-engine/src/match/match-engine.test.ts packages/simulation-engine/src/wellbeing/wellbeing.test.ts",
     "simulate:careers": "tsx scripts/simulate-careers.ts",
+    "editor": "tsx scripts/editor.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",

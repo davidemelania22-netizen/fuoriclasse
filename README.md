@@ -28,27 +28,43 @@ cp .env.example .env
 
 ## Comandi
 
-| Comando                    | Descrizione                                             |
-| -------------------------- | ------------------------------------------------------- |
-| `npm run dev`              | Avvia server (Fastify) e web (Vite) in parallelo        |
-| `npm run dev:server`       | Avvia solo il backend                                   |
-| `npm run dev:web`          | Avvia solo il frontend                                  |
-| `npm run build`            | Build dei workspace che la prevedono (web)              |
-| `npm run typecheck`        | Type-check TypeScript di tutti i workspace              |
-| `npm run lint`             | ESLint sull'intero monorepo                             |
-| `npm run format`           | Prettier in scrittura                                   |
-| `npm run format:check`     | Prettier in sola verifica                               |
-| `npm run test`             | Esegue i test (Vitest)                                  |
-| `npm run test:statistical` | Esegue i test statistici (carriere, partite, infortuni) |
-| `npm run prisma:migrate`   | Crea/applica le migrazioni SQLite                       |
-| `npm run prisma:seed`      | Popola i dati statici (paesi)                           |
-| `npm run simulate:careers` | Simula N carriere complete e stampa le metriche         |
+| Comando                    | Descrizione                                                |
+| -------------------------- | ---------------------------------------------------------- |
+| `npm run dev`              | Avvia server (Fastify) e web (Vite) in parallelo           |
+| `npm run dev:server`       | Avvia solo il backend                                      |
+| `npm run dev:web`          | Avvia solo il frontend                                     |
+| `npm run build`            | Build dei workspace che la prevedono (web)                 |
+| `npm run typecheck`        | Type-check TypeScript di tutti i workspace                 |
+| `npm run lint`             | ESLint sull'intero monorepo                                |
+| `npm run format`           | Prettier in scrittura                                      |
+| `npm run format:check`     | Prettier in sola verifica                                  |
+| `npm run test`             | Esegue i test (Vitest)                                     |
+| `npm run test:statistical` | Esegue i test statistici (carriere, partite, infortuni)    |
+| `npm run prisma:migrate`   | Crea/applica le migrazioni SQLite                          |
+| `npm run prisma:seed`      | Popola i dati statici (paesi)                              |
+| `npm run simulate:careers` | Simula N carriere complete e stampa le metriche            |
+| `npm run editor`           | Editor esterno live (CLI) collegato al gioco in esecuzione |
 
 Esempio del simulatore batch (200 carriere):
 
 ```bash
 npm run simulate:careers 200
 ```
+
+### Editor esterno (modifica in tempo reale)
+
+Con il gioco avviato (`npm run dev`), in un altro terminale:
+
+```bash
+npm run editor
+# (opzionale) puntare a un host diverso:
+# EDITOR_API_URL=http://localhost:3001 npm run editor
+```
+
+Si seleziona un salvataggio e si usano comandi come `money 5000000`,
+`set currentAbility 90`, `attr finishing 95`, `career ACTIVE`, `status`, `quit`.
+Le modifiche passano dalla stessa API (con validazione/clamp) e sono applicate al
+salvataggio in tempo reale.
 
 Verifica rapida del backend dopo `npm run dev:server`:
 

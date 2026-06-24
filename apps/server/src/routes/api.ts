@@ -13,6 +13,7 @@ import {
   INJURY_TYPES,
 } from '@football-life/game-data';
 import { PrismaEditorRepository } from '../repositories/prisma-editor-repository';
+import { PrismaFinanceRepository } from '../repositories/prisma-finance-repository';
 import { PrismaEventRepository } from '../repositories/prisma-event-repository';
 import { PrismaProgressionRepository } from '../repositories/prisma-progression-repository';
 import { PrismaSaveGameRepository } from '../repositories/prisma-save-game-repository';
@@ -20,6 +21,7 @@ import { createNewGame } from '../application/create-new-game';
 import { listSaves, loadGame } from '../application/load-game';
 import { advanceWeeks } from '../application/advance-week';
 import { editPlayer, loadEditablePlayer } from '../application/edit-player';
+import { getBalance, grantFunds } from '../application/finance';
 import {
   generateWeeklyEvent,
   resolvePendingEvent,
@@ -37,6 +39,11 @@ const advanceWeekSchema = z.object({
 });
 
 const chooseSchema = z.object({ choiceKey: z.string().min(1) });
+
+const financeSchema = z.object({
+  amount: z.number(),
+  description: z.string().optional(),
+});
 
 function parseBody<T>(
   schema: ZodType<T>,
@@ -61,6 +68,7 @@ export function registerApiRoutes(
   const progressionRepo = new PrismaProgressionRepository(prisma);
   const eventRepo = new PrismaEventRepository(prisma);
   const editorRepo = new PrismaEditorRepository(prisma);
+  const financeRepo = new PrismaFinanceRepository(prisma);
   const eventDeps = { repository: eventRepo, definitions: EVENT_DEFINITIONS };
 
   app.post('/api/saves', async (request, reply) => {
@@ -150,6 +158,29 @@ export function registerApiRoutes(
     );
     if (!updated) return reply.code(404).send({ error: 'NotFound' });
     return reply.send(updated);
+  });
+
+  app.get('/api/saves/:id/finance', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const balance = await getBalance({ repository: financeRepo }, id);
+    if (balance === null) return reply.code(404).send({ error: 'NotFound' });
+    return reply.send({ balance });
+  });
+
+  app.post('/api/saves/:id/finance', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const body = parseBody(financeSchema, request.body, reply);
+    if (!body) return reply;
+    const balance = await grantFunds(
+      { repository: financeRepo },
+      {
+        saveGameId: id,
+        amount: body.amount,
+        description: body.description,
+      },
+    );
+    if (balance === null) return reply.code(404).send({ error: 'NotFound' });
+    return reply.send({ balance });
   });
 
   app.get('/api/saves/:id/career-summary', async (request, reply) => {
