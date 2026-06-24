@@ -5,8 +5,9 @@ anni). Le partite non sono giocate direttamente: vengono simulate da un motore
 deterministico e presentate in forma testuale (risultato, minuti, voto,
 statistiche, cronaca, conseguenze).
 
-> Stato attuale: **Milestone 1 — Inizializzazione**. Monorepo, tooling e
-> struttura di base. La logica di gioco arriva dalle milestone successive.
+> Stato attuale: **MVP completo (Milestone 1–10)**. Motore deterministico
+> (generazione mondo, allenamento/crescita, partite, carriera/contratti,
+> infortuni/benessere, eventi, ritiro), API Fastify e interfaccia React.
 
 ## Requisiti
 
@@ -98,6 +99,8 @@ Vedi `.env.example`. Per l'MVP non sono presenti segreti.
 
 ## Roadmap
 
-Sviluppo per milestone (vedi documento di progetto). Milestone 1 in corso;
-dominio + database, generazione mondo, tempo/allenamento, motore partita,
-carriera/contratti, infortuni/relazioni, eventi, UI e bilanciamento seguono.
+Tutte e 10 le milestone dell'MVP sono completate: inizializzazione, dominio +
+database, generazione mondo, tempo/allenamento, motore partita, carriera/
+contratti, infortuni/relazioni, eventi dinamici, API + interfaccia, ritiro +
+bilanciamento. Il motore è deterministico e validato da test statistici
+(`npm run test:statistical`, `npm run simulate:careers`).
