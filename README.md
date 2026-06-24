@@ -27,17 +27,27 @@ cp .env.example .env
 
 ## Comandi
 
-| Comando                | Descrizione                                      |
-| ---------------------- | ------------------------------------------------ |
-| `npm run dev`          | Avvia server (Fastify) e web (Vite) in parallelo |
-| `npm run dev:server`   | Avvia solo il backend                            |
-| `npm run dev:web`      | Avvia solo il frontend                           |
-| `npm run build`        | Build dei workspace che la prevedono (web)       |
-| `npm run typecheck`    | Type-check TypeScript di tutti i workspace       |
-| `npm run lint`         | ESLint sull'intero monorepo                      |
-| `npm run format`       | Prettier in scrittura                            |
-| `npm run format:check` | Prettier in sola verifica                        |
-| `npm run test`         | Esegue i test (Vitest)                           |
+| Comando                    | Descrizione                                             |
+| -------------------------- | ------------------------------------------------------- |
+| `npm run dev`              | Avvia server (Fastify) e web (Vite) in parallelo        |
+| `npm run dev:server`       | Avvia solo il backend                                   |
+| `npm run dev:web`          | Avvia solo il frontend                                  |
+| `npm run build`            | Build dei workspace che la prevedono (web)              |
+| `npm run typecheck`        | Type-check TypeScript di tutti i workspace              |
+| `npm run lint`             | ESLint sull'intero monorepo                             |
+| `npm run format`           | Prettier in scrittura                                   |
+| `npm run format:check`     | Prettier in sola verifica                               |
+| `npm run test`             | Esegue i test (Vitest)                                  |
+| `npm run test:statistical` | Esegue i test statistici (carriere, partite, infortuni) |
+| `npm run prisma:migrate`   | Crea/applica le migrazioni SQLite                       |
+| `npm run prisma:seed`      | Popola i dati statici (paesi)                           |
+| `npm run simulate:careers` | Simula N carriere complete e stampa le metriche         |
+
+Esempio del simulatore batch (200 carriere):
+
+```bash
+npm run simulate:careers 200
+```
 
 Verifica rapida del backend dopo `npm run dev:server`:
 

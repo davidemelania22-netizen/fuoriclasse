@@ -4,6 +4,7 @@ import { z, type ZodType } from 'zod';
 import { newGameInputSchema } from '@football-life/shared';
 import {
   DEFAULT_PROGRESSION_CONFIG,
+  DEFAULT_RETIREMENT_CONFIG,
   DEFAULT_WELLBEING_CONFIG,
   EVENT_DEFINITIONS,
   INJURY_TYPES,
@@ -92,6 +93,7 @@ export function registerApiRoutes(
         repository: progressionRepo,
         config: DEFAULT_PROGRESSION_CONFIG,
         wellbeingConfig: DEFAULT_WELLBEING_CONFIG,
+        retirementConfig: DEFAULT_RETIREMENT_CONFIG,
         injuryTypeKeys,
       },
       { saveGameId: id, ...body },

@@ -59,6 +59,8 @@ export interface WeeklyUpdate {
   attributeValues: { key: string; value: number }[];
   injuriesToCreate: InjuryToCreate[];
   healedInjuryIds: { id: string; actualEndAt: Date }[];
+  retired: boolean;
+  retirementDate: Date | null;
 }
 
 /** Persistence boundary for advancing the protagonist's weekly progression. */

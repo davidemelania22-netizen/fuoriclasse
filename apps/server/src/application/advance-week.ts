@@ -3,6 +3,7 @@ import {
   InjuryStatus,
   type AttributeCategory,
   type ProgressionConfig,
+  type RetirementConfig,
   type WellbeingConfig,
   TrainingIntensity,
 } from '@football-life/shared';
@@ -16,6 +17,7 @@ import {
   recoverInjuryWeek,
   rollInjury,
   seasonIndexSince,
+  shouldRetire,
   updateMentalHealth,
   updateMorale,
   updateStress,
@@ -33,6 +35,7 @@ export interface AdvanceWeeksDeps {
   repository: ProgressionRepository;
   config: ProgressionConfig;
   wellbeingConfig: WellbeingConfig;
+  retirementConfig?: RetirementConfig;
   injuryTypeKeys?: readonly string[];
   difficultyModifier?: number;
 }
@@ -58,6 +61,7 @@ export interface WeeklyAdvanceReport {
   stress: number;
   injured: boolean;
   injuriesSustained: number;
+  retired: boolean;
   newCurrentDate: string;
 }
 
@@ -114,6 +118,8 @@ export async function advanceWeeks(
   let mentalHealth = snapshot.mentalHealth;
   let currentDate = snapshot.currentDate;
   let seasonsCrossed = 0;
+  let weeksDone = 0;
+  let retired = false;
 
   let injury: TrackedInjury | null = snapshot.activeInjury
     ? {
@@ -215,23 +221,41 @@ export async function advanceWeeks(
     const seasonAfter = seasonIndexSince(GAME_START_DATE, currentDate);
     if (seasonAfter > seasonBefore) {
       seasonsCrossed += seasonAfter - seasonBefore;
+      const newAge = calendarAge(snapshot.birthDate, currentDate);
       player = applySeasonalAging({
         player,
-        age: calendarAge(snapshot.birthDate, currentDate),
+        age: newAge,
         config: deps.config,
       }).player;
+      if (
+        deps.retirementConfig &&
+        shouldRetire({
+          age: newAge,
+          currentAbility: player.currentAbility,
+          peakAbility: snapshot.potentialAbility,
+          config: deps.retirementConfig,
+          rng,
+        })
+      ) {
+        retired = true;
+      }
     }
+
+    weeksDone += 1;
+    if (retired) break;
   }
 
   const attributeValues = player.attributes
     .filter((attribute) => initialValues.get(attribute.key) !== attribute.value)
     .map((attribute) => ({ key: attribute.key, value: attribute.value }));
 
-  const careerStatus = injury
-    ? CareerStatus.Injured
-    : snapshot.careerStatus === CareerStatus.Injured
-      ? CareerStatus.Active
-      : snapshot.careerStatus;
+  const careerStatus = retired
+    ? CareerStatus.Retired
+    : injury
+      ? CareerStatus.Injured
+      : snapshot.careerStatus === CareerStatus.Injured
+        ? CareerStatus.Active
+        : snapshot.careerStatus;
 
   await deps.repository.applyWeeklyUpdate({
     saveGameId: snapshot.saveGameId,
@@ -248,10 +272,12 @@ export async function advanceWeeks(
     attributeValues,
     injuriesToCreate,
     healedInjuryIds,
+    retired,
+    retirementDate: retired ? currentDate : null,
   });
 
   return {
-    weeksAdvanced: weeks,
+    weeksAdvanced: weeksDone,
     seasonsCrossed,
     ageBefore,
     ageAfter: calendarAge(snapshot.birthDate, currentDate),
@@ -263,6 +289,7 @@ export async function advanceWeeks(
     stress,
     injured: injury !== null,
     injuriesSustained: injuriesToCreate.length,
+    retired,
     newCurrentDate: currentDate.toISOString(),
   };
 }

@@ -114,6 +114,7 @@ export class PrismaProgressionRepository implements ProgressionRepository {
           stress: update.stress,
           mentalHealth: update.mentalHealth,
           careerStatus: update.careerStatus,
+          retirementDate: update.retirementDate,
         },
       });
 
@@ -160,6 +161,7 @@ export class PrismaProgressionRepository implements ProgressionRepository {
         data: {
           currentDate: update.newCurrentDate,
           lastPlayedAt: new Date(),
+          ...(update.retired ? { isCompleted: true } : {}),
         },
       });
     });
