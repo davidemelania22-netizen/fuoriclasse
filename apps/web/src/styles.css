@@ -198,6 +198,24 @@ button:disabled {
   border-color: var(--line);
 }
 
+.topbar .ghost {
+  margin-left: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.5rem 0.75rem;
+}
+
+.grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
 .events {
   display: flex;
   flex-direction: column;

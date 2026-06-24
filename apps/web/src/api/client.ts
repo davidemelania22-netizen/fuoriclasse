@@ -1,6 +1,8 @@
 import type {
+  EditablePlayer,
   LoadedGame,
   NewGameInput,
+  PlayerEditInput,
   PlayerSummary,
   SaveGameSummary,
   TrainingIntensity,
@@ -103,5 +105,12 @@ export const api = {
     }>(`/saves/${id}/events/${eventId}/choose`, {
       method: 'POST',
       body: JSON.stringify({ choiceKey }),
+    }),
+  getEditablePlayer: (id: string) =>
+    http<EditablePlayer>(`/saves/${id}/editable-player`),
+  editPlayer: (id: string, edits: PlayerEditInput) =>
+    http<EditablePlayer>(`/saves/${id}/player`, {
+      method: 'PATCH',
+      body: JSON.stringify(edits),
     }),
 };

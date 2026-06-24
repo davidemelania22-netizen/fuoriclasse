@@ -128,4 +128,50 @@ describe('HTTP API', () => {
     });
     expect(response.statusCode).toBe(404);
   });
+
+  it('loads and edits the protagonist via the editor, clamping out-of-range values', async () => {
+    const id = await createSave();
+
+    const editable = await app.inject({
+      method: 'GET',
+      url: `/api/saves/${id}/editable-player`,
+    });
+    expect(editable.statusCode).toBe(200);
+    expect(editable.json().attributes.length).toBeGreaterThanOrEqual(49);
+
+    const patch = await app.inject({
+      method: 'PATCH',
+      url: `/api/saves/${id}/player`,
+      payload: {
+        currentAbility: 88,
+        morale: 95,
+        careerStatus: 'ACTIVE',
+        attributes: [{ key: 'finishing', value: 150 }],
+      },
+    });
+    expect(patch.statusCode).toBe(200);
+    const body = patch.json();
+    expect(body.currentAbility).toBe(88);
+    expect(body.morale).toBe(95);
+    const finishing = body.attributes.find(
+      (a: { key: string; value: number }) => a.key === 'finishing',
+    );
+    expect(finishing.value).toBe(99); // clamped from 150
+
+    // Persisted: the dashboard reflects the edit.
+    const dashboard = await app.inject({
+      method: 'GET',
+      url: `/api/saves/${id}/dashboard`,
+    });
+    expect(dashboard.json().player.currentAbility).toBe(88);
+  });
+
+  it('editing an unknown save returns 404', async () => {
+    const response = await app.inject({
+      method: 'PATCH',
+      url: '/api/saves/nope/player',
+      payload: { morale: 50 },
+    });
+    expect(response.statusCode).toBe(404);
+  });
 });

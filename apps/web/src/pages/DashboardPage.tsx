@@ -13,6 +13,7 @@ interface DashboardPageProps {
 export function DashboardPage({ saveId }: DashboardPageProps) {
   const queryClient = useQueryClient();
   const clearSave = useGameStore((s) => s.clearSave);
+  const openEditor = useGameStore((s) => s.openEditor);
   const [intensity, setIntensity] = useState<string>(TrainingIntensity.Normal);
   const [lastReport, setLastReport] = useState<
     AdvanceResponse['report'] | null
@@ -67,6 +68,9 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
           ← Saves
         </button>
         <strong>{save.name}</strong>
+        <button type="button" className="ghost" onClick={openEditor}>
+          Edit player
+        </button>
       </div>
 
       <PlayerCard player={player} save={save} />

@@ -1,7 +1,10 @@
 import type { PrismaClient } from '@prisma/client';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z, type ZodType } from 'zod';
-import { newGameInputSchema } from '@football-life/shared';
+import {
+  newGameInputSchema,
+  playerEditInputSchema,
+} from '@football-life/shared';
 import {
   DEFAULT_PROGRESSION_CONFIG,
   DEFAULT_RETIREMENT_CONFIG,
@@ -9,12 +12,14 @@ import {
   EVENT_DEFINITIONS,
   INJURY_TYPES,
 } from '@football-life/game-data';
+import { PrismaEditorRepository } from '../repositories/prisma-editor-repository';
 import { PrismaEventRepository } from '../repositories/prisma-event-repository';
 import { PrismaProgressionRepository } from '../repositories/prisma-progression-repository';
 import { PrismaSaveGameRepository } from '../repositories/prisma-save-game-repository';
 import { createNewGame } from '../application/create-new-game';
 import { listSaves, loadGame } from '../application/load-game';
 import { advanceWeeks } from '../application/advance-week';
+import { editPlayer, loadEditablePlayer } from '../application/edit-player';
 import {
   generateWeeklyEvent,
   resolvePendingEvent,
@@ -55,6 +60,7 @@ export function registerApiRoutes(
   const saveRepo = new PrismaSaveGameRepository(prisma);
   const progressionRepo = new PrismaProgressionRepository(prisma);
   const eventRepo = new PrismaEventRepository(prisma);
+  const editorRepo = new PrismaEditorRepository(prisma);
   const eventDeps = { repository: eventRepo, definitions: EVENT_DEFINITIONS };
 
   app.post('/api/saves', async (request, reply) => {
@@ -122,6 +128,28 @@ export function registerApiRoutes(
     });
     if (!result) return reply.code(409).send({ error: 'EventNotResolvable' });
     return reply.send(result);
+  });
+
+  app.get('/api/saves/:id/editable-player', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const editable = await loadEditablePlayer({ repository: editorRepo }, id);
+    if (!editable) return reply.code(404).send({ error: 'NotFound' });
+    return reply.send(editable);
+  });
+
+  app.patch('/api/saves/:id/player', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const edits = parseBody(playerEditInputSchema, request.body, reply);
+    if (!edits) return reply;
+    const updated = await editPlayer(
+      { repository: editorRepo },
+      {
+        saveGameId: id,
+        edits,
+      },
+    );
+    if (!updated) return reply.code(404).send({ error: 'NotFound' });
+    return reply.send(updated);
   });
 
   app.get('/api/saves/:id/career-summary', async (request, reply) => {
