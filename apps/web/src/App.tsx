@@ -1,8 +1,13 @@
+import { useGameStore } from './stores/useGameStore';
+import { HomePage } from './pages/HomePage';
+import { DashboardPage } from './pages/DashboardPage';
+
 export function App() {
+  const currentSaveId = useGameStore((s) => s.currentSaveId);
+
   return (
-    <main>
-      <h1>Football Life: Player Career Simulator</h1>
-      <p>Milestone 1 — scaffolding del monorepo completato.</p>
-    </main>
+    <div className="app">
+      {currentSaveId ? <DashboardPage saveId={currentSaveId} /> : <HomePage />}
+    </div>
   );
 }

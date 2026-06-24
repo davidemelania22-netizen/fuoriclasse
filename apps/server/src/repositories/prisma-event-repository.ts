@@ -11,8 +11,14 @@ import type {
   EventGenerationContext,
   EventRepository,
   PendingEventRecord,
+  PendingEventView,
   PlayerEffectSnapshot,
 } from './event-repository';
+
+interface StoredChoice {
+  key: string;
+  label: string;
+}
 
 const WEEK_MS = 7 * 86_400_000;
 const j = (value: unknown): Prisma.InputJsonValue =>
@@ -170,6 +176,24 @@ export class PrismaEventRepository implements EventRepository {
       definitionKey: event.definitionKey,
       status: event.status,
     };
+  }
+
+  async listPendingEvents(saveGameId: string): Promise<PendingEventView[]> {
+    const events = await this.prisma.gameEvent.findMany({
+      where: { saveGameId, status: EventStatus.Pending },
+      orderBy: { occurredAt: 'desc' },
+    });
+    return events.map((event) => {
+      const payload = event.payload as { choices?: StoredChoice[] } | null;
+      return {
+        id: event.id,
+        definitionKey: event.definitionKey,
+        category: event.category,
+        title: event.title,
+        description: event.description,
+        choices: payload?.choices ?? [],
+      };
+    });
   }
 
   async applyEventOutcome(input: ApplyEventOutcomeInput): Promise<void> {

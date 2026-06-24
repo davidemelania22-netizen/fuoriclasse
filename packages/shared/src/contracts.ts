@@ -37,6 +37,12 @@ export interface PlayerSummary {
   currentAbility: number;
   potentialAbility: number;
   clubId: string | null;
+  condition: number;
+  fatigue: number;
+  morale: number;
+  form: number;
+  stress: number;
+  marketValue: number;
 }
 
 /** A loaded game: its header plus the protagonist snapshot. */

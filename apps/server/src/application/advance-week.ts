@@ -39,10 +39,10 @@ export interface AdvanceWeeksDeps {
 
 export interface AdvanceWeeksInput {
   saveGameId: string;
-  weeks?: number;
-  intensity?: TrainingIntensity;
-  focus?: AttributeCategory | null;
-  usefulMinutes?: number;
+  weeks?: number | undefined;
+  intensity?: TrainingIntensity | undefined;
+  focus?: AttributeCategory | null | undefined;
+  usefulMinutes?: number | undefined;
 }
 
 export interface WeeklyAdvanceReport {

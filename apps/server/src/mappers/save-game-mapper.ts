@@ -53,5 +53,11 @@ export function toPlayerSummary(
     currentAbility: player.currentAbility,
     potentialAbility: player.potentialAbility,
     clubId: player.clubId,
+    condition: player.condition,
+    fatigue: player.fatigue,
+    morale: player.morale,
+    form: player.form,
+    stress: player.stress,
+    marketValue: player.marketValue,
   };
 }

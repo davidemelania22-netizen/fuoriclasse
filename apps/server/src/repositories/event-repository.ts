@@ -33,6 +33,15 @@ export interface PendingEventRecord {
   status: string;
 }
 
+export interface PendingEventView {
+  id: string;
+  definitionKey: string;
+  category: string;
+  title: string;
+  description: string;
+  choices: { key: string; label: string }[];
+}
+
 export interface ApplyEventOutcomeInput {
   saveGameId: string;
   playerId: string;
@@ -57,5 +66,6 @@ export interface EventRepository {
     nextEligibleAt: Date,
   ): Promise<void>;
   getPendingEvent(gameEventId: string): Promise<PendingEventRecord | null>;
+  listPendingEvents(saveGameId: string): Promise<PendingEventView[]>;
   applyEventOutcome(input: ApplyEventOutcomeInput): Promise<void>;
 }
