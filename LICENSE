@@ -1,0 +1,42 @@
+Fuoriclasse — simulatore di carriera calcistica
+Copyright © 2026 Davide Simonetti. Tutti i diritti riservati.
+
+TERMINI DI LICENZA
+
+Questo software e tutto il materiale che lo accompagna — codice sorgente,
+testi, immagini, dati di gioco e documentazione — sono di esclusiva proprietà
+di Davide Simonetti.
+
+È concesso, a chiunque riceva una copia del gioco, il permesso di installarlo
+e usarlo gratuitamente per uso personale.
+
+Non è concesso, senza autorizzazione scritta preventiva dell'autore:
+
+  1. vendere, noleggiare, concedere in sublicenza o distribuire il software,
+     in tutto o in parte, né a titolo oneroso né gratuito;
+  2. modificare, adattare o creare opere derivate;
+  3. rimuovere o alterare le indicazioni di paternità e di proprietà presenti
+     nel gioco;
+  4. usare il software, il suo nome o la sua grafica per scopi commerciali.
+
+La pubblicazione del codice sorgente su un repository ad accesso pubblico non
+costituisce rinuncia ad alcuno di questi diritti né concessione di licenza
+d'uso oltre a quanto sopra.
+
+ESCLUSIONE DI GARANZIA
+
+Il software è fornito "così com'è", senza garanzie di alcun tipo, esplicite o
+implicite, incluse fra le altre le garanzie di commerciabilità, idoneità a uno
+scopo specifico e assenza di violazioni. In nessun caso l'autore potrà essere
+ritenuto responsabile per danni, perdite di dati o altre conseguenze derivanti
+dall'uso o dall'impossibilità di usare il software.
+
+SOFTWARE DI TERZE PARTI
+
+Il gioco include componenti software di terze parti, distribuiti dai
+rispettivi autori sotto licenze proprie (MIT, ISC, Apache-2.0, BSD e altre).
+Quelle licenze si applicano a quei componenti, non a quest'opera, e i relativi
+testi e note di copyright sono raccolti nel file THIRD-PARTY-NOTICES.md
+distribuito insieme al gioco.
+
+Contatti: davidemelania22@gmail.com

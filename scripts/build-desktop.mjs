@@ -99,6 +99,18 @@ step('Copia del client web e del processo principale');
 copyTree(path.join(ROOT, 'apps/web/dist'), path.join(APP, 'web'));
 fs.copyFileSync(path.join(ROOT, 'apps/desktop/main.mjs'), path.join(APP, 'main.mjs'));
 
+step('Licenza e note di terze parti');
+// Regenerated rather than copied as-is: MIT, BSD and Apache require the
+// notices to match what is actually shipped, and a file edited by hand drifts
+// the moment a dependency changes.
+run('node', ['scripts/generate-notices.mjs']);
+for (const file of ['LICENSE', 'THIRD-PARTY-NOTICES.md']) {
+  // Two destinations on purpose: next to the app for anyone opening the
+  // bundle, and inside `web/` so the running game can link to them.
+  fs.copyFileSync(path.join(ROOT, file), path.join(APP, file));
+  fs.copyFileSync(path.join(ROOT, file), path.join(APP, 'web', file));
+}
+
 const { version } = JSON.parse(
   fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'),
 );

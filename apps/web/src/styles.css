@@ -3297,3 +3297,13 @@ textarea:focus {
   color: var(--muted);
   font-weight: 700;
 }
+
+.app-footer a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-footer a:hover {
+  color: var(--accent);
+}

@@ -1,6 +1,6 @@
 {
   "name": "football-life",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Fuoriclasse: simulatore di carriera calcistica — monorepo",
   "type": "module",
@@ -31,6 +31,7 @@
     "prisma:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "desktop:dev": "electron apps/desktop",
+    "notices": "node scripts/generate-notices.mjs",
     "desktop:stage": "node scripts/build-desktop.mjs",
     "desktop:package": "npm run desktop:stage && electron-builder --publish never",
     "desktop:package:mac": "npm run desktop:stage && electron-builder --mac --publish never",
@@ -48,13 +49,23 @@
       "output": "apps/desktop/release",
       "buildResources": "apps/desktop"
     },
-    "files": ["**/*"],
-    "extraResources": [{ "from": "apps/desktop/build/resources", "to": "." }],
+    "files": [
+      "**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "apps/desktop/build/resources",
+        "to": "."
+      }
+    ],
     "asar": false,
     "mac": {
       "category": "public.app-category.sports",
       "icon": "apps/desktop/icon.icns",
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "identity": null
     },
     "dmg": {
@@ -62,7 +73,14 @@
     },
     "win": {
       "icon": "apps/desktop/icon.png",
-      "target": [{ "target": "nsis", "arch": ["x64"] }]
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,

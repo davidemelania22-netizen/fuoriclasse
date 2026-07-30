@@ -63,10 +63,21 @@ export function App() {
         <DashboardPage saveId={currentSaveId} />
       )}
 
-      {/* Ownership notice, on every screen of the game. */}
+      {/* Ownership notice, on every screen of the game. The two links are the
+          licence and the third-party attributions the MIT/BSD/Apache
+          components require to travel with every copy: the packaging step
+          copies both files in next to the web assets, so they resolve in the
+          installed game (in `npm run dev` there is nothing to serve yet). */}
       <footer className="app-footer">
         Fuoriclasse — gioco di esclusiva proprietà di{' '}
-        <strong>Davide Simonetti</strong>. Tutti i diritti riservati.
+        <strong>Davide Simonetti</strong>. Tutti i diritti riservati.{' '}
+        <a href="/LICENSE" target="_blank" rel="noreferrer">
+          Licenza
+        </a>
+        {' · '}
+        <a href="/THIRD-PARTY-NOTICES.md" target="_blank" rel="noreferrer">
+          Componenti di terze parti
+        </a>
       </footer>
     </div>
   );
