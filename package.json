@@ -32,9 +32,9 @@
     "db:reset": "prisma migrate reset --force",
     "desktop:dev": "electron apps/desktop",
     "desktop:stage": "node scripts/build-desktop.mjs",
-    "desktop:package": "npm run desktop:stage && electron-builder",
-    "desktop:package:mac": "npm run desktop:stage && electron-builder --mac",
-    "desktop:package:win": "npm run desktop:stage && electron-builder --win"
+    "desktop:package": "npm run desktop:stage && electron-builder --publish never",
+    "desktop:package:mac": "npm run desktop:stage && electron-builder --mac --publish never",
+    "desktop:package:win": "npm run desktop:stage && electron-builder --win --publish never"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

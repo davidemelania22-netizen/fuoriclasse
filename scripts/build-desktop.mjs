@@ -28,14 +28,15 @@ const APP = path.join(BUILD, 'app');
 const RESOURCES = path.join(BUILD, 'resources');
 
 const step = (message) => console.log(`\n▶  ${message}`);
-// On Windows `npm` and `npx` are batch files, which execFile cannot run under
-// their bare name — the packaging must work on the machine that builds the
-// Windows installer just as well as on this Mac.
-const cmd = (name) => (process.platform === 'win32' ? `${name}.cmd` : name);
+// On Windows `npm` and `npx` are batch files, and since the argument-injection
+// fix in Node 20.12 spawning a .cmd without a shell fails outright with
+// EINVAL. Going through the shell there is the supported way; on macOS and
+// Linux we keep the direct, quoting-free exec.
 const run = (command, args, env) =>
-  execFileSync(cmd(command), args, {
+  execFileSync(command, args, {
     cwd: ROOT,
     stdio: 'inherit',
+    shell: process.platform === 'win32',
     env: { ...process.env, ...env },
   });
 
