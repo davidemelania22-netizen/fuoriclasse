@@ -39,9 +39,9 @@ npm run desktop:package:win    # installer .exe (da eseguire su Windows)
 I file finiti compaiono in `apps/desktop/release/`. Ogni piattaforma va
 costruita sulla propria macchina: il gioco include il motore nativo di Prisma,
 che esiste in una versione diversa per ogni sistema operativo. Per questo
-`.github/workflows/release.yml` costruisce le tre versioni (Mac Apple Silicon,
-Mac Intel, Windows) e le pubblica in una **Release di GitHub**: quella pagina è
-il link da dare a chi vuole giocare. Basta creare un tag:
+`.github/workflows/release.yml` costruisce le due versioni (Mac Apple Silicon
+e Windows) e le pubblica in una **Release di GitHub**: quella pagina è il link
+da dare a chi vuole giocare. Basta creare un tag:
 
 ```bash
 git tag v0.1.0 && git push origin v0.1.0
@@ -53,6 +53,11 @@ unico file JavaScript con esbuild, copia il client Prisma con il suo motore
 nativo e prepara un database vuoto già seedato. L'app installata lo copia al
 primo avvio nella cartella dati dell'utente — le carriere non stanno mai dentro
 il pacchetto dell'applicazione, che è di sola lettura.
+
+I Mac Intel non sono coperti: i runner `macos-13` sono rimasti in coda per più
+di un'ora a ogni tentativo mentre gli altri due finivano in quattro minuti.
+Rimettere la voce nella matrice del workflow è tutto ciò che serve, se un
+giorno servisse.
 
 L'app **non è firmata** (serve un certificato Apple a pagamento): la prima
 volta, su Mac, occorre **tasto destro sull'app → Apri → Apri**. Su Windows

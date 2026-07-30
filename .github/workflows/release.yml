@@ -3,11 +3,16 @@
 #
 # There is no way around building each platform on its own machine: the app
 # ships a native Prisma engine, and the engine for Windows only exists on a
-# Windows runner. Hence three jobs for three artefacts:
+# Windows runner. Hence one job per artefact:
 #
 #   macOS (Apple Silicon)  → Fuoriclasse-<ver>-arm64.dmg
-#   macOS (Intel)          → Fuoriclasse-<ver>.dmg
 #   Windows                → Fuoriclasse Setup <ver>.exe
+#
+# Intel Macs are not built. The macos-13 runners that could do it sat queued
+# for over an hour on every attempt while the other two finished in four
+# minutes, and Apple stopped selling Intel Macs in 2023. Add a third entry to
+# the matrix with `os: macos-13` if one is ever needed — the packaging itself
+# is platform-agnostic and was working, only the runner never arrived.
 #
 # To publish a version: bump `version` in package.json, then
 #   git tag v0.1.0 && git push origin v0.1.0
@@ -31,9 +36,6 @@ jobs:
         include:
           - os: macos-14
             name: mac-apple-silicon
-            command: desktop:package:mac
-          - os: macos-13
-            name: mac-intel
             command: desktop:package:mac
           - os: windows-latest
             name: windows
@@ -78,10 +80,14 @@ jobs:
             --title "Fuoriclasse $TAG" \
             --notes "Scarica il file adatto al tuo computer:
 
-          - **Mac con chip Apple (M1/M2/M3/M4)** → il file \`.dmg\` che finisce per \`arm64\`
-          - **Mac Intel** → l'altro file \`.dmg\`
+          - **Mac con chip Apple (M1/M2/M3/M4)** → il file \`.dmg\`
           - **Windows** → il file \`.exe\`
 
-          Su Mac, la prima volta: tasto destro sull'app → Apri → Apri.
+          Su Mac: apri il \`.dmg\` e trascina Fuoriclasse in Applicazioni. La prima
+          volta aprila con **tasto destro → Apri → Apri**, non con il doppio clic.
+          Su Windows, se Defender avvisa: **Altre informazioni → Esegui comunque**.
+          Succede perché il gioco non è firmato con un certificato a pagamento.
+
+          I Mac con processore Intel non sono supportati.
 
           Gioco di esclusiva proprietà di Davide Simonetti. Tutti i diritti riservati."

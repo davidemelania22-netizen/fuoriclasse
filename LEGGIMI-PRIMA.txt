@@ -9,9 +9,11 @@ IL MODO PIU' SEMPLICE
 
 Scarica l'installer dalla pagina delle release e fai doppio clic:
 
-  Mac con chip Apple (M1/M2/M3/M4)  ->  il file .dmg che finisce per arm64
-  Mac Intel                         ->  l'altro file .dmg
+  Mac con chip Apple (M1/M2/M3/M4)  ->  il file .dmg
   Windows                           ->  il file .exe
+
+I Mac con processore Intel non sono supportati: su quelli si puo'
+giocare solo dalla cartella del progetto (vedi sotto).
 
 Su Mac: apri il .dmg e trascina Fuoriclasse nella cartella Applicazioni.
 La PRIMA volta, invece del doppio clic, fai tasto destro sull'app e scegli
