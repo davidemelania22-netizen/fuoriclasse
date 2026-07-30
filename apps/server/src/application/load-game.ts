@@ -13,3 +13,10 @@ export async function listSaves(
 ): Promise<SaveGameSummary[]> {
   return repository.listSaves();
 }
+
+export async function removeSave(
+  repository: SaveGameRepository,
+  saveGameId: string,
+): Promise<boolean> {
+  return repository.deleteSave(saveGameId);
+}

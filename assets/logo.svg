@@ -1,13 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#27c06a"/>
-      <stop offset="0.55" stop-color="#129a4d"/>
-      <stop offset="1" stop-color="#0a3d22"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#232a3a"/>
+      <stop offset="0.5" stop-color="#141922"/>
+      <stop offset="1" stop-color="#0a0d12"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.34" r="0.7">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    <radialGradient id="sunset" cx="0.5" cy="0.9" r="0.8">
+      <stop offset="0" stop-color="#f59a2e" stop-opacity="0.6"/>
+      <stop offset="0.5" stop-color="#e2581e" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#e2581e" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="gold" x1="0" y1="1" x2="1" y2="0">
       <stop offset="0" stop-color="#ffd54a"/>
@@ -20,7 +21,7 @@
   </defs>
 
   <rect x="40" y="40" width="944" height="944" rx="224" fill="url(#bg)"/>
-  <rect x="40" y="40" width="944" height="944" rx="224" fill="url(#glow)"/>
+  <rect x="40" y="40" width="944" height="944" rx="224" fill="url(#sunset)"/>
 
   <!-- rising career arc -->
   <path d="M 196 812 C 360 720 470 470 596 300 L 700 232 L 612 360 C 520 520 420 720 256 856 Z"
@@ -31,7 +32,7 @@
   </g>
 
   <!-- football -->
-  <circle cx="512" cy="486" r="308" fill="#0a3320" opacity="0.35"/>
+  <circle cx="512" cy="486" r="308" fill="#000000" opacity="0.4"/>
   <circle cx="512" cy="486" r="300" fill="url(#ball)" stroke="#16221c" stroke-width="6"/>
   <g fill="#16221c">
       <polygon points="512.0,378.0 614.7,452.6 575.5,573.4 448.5,573.4 409.3,452.6" />
@@ -41,4 +42,7 @@
       <polygon points="263.9,458.6 224.6,579.4 327.3,654.0 430.1,579.4 390.8,458.6" />
       <polygon points="500.6,362.3 461.4,241.5 334.4,241.5 295.2,362.3 397.9,436.9" />
   </g>
+
+  <!-- gold frame -->
+  <rect x="40" y="40" width="944" height="944" rx="224" fill="none" stroke="url(#gold)" stroke-width="10" opacity="0.55"/>
 </svg>

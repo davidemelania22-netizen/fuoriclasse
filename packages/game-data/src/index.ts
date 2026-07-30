@@ -12,5 +12,11 @@ export * from './career-config';
 export * from './wellbeing-config';
 export * from './events';
 export * from './retirement-config';
+export * from './shop';
+export * from './agents';
+export * from './lifestyles';
+export * from './interviews';
+export * from './news-interviews';
+export * from './quick-starts';
 
 export const GAME_DATA_PACKAGE_NAME = '@football-life/game-data';

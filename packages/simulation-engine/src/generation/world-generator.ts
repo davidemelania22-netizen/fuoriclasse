@@ -60,14 +60,14 @@ export function generateWorld(input: WorldGenerationInput): GeneratedWorld {
       clubCount: config.clubsPerTopDivision,
       abilityMean: config.ability.topDivisionMean,
       reputation: config.reputation.topDivision,
-      label: 'Prima Divisione',
+      label: 'Serie A',
     },
     {
       tier: 2,
       clubCount: config.clubsPerSecondDivision,
       abilityMean: config.ability.topDivisionMean - config.ability.divisionStep,
       reputation: config.reputation.secondDivision,
-      label: 'Seconda Divisione',
+      label: 'Serie B',
     },
   ];
 
@@ -91,6 +91,21 @@ export function generateWorld(input: WorldGenerationInput): GeneratedWorld {
       seasonEnd,
     });
 
+    // National knockout cup (all the country's clubs enter; resolved per season).
+    competitions.push({
+      key: `comp-${country.id}-cup`,
+      name: `Coppa ${country.name}`,
+      countryId: country.id,
+      type: CompetitionType.Cup,
+      tier: 0,
+      reputation: config.reputation.topDivision,
+      seasonStart,
+      seasonEnd,
+    });
+
+    // Runs across every division so a country's club names stay unique even
+    // after promotion/relegation mixes the divisions.
+    let clubOrdinal = 0;
     for (const division of divisions) {
       if (division.clubCount < 2) continue;
 
@@ -106,6 +121,14 @@ export function generateWorld(input: WorldGenerationInput): GeneratedWorld {
         seasonEnd,
       });
 
+      // Featured club names (e.g. real favourites like Inter) claim the first
+      // slots of their division; any leftover slots stay procedural.
+      const featured =
+        division.tier === 1
+          ? (namePool.featuredClubs ?? [])
+          : division.tier === 2
+            ? (namePool.secondDivisionClubs ?? [])
+            : [];
       const divisionClubKeys: string[] = [];
       for (let i = 0; i < division.clubCount; i += 1) {
         const clubKey = `${compKey}-club${String(i).padStart(2, '0')}`;
@@ -114,12 +137,14 @@ export function generateWorld(input: WorldGenerationInput): GeneratedWorld {
           key: clubKey,
           competitionKey: compKey,
           countryId: country.id,
-          cityIndex: i,
+          cityIndex: clubOrdinal,
+          forcedName: featured[i],
           namePool,
           divisionMean: division.abilityMean,
           baseReputation: division.reputation,
           config,
         });
+        clubOrdinal += 1;
         clubs.push(club);
         divisionClubKeys.push(clubKey);
 
@@ -173,6 +198,30 @@ export function generateWorld(input: WorldGenerationInput): GeneratedWorld {
         });
       }
     }
+  }
+
+  if (input.countries.length > 0) {
+    competitions.push({
+      key: 'comp-continental',
+      name: 'Champions League',
+      countryId: null,
+      type: CompetitionType.Continental,
+      tier: 0,
+      reputation: Math.round(config.reputation.topDivision * 1.5),
+      seasonStart,
+      seasonEnd,
+    });
+
+    competitions.push({
+      key: 'comp-national-teams',
+      name: 'Europei',
+      countryId: null,
+      type: CompetitionType.International,
+      tier: 0,
+      reputation: Math.round(config.reputation.topDivision * 2),
+      seasonStart,
+      seasonEnd,
+    });
   }
 
   return { competitions, clubs, coaches, players, seasons, fixtures };

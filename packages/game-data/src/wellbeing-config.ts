@@ -55,6 +55,9 @@ export const DEFAULT_WELLBEING_CONFIG: WellbeingConfig = {
     ],
     recurrenceBase: 0.08,
     attributeImpactPerSeverity: 0.4,
+    recurrenceWindowWeeks: 6,
+    rushDurationFactor: 0.55,
+    rushRecurrencePenalty: 0.18,
   },
   morale: {
     baseline: 60,

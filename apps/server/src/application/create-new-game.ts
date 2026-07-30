@@ -6,29 +6,22 @@ import {
   type LoadedGame,
   type NewGameInput,
 } from '@football-life/shared';
+import { quickStartOf } from '@football-life/game-data';
 import {
   DEFAULT_SEED,
   GAME_START_DATE,
   SIMULATION_VERSION,
-  STARTING_AGE_YEARS,
+  STARTING_BALANCE,
 } from '../config';
 import type {
   NewGamePersistenceInput,
   SaveGameRepository,
 } from '../repositories/save-game-repository';
 
-// Deterministic baselines for the protagonist. Procedural generation of varied
-// talent and attributes is introduced in Milestone 3; here we persist a sound,
-// reproducible starting point so create/reload can be validated.
-const VISIBLE_BASELINE = 25;
+// Deterministic baselines for the protagonist: the visible baseline, age,
+// potential, reputation and market value come from the chosen quick-start
+// (CLASSIC reproduces the historical defaults). Hidden traits stay neutral.
 const HIDDEN_BASELINE = 50;
-const STARTING_POTENTIAL = 65;
-
-function baselineFor(category: AttributeCategory): number {
-  return category === AttributeCategory.Hidden
-    ? HIDDEN_BASELINE
-    : VISIBLE_BASELINE;
-}
 
 export interface CreateNewGameDeps {
   repository: SaveGameRepository;
@@ -41,9 +34,10 @@ export async function createNewGame(
 ): Promise<LoadedGame> {
   const now = (deps.now ?? (() => new Date()))();
   const currentDate = GAME_START_DATE;
+  const quickStart = quickStartOf(input.quickStart);
   const birthDate = new Date(
     Date.UTC(
-      currentDate.getUTCFullYear() - STARTING_AGE_YEARS,
+      currentDate.getUTCFullYear() - quickStart.ageYears,
       currentDate.getUTCMonth(),
       currentDate.getUTCDate(),
     ),
@@ -51,7 +45,10 @@ export async function createNewGame(
 
   const attributes = ATTRIBUTE_DEFINITIONS.map((definition) => ({
     attributeKey: definition.key,
-    value: baselineFor(definition.category),
+    value:
+      definition.category === AttributeCategory.Hidden
+        ? HIDDEN_BASELINE
+        : quickStart.visibleBaseline,
     category: definition.category,
   }));
 
@@ -85,10 +82,10 @@ export async function createNewGame(
       heightCm: 170,
       weightKg: 62,
       currentAbility,
-      potentialAbility: STARTING_POTENTIAL,
-      reputation: 100,
+      potentialAbility: quickStart.potential,
+      reputation: quickStart.reputation,
       popularity: 20,
-      marketValue: 50_000,
+      marketValue: quickStart.marketValue,
       condition: 100,
       fatigue: 0,
       morale: 60,
@@ -101,6 +98,7 @@ export async function createNewGame(
       careerStatus: CareerStatus.Youth,
     },
     attributes,
+    startingBalance: STARTING_BALANCE,
   };
 
   return deps.repository.persistNewGame(persistence);

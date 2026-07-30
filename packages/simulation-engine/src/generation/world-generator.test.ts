@@ -63,8 +63,8 @@ describe('generateWorld', () => {
     expect(world.clubs).toHaveLength(20);
     expect(world.coaches).toHaveLength(20);
     expect(world.players).toHaveLength(20 * 16);
-    // per country: youth + tier1 + tier2
-    expect(world.competitions).toHaveLength(2 * 3);
+    // per country: youth + national cup + tier1 + tier2, plus continental cup + national-team tournament
+    expect(world.competitions).toHaveLength(2 * 4 + 2);
     expect(world.seasons).toHaveLength(2 * 2);
   });
 
@@ -131,6 +131,57 @@ describe('generateWorld', () => {
     expect(pairCounts.size).toBe((6 * 5) / 2);
     for (const count of pairCounts.values()) {
       expect(count).toBe(2);
+    }
+  });
+
+  it('featured club names claim their division slots', () => {
+    const world = generateWorld({
+      ...input,
+      config: {
+        ...config,
+        namePools: {
+          AA: {
+            ...namePool,
+            featuredClubs: ['Inter', 'Stella Rossa'],
+            secondDivisionClubs: ['Palermo', 'Sampdoria'],
+          },
+          BB: namePool,
+        },
+      },
+    });
+    const topAA = world.clubs.filter(
+      (club) => club.competitionKey === 'comp-AA-t1',
+    );
+    expect(topAA.map((club) => club.name)).toContain('Inter');
+    expect(topAA.map((club) => club.name)).toContain('Stella Rossa');
+    const inter = topAA.find((club) => club.name === 'Inter')!;
+    expect(inter.shortName).toBe('INT');
+    const secondAA = world.clubs.filter(
+      (club) => club.competitionKey === 'comp-AA-t2',
+    );
+    expect(secondAA.map((club) => club.name)).toContain('Palermo');
+    expect(secondAA.map((club) => club.name)).toContain('Sampdoria');
+    // Forced names never leak into the other division or country.
+    expect(
+      world.clubs.filter(
+        (club) => club.competitionKey !== 'comp-AA-t1' && club.name === 'Inter',
+      ),
+    ).toHaveLength(0);
+    expect(
+      world.clubs.filter(
+        (club) =>
+          club.competitionKey !== 'comp-AA-t2' && club.name === 'Palermo',
+      ),
+    ).toHaveLength(0);
+  });
+
+  it('the default world has no duplicate club names within a country', () => {
+    const world = generateWorld(input);
+    for (const country of countries) {
+      const names = world.clubs
+        .filter((club) => club.countryId === country.id)
+        .map((club) => club.name);
+      expect(new Set(names).size).toBe(names.length);
     }
   });
 });

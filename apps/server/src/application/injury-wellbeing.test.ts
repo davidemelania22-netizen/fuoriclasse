@@ -27,6 +27,29 @@ const noInjuryWellbeing = {
   injury: { ...DEFAULT_WELLBEING_CONFIG.injury, weeklyBaseProbability: 0 },
 };
 
+// Forces a one-week injury with a guaranteed high recurrenceRisk, so a
+// relapse can be provoked afterwards without waiting on the normal odds.
+const forceQuickInjuryWellbeing = {
+  ...DEFAULT_WELLBEING_CONFIG,
+  injury: {
+    ...DEFAULT_WELLBEING_CONFIG.injury,
+    weeklyBaseProbability: 3,
+    maxWeeklyProbability: 1,
+    severityBands: [{ severity: 1, weight: 100, minWeeks: 1, maxWeeks: 1 }],
+    recurrenceBase: 10,
+    recurrenceWindowWeeks: 10,
+  },
+};
+// No fresh injuries, so only a relapse of a previously healed injury can occur.
+const relapseOnlyWellbeing = {
+  ...DEFAULT_WELLBEING_CONFIG,
+  injury: {
+    ...DEFAULT_WELLBEING_CONFIG.injury,
+    weeklyBaseProbability: 0,
+    recurrenceWindowWeeks: 10,
+  },
+};
+
 const newGame: NewGameInput = {
   name: 'Injury Test',
   player: {
@@ -140,5 +163,58 @@ describe('injuries and wellbeing in the weekly loop', () => {
       where: { id: game.player.id },
     });
     expect(recoveredPlayer?.careerStatus).not.toBe('INJURED');
+  });
+
+  it('relapses into the same injury type within the recurrence window', async () => {
+    const saveRepo = new PrismaSaveGameRepository(db.prisma);
+    const repo = new PrismaProgressionRepository(db.prisma);
+    const game = await createNewGame({ repository: saveRepo }, newGame);
+
+    // Advance a week at a time until a one-week injury has come and gone,
+    // independent of the (random) save seed.
+    let healed = null;
+    for (let attempt = 0; attempt < 20 && !healed; attempt += 1) {
+      await advanceWeeks(
+        {
+          repository: repo,
+          config: DEFAULT_PROGRESSION_CONFIG,
+          wellbeingConfig: forceQuickInjuryWellbeing,
+          injuryTypeKeys,
+        },
+        {
+          saveGameId: game.save.id,
+          weeks: 1,
+          intensity: TrainingIntensity.Intense,
+        },
+      );
+      healed = await db.prisma.injury.findFirst({
+        where: { playerId: game.player.id, status: 'HEALED' },
+      });
+    }
+    expect(healed).not.toBeNull();
+    const originalTypeKey = healed!.injuryTypeKey;
+
+    let relapsed = false;
+    for (let attempt = 0; attempt < 10 && !relapsed; attempt += 1) {
+      const report = await advanceWeeks(
+        {
+          repository: repo,
+          config: DEFAULT_PROGRESSION_CONFIG,
+          wellbeingConfig: relapseOnlyWellbeing,
+          injuryTypeKeys,
+        },
+        { saveGameId: game.save.id, weeks: 1 },
+      );
+      relapsed = report?.injuryRelapse ?? false;
+    }
+    expect(relapsed).toBe(true);
+
+    const relapseInjury = await db.prisma.injury.findFirst({
+      where: {
+        playerId: game.player.id,
+        status: { in: ['ACTIVE', 'RECOVERING'] },
+      },
+    });
+    expect(relapseInjury?.injuryTypeKey).toBe(originalTypeKey);
   });
 });

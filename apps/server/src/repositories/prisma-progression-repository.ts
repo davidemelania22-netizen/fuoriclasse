@@ -2,6 +2,7 @@ import type { PrismaClient } from '@prisma/client';
 import { InjuryStatus, type AttributeCategory } from '@football-life/shared';
 import type { AttributeValue } from '@football-life/simulation-engine';
 import type {
+  InjuryTreatmentUpdate,
   ProgressionRepository,
   ProtagonistSnapshot,
   WeeklyUpdate,
@@ -64,6 +65,30 @@ export class PrismaProgressionRepository implements ProgressionRepository {
           ),
         )
       : 0;
+    const recentHealed = await this.prisma.injury.findFirst({
+      where: {
+        playerId: player.id,
+        status: InjuryStatus.Healed,
+        actualEndAt: { not: null },
+      },
+      orderBy: { actualEndAt: 'desc' },
+    });
+
+    // Minutes played in the fortnight before now — the "match fitness" that
+    // feeds training growth. A benched player trains without this boost.
+    const recentAppearances = await this.prisma.matchAppearance.aggregate({
+      where: {
+        playerId: player.id,
+        fixture: {
+          scheduledAt: {
+            gt: new Date(save.currentDate.getTime() - 2 * WEEK_MS),
+            lte: save.currentDate,
+          },
+        },
+      },
+      _sum: { minutesPlayed: true },
+    });
+    const recentMinutes = recentAppearances._sum.minutesPlayed ?? 0;
 
     return {
       saveGameId,
@@ -82,14 +107,25 @@ export class PrismaProgressionRepository implements ProgressionRepository {
       careerStatus: player.careerStatus,
       injuryProneness: attributeValue(attributes, 'injuryProneness', 30),
       injuryHistoryCount,
+      recentMinutes,
       activeInjury: active
         ? {
             id: active.id,
+            typeKey: active.injuryTypeKey,
             weeksRemaining,
             severity: active.severity,
             recurrenceRisk: active.recurrenceRisk,
+            treatmentChoice: active.treatmentChoice,
           }
         : null,
+      recentlyHealedInjury:
+        recentHealed && recentHealed.actualEndAt
+          ? {
+              typeKey: recentHealed.injuryTypeKey,
+              actualEndAt: recentHealed.actualEndAt,
+              recurrenceRisk: recentHealed.recurrenceRisk,
+            }
+          : null,
       attributes,
       club: player.club
         ? {
@@ -164,6 +200,17 @@ export class PrismaProgressionRepository implements ProgressionRepository {
           ...(update.retired ? { isCompleted: true } : {}),
         },
       });
+    });
+  }
+
+  async applyInjuryTreatment(update: InjuryTreatmentUpdate): Promise<void> {
+    await this.prisma.injury.update({
+      where: { id: update.injuryId },
+      data: {
+        treatmentChoice: update.treatmentChoice,
+        expectedEndAt: update.expectedEndAt,
+        recurrenceRisk: update.recurrenceRisk,
+      },
     });
   }
 }

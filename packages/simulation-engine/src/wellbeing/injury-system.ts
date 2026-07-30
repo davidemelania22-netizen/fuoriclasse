@@ -97,3 +97,81 @@ export function recoverInjuryWeek(weeksRemaining: number): {
   const remaining = weeksRemaining - 1;
   return { weeksRemaining: Math.max(0, remaining), healed: remaining <= 0 };
 }
+
+export type InjuryTreatmentChoice = 'REST' | 'RUSH';
+
+export interface TreatmentEffect {
+  weeksRemaining: number;
+  recurrenceRisk: number;
+}
+
+/**
+ * REST leaves the recovery plan untouched. RUSH shortens the remaining time
+ * off the pitch at the cost of a higher chance of relapse once healed.
+ */
+export function applyTreatmentChoice(
+  current: { weeksRemaining: number; recurrenceRisk: number },
+  choice: InjuryTreatmentChoice,
+  config: WellbeingConfig,
+): TreatmentEffect {
+  if (choice === 'REST') {
+    return {
+      weeksRemaining: current.weeksRemaining,
+      recurrenceRisk: current.recurrenceRisk,
+    };
+  }
+  return {
+    // Never longer than the untreated plan, even when it was already
+    // within one week of healing on its own.
+    weeksRemaining: Math.min(
+      current.weeksRemaining,
+      Math.max(
+        1,
+        Math.round(current.weeksRemaining * config.injury.rushDurationFactor),
+      ),
+    ),
+    recurrenceRisk: clamp(
+      current.recurrenceRisk + config.injury.rushRecurrencePenalty,
+      0,
+      0.9,
+    ),
+  };
+}
+
+/**
+ * Weekly relapse check for a healed injury, active only within the
+ * post-recovery vulnerability window (spec section 4.4's recurrenceRisk).
+ */
+export function rollRelapseInjury(
+  input: {
+    typeKey: string;
+    recurrenceRisk: number;
+    weeksSinceHealed: number;
+  },
+  config: WellbeingConfig,
+  rng: RandomSource,
+): InjuryRollResult | null {
+  if (input.weeksSinceHealed > config.injury.recurrenceWindowWeeks) {
+    return null;
+  }
+  if (!rng.chance(input.recurrenceRisk)) {
+    return null;
+  }
+
+  const band = rng.weightedPick(
+    config.injury.severityBands.map((b) => ({ value: b, weight: b.weight })),
+  );
+  const durationWeeks = rng.integer(band.minWeeks, band.maxWeeks);
+
+  return {
+    typeKey: input.typeKey,
+    severity: band.severity,
+    durationWeeks,
+    recurrenceRisk: clamp(
+      config.injury.recurrenceBase * band.severity,
+      0,
+      0.6,
+    ),
+    attributeImpact: band.severity * config.injury.attributeImpactPerSeverity,
+  };
+}

@@ -19,7 +19,7 @@ export const countryLabels: Record<string, string> = {
   EN: 'Inghilterra',
   ES: 'Spagna',
   FR: 'Francia',
-  US: 'Stati Uniti',
+  DE: 'Germania',
 };
 
 export const careerStatusLabels: Record<string, string> = {
@@ -114,3 +114,22 @@ export const attributeLabels: Record<string, string> = {
 export function label(map: Record<string, string>, key: string): string {
   return map[key] ?? key;
 }
+
+/**
+ * Italian articles for country names: "l'Italia" but "la Germania". Without
+ * this the UI reads "la Italia", which no Italian would ever write.
+ */
+const startsWithVowel = (name: string): boolean =>
+  /^[aeiouàèéìòù]/i.test(name.trim());
+
+/** "l'Italia" / "la Germania" */
+export const laCountry = (name: string): string =>
+  startsWithVowel(name) ? `l'${name}` : `la ${name}`;
+
+/** "all'Italia" / "alla Germania" */
+export const allaCountry = (name: string): string =>
+  startsWithVowel(name) ? `all'${name}` : `alla ${name}`;
+
+/** "dell'Italia" / "della Germania" */
+export const dellaCountry = (name: string): string =>
+  startsWithVowel(name) ? `dell'${name}` : `della ${name}`;

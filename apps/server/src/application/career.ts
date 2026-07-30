@@ -10,6 +10,7 @@ import {
 } from '@football-life/simulation-engine';
 import type {
   CareerRepository,
+  ClubDirectoryEntry,
   OfferInput,
   PendingOffer,
 } from '../repositories/career-repository';
@@ -35,8 +36,51 @@ export interface CareerDeps {
 export interface SignContractResult {
   clubId: string;
   weeklyWage: number;
+  signingBonus: number;
   squadRole: string;
   endDate: string;
+}
+
+export async function listClubs(
+  repository: CareerRepository,
+  saveGameId: string,
+): Promise<ClubDirectoryEntry[]> {
+  return repository.listClubDirectory(saveGameId);
+}
+
+export interface ProtagonistOfferView {
+  id: string;
+  clubName: string;
+  clubReputation: number;
+  fee: number;
+  weeklyWage: number;
+  contractYears: number;
+  squadRole: string;
+}
+
+/** Pending transfer offers for the protagonist, enriched with club names. */
+export async function listProtagonistOffers(
+  repository: CareerRepository,
+  saveGameId: string,
+): Promise<ProtagonistOfferView[] | null> {
+  const career = await repository.loadProtagonist(saveGameId);
+  if (!career) return null;
+  const offers = await repository.listPendingOffers(career.playerId);
+  const byId = new Map(
+    (await repository.listClubDirectory(saveGameId)).map((c) => [c.clubId, c]),
+  );
+  return offers.map((offer) => {
+    const club = byId.get(offer.toClubId);
+    return {
+      id: offer.id,
+      clubName: club?.name ?? 'Sconosciuto',
+      clubReputation: club?.reputation ?? 0,
+      fee: offer.fee,
+      weeklyWage: offer.offeredWage,
+      contractYears: offer.contractYears,
+      squadRole: offer.squadRole,
+    };
+  });
 }
 
 export async function signWithClub(
@@ -78,6 +122,7 @@ export async function signWithClub(
   return {
     clubId: input.clubId,
     weeklyWage: terms.weeklyWage,
+    signingBonus: terms.signingBonus,
     squadRole: terms.squadRole,
     endDate: endDate.toISOString(),
   };
@@ -153,8 +198,18 @@ export async function generateProtagonistOffers(
     rng,
   );
 
+  // Keep at most one offer per club (the best wage), so the list stays clean.
+  const bestByClub = new Map<string, (typeof generated)[number]>();
+  for (const offer of generated) {
+    const prev = bestByClub.get(offer.clubId);
+    if (!prev || offer.offeredWeeklyWage > prev.offeredWeeklyWage) {
+      bestByClub.set(offer.clubId, offer);
+    }
+  }
+  const deduped = [...bestByClub.values()];
+
   const expiresAt = new Date(career.currentDate.getTime() + OFFER_VALIDITY_MS);
-  const offerInputs: OfferInput[] = generated.map((offer) => {
+  const offerInputs: OfferInput[] = deduped.map((offer) => {
     const club = clubById.get(offer.clubId);
     return {
       fromClubId: career.clubId!,
@@ -172,6 +227,8 @@ export async function generateProtagonistOffers(
     };
   });
 
+  // Replace any still-pending offers from a previous search instead of piling up.
+  await deps.repository.expirePendingOffers(career.playerId);
   await deps.repository.createOffers(career.playerId, offerInputs);
   return deps.repository.listPendingOffers(career.playerId);
 }

@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { TrainingIntensity, type WellbeingConfig } from '@football-life/shared';
 import { createRandomSource } from '../random/seeded-random';
 import {
+  applyTreatmentChoice,
   computeInjuryRisk,
   injuryProbability,
   recoverInjuryWeek,
   rollInjury,
+  rollRelapseInjury,
   type InjuryRiskInput,
 } from './injury-system';
 import {
@@ -45,6 +47,9 @@ const config: WellbeingConfig = {
     ],
     recurrenceBase: 0.08,
     attributeImpactPerSeverity: 0.4,
+    recurrenceWindowWeeks: 6,
+    rushDurationFactor: 0.55,
+    rushRecurrencePenalty: 0.18,
   },
   morale: {
     baseline: 60,
@@ -141,6 +146,90 @@ describe('injury system', () => {
     const a = rollInjury(midRisk, injuryTypes, config, createRandomSource('x'));
     const b = rollInjury(midRisk, injuryTypes, config, createRandomSource('x'));
     expect(a).toEqual(b);
+  });
+});
+
+describe('injury treatment choice', () => {
+  it('leaves duration and recurrence risk untouched on REST', () => {
+    const effect = applyTreatmentChoice(
+      { weeksRemaining: 6, recurrenceRisk: 0.1 },
+      'REST',
+      config,
+    );
+    expect(effect).toEqual({ weeksRemaining: 6, recurrenceRisk: 0.1 });
+  });
+
+  it('shortens duration but raises recurrence risk on RUSH', () => {
+    const effect = applyTreatmentChoice(
+      { weeksRemaining: 10, recurrenceRisk: 0.1 },
+      'RUSH',
+      config,
+    );
+    expect(effect.weeksRemaining).toBeLessThan(10);
+    expect(effect.weeksRemaining).toBeGreaterThanOrEqual(1);
+    expect(effect.recurrenceRisk).toBeCloseTo(0.28);
+  });
+
+  it('never rushes an injury down to zero weeks', () => {
+    const effect = applyTreatmentChoice(
+      { weeksRemaining: 1, recurrenceRisk: 0.1 },
+      'RUSH',
+      config,
+    );
+    expect(effect.weeksRemaining).toBeGreaterThanOrEqual(1);
+  });
+
+  it('never makes recovery longer, even when almost already healed', () => {
+    const effect = applyTreatmentChoice(
+      { weeksRemaining: 0, recurrenceRisk: 0.1 },
+      'RUSH',
+      config,
+    );
+    expect(effect.weeksRemaining).toBeLessThanOrEqual(0);
+  });
+});
+
+describe('injury relapse', () => {
+  it('never relapses outside the vulnerability window', () => {
+    const rng = createRandomSource('relapse-window');
+    const result = rollRelapseInjury(
+      { typeKey: 'hamstring', recurrenceRisk: 1, weeksSinceHealed: 7 },
+      config,
+      rng,
+    );
+    expect(result).toBeNull();
+  });
+
+  it('relapses with high frequency at high recurrence risk inside the window', () => {
+    const rng = createRandomSource('relapse-frequency');
+    let relapses = 0;
+    const attempts = 2000;
+    for (let i = 0; i < attempts; i += 1) {
+      const result = rollRelapseInjury(
+        { typeKey: 'hamstring', recurrenceRisk: 0.9, weeksSinceHealed: 1 },
+        config,
+        rng,
+      );
+      if (result) relapses += 1;
+    }
+    expect(relapses / attempts).toBeGreaterThan(0.7);
+  });
+
+  it('reuses the same injury type on relapse', () => {
+    const rng = createRandomSource('relapse-type');
+    let found = false;
+    for (let i = 0; i < 200 && !found; i += 1) {
+      const result = rollRelapseInjury(
+        { typeKey: 'knee-ligament', recurrenceRisk: 0.9, weeksSinceHealed: 1 },
+        config,
+        rng,
+      );
+      if (result) {
+        expect(result.typeKey).toBe('knee-ligament');
+        found = true;
+      }
+    }
+    expect(found).toBe(true);
   });
 });
 

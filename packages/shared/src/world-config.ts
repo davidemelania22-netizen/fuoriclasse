@@ -5,6 +5,10 @@ export const namePoolSchema = z.object({
   firstNames: z.array(z.string().min(1)).min(1),
   lastNames: z.array(z.string().min(1)).min(1),
   cities: z.array(z.string().min(1)).min(1),
+  /** Club names guaranteed to appear in the country's top division, in order. */
+  featuredClubs: z.array(z.string().min(1)).optional(),
+  /** Club names guaranteed in the second division, in order. */
+  secondDivisionClubs: z.array(z.string().min(1)).optional(),
 });
 
 /** Fully configurable, validated parameters for procedural world generation. */

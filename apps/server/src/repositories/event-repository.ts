@@ -1,8 +1,23 @@
-import type { EventContext } from '@football-life/shared';
+import type {
+  EventConsequence,
+  EventContext,
+  EventGamble,
+} from '@football-life/shared';
 import type {
   CooldownState,
   EventEffectState,
 } from '@football-life/simulation-engine';
+
+/**
+ * A choice as the player sees it: the label, what it costs or gives for
+ * certain, and — when it is a gamble — the odds, declared up front.
+ */
+export interface EventChoiceView {
+  key: string;
+  label: string;
+  consequences: EventConsequence;
+  gamble?: EventGamble;
+}
 
 export interface EventGenerationContext {
   context: EventContext;
@@ -15,6 +30,8 @@ export interface PlayerEffectSnapshot extends EventEffectState {
   playerId: string;
   saveGameId: string;
   currentDate: Date;
+  /** Save seed, so a gamble's roll is reproducible for this career. */
+  seed: string;
 }
 
 export interface CreatePendingEventInput {
@@ -24,7 +41,7 @@ export interface CreatePendingEventInput {
   title: string;
   description: string;
   occurredAt: Date;
-  choices: { key: string; label: string }[];
+  choices: EventChoiceView[];
 }
 
 export interface PendingEventRecord {
@@ -39,7 +56,7 @@ export interface PendingEventView {
   category: string;
   title: string;
   description: string;
-  choices: { key: string; label: string }[];
+  choices: EventChoiceView[];
 }
 
 export interface ApplyEventOutcomeInput {
@@ -50,6 +67,8 @@ export interface ApplyEventOutcomeInput {
   occurredAt: Date;
   description: string;
   effect: EventEffectState;
+  /** How a declared-odds choice turned out, kept so the story is not lost. */
+  outcomeLabel?: string | undefined;
 }
 
 export interface EventRepository {

@@ -1,0 +1,157 @@
+import type { Prisma, PrismaClient } from '@prisma/client';
+import type {
+  PlayerProfile,
+  ProfileRepository,
+  StoredLoan,
+  StoredLoanOffer,
+  StoredMatchPlan,
+  StoredNationalCallup,
+  StoredNaturalization,
+  StoredPostMatch,
+} from './profile-repository';
+
+const j = (value: unknown): Prisma.InputJsonValue =>
+  value as Prisma.InputJsonValue;
+
+export class PrismaProfileRepository implements ProfileRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  private async personId(saveGameId: string): Promise<string | null> {
+    const save = await this.prisma.saveGame.findUnique({
+      where: { id: saveGameId },
+    });
+    return save?.playerPersonId ?? null;
+  }
+
+  async getProfile(saveGameId: string): Promise<PlayerProfile | null> {
+    const id = await this.personId(saveGameId);
+    if (!id) return null;
+    const person = await this.prisma.person.findUnique({ where: { id } });
+    if (!person) return null;
+    const profile = (person.personalityProfile ?? {}) as Record<
+      string,
+      unknown
+    >;
+    return {
+      agentKey: (profile.agentKey as string | undefined) ?? null,
+      lifestyle: (profile.lifestyle as string | undefined) ?? null,
+      avatarDataUrl: (profile.avatarDataUrl as string | undefined) ?? null,
+      managerTrust: (profile.managerTrust as number | undefined) ?? null,
+      matchPlan: (profile.matchPlan as StoredMatchPlan | undefined) ?? null,
+      postMatchPending:
+        (profile.postMatchPending as StoredPostMatch | undefined) ?? null,
+      scoutInterest:
+        (profile.scoutInterest as Record<string, number> | undefined) ?? {},
+      tacticalInstructions:
+        (profile.tacticalInstructions as
+          | { style: string; temperament: string }
+          | undefined) ?? null,
+      nationalCallup:
+        (profile.nationalCallup as StoredNationalCallup | undefined) ?? null,
+      activeLoan: (profile.activeLoan as StoredLoan | undefined) ?? null,
+      loanOffer: (profile.loanOffer as StoredLoanOffer | undefined) ?? null,
+      cappedForCountryId:
+        (profile.cappedForCountryId as string | undefined) ?? null,
+      naturalization:
+        (profile.naturalization as StoredNaturalization | undefined) ?? null,
+    };
+  }
+
+  private async patch(
+    saveGameId: string,
+    patch: Record<string, unknown>,
+  ): Promise<boolean> {
+    const id = await this.personId(saveGameId);
+    if (!id) return false;
+    const person = await this.prisma.person.findUnique({ where: { id } });
+    if (!person) return false;
+    const current = (person.personalityProfile ?? {}) as Record<
+      string,
+      unknown
+    >;
+    await this.prisma.person.update({
+      where: { id },
+      data: { personalityProfile: j({ ...current, ...patch }) },
+    });
+    return true;
+  }
+
+  setAgent(saveGameId: string, agentKey: string): Promise<boolean> {
+    return this.patch(saveGameId, { agentKey });
+  }
+
+  setLifestyle(saveGameId: string, lifestyle: string): Promise<boolean> {
+    return this.patch(saveGameId, { lifestyle });
+  }
+
+  setAvatar(
+    saveGameId: string,
+    avatarDataUrl: string | null,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { avatarDataUrl });
+  }
+
+  setManagerTrust(saveGameId: string, trust: number): Promise<boolean> {
+    return this.patch(saveGameId, { managerTrust: trust });
+  }
+
+  setMatchPlan(
+    saveGameId: string,
+    plan: StoredMatchPlan | null,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { matchPlan: plan });
+  }
+
+  setPostMatchPending(
+    saveGameId: string,
+    pending: StoredPostMatch | null,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { postMatchPending: pending });
+  }
+
+  setScoutInterest(
+    saveGameId: string,
+    interest: Record<string, number>,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { scoutInterest: interest });
+  }
+
+  setTacticalInstructions(
+    saveGameId: string,
+    instructions: { style: string; temperament: string },
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { tacticalInstructions: instructions });
+  }
+
+  setNationalCallup(
+    saveGameId: string,
+    callup: StoredNationalCallup,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { nationalCallup: callup });
+  }
+
+  setActiveLoan(saveGameId: string, loan: StoredLoan | null): Promise<boolean> {
+    return this.patch(saveGameId, { activeLoan: loan });
+  }
+
+  setLoanOffer(
+    saveGameId: string,
+    offer: StoredLoanOffer | null,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { loanOffer: offer });
+  }
+
+  setCappedForCountry(
+    saveGameId: string,
+    countryId: string,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { cappedForCountryId: countryId });
+  }
+
+  setNaturalization(
+    saveGameId: string,
+    naturalization: StoredNaturalization | null,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { naturalization });
+  }
+}

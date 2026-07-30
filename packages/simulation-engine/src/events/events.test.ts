@@ -7,8 +7,11 @@ import { selectEvent } from './event-selector';
 import {
   applyConsequence,
   getChoice,
+  mergeConsequences,
+  resolveChoiceOutcome,
   type EventEffectState,
 } from './event-resolver';
+import { renderTemplate } from './render-template';
 
 const defs: GameEventDefinition[] = [
   {
@@ -62,6 +65,18 @@ const ctx: EventContext = {
   hasClub: false,
   clubReputation: 0,
   weekIndex: 0,
+  form: 50,
+  condition: 100,
+  fatigue: 0,
+  isInjured: false,
+  seasonPhase: 'SEASON',
+  marketValue: 50_000,
+  squadRole: '',
+  contractYearsLeft: 0,
+  lifestyle: '',
+  clubName: '',
+  leagueName: '',
+  firstName: 'Alex',
 };
 
 describe('trigger evaluation', () => {
@@ -154,5 +169,91 @@ describe('event resolution', () => {
   it('looks up a choice and throws on an unknown one', () => {
     expect(getChoice(defs[0]!, 'x').key).toBe('x');
     expect(() => getChoice(defs[0]!, 'missing')).toThrow();
+  });
+});
+
+describe('choices with declared odds', () => {
+  const gambleChoice = {
+    key: 'bet',
+    label: 'Rischia',
+    consequences: { stress: 4 },
+    gamble: {
+      successChance: 0.6,
+      successLabel: 'Ti è andata bene.',
+      failureLabel: 'È finita male.',
+      success: { reputation: 30, morale: 5 },
+      failure: { reputation: -20, morale: -5 },
+    },
+  };
+
+  it('adds the price of trying to whichever way it goes', () => {
+    const outcome = resolveChoiceOutcome(
+      gambleChoice,
+      createRandomSource('lucky'),
+    );
+    expect(outcome.succeeded).not.toBeNull();
+    // The choice's own consequences apply either way.
+    expect(outcome.consequences.stress).toBe(4);
+    if (outcome.succeeded) {
+      expect(outcome.consequences.reputation).toBe(30);
+      expect(outcome.outcomeLabel).toBe('Ti è andata bene.');
+    } else {
+      expect(outcome.consequences.reputation).toBe(-20);
+      expect(outcome.outcomeLabel).toBe('È finita male.');
+    }
+  });
+
+  it('is deterministic for the same seed', () => {
+    const a = resolveChoiceOutcome(gambleChoice, createRandomSource('same'));
+    const b = resolveChoiceOutcome(gambleChoice, createRandomSource('same'));
+    expect(a).toEqual(b);
+  });
+
+  it('respects the declared odds over many rolls', () => {
+    let wins = 0;
+    for (let i = 0; i < 2000; i += 1) {
+      if (resolveChoiceOutcome(gambleChoice, createRandomSource(`roll-${i}`))
+        .succeeded) {
+        wins += 1;
+      }
+    }
+    // 60% declared: the player is not being lied to.
+    expect(wins / 2000).toBeGreaterThan(0.55);
+    expect(wins / 2000).toBeLessThan(0.65);
+  });
+
+  it('leaves a sure choice exactly as promised, with no dice', () => {
+    const outcome = resolveChoiceOutcome(
+      defs[0]!.choices[0]!,
+      createRandomSource('irrelevant'),
+    );
+    expect(outcome.succeeded).toBeNull();
+    expect(outcome.outcomeLabel).toBeNull();
+    expect(outcome.consequences).toEqual({ morale: 5 });
+  });
+
+  it('merges consequences and drops what cancels out', () => {
+    expect(
+      mergeConsequences({ morale: 5, stress: 3 }, { morale: -5, money: 100 }),
+    ).toEqual({ stress: 3, money: 100 });
+  });
+});
+
+describe('renderTemplate', () => {
+  it('interpolates context fields into event text', () => {
+    const text = renderTemplate(
+      'Il mercato parla di {firstName} al {clubName} in {leagueName}.',
+      { ...ctx, firstName: 'Leo', clubName: 'Roma', leagueName: 'Serie A' },
+    );
+    expect(text).toBe('Il mercato parla di Leo al Roma in Serie A.');
+  });
+
+  it('drops empty/unknown fields and tidies whitespace and punctuation', () => {
+    const text = renderTemplate('Arrivo al {clubName} di {firstName}.', {
+      ...ctx,
+      clubName: '',
+      firstName: 'Leo',
+    });
+    expect(text).toBe('Arrivo al di Leo.');
   });
 });

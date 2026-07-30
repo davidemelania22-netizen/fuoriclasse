@@ -122,7 +122,8 @@ export function simulateMatch(input: SimulateMatchInput): MatchResult {
         starters,
         (p) =>
           (p.finishing * 0.6 + p.currentAbility * 0.4) *
-          ATTACK_WEIGHT[p.position],
+          ATTACK_WEIGHT[p.position] *
+          (p.goalBias ?? 1),
       );
       if (!scorer) continue;
       scorerGoals.set(scorer.id, (scorerGoals.get(scorer.id) ?? 0) + 1);
@@ -132,7 +133,8 @@ export function simulateMatch(input: SimulateMatchInput): MatchResult {
         const assister = pickWeighted(
           rng,
           starters,
-          (p) => p.currentAbility * ASSIST_WEIGHT[p.position],
+          (p) =>
+            p.currentAbility * ASSIST_WEIGHT[p.position] * (p.assistBias ?? 1),
           scorer.id,
         );
         if (assister) {
@@ -144,13 +146,15 @@ export function simulateMatch(input: SimulateMatchInput): MatchResult {
         }
       }
 
+      const minute = rng.integer(1, 90);
       events.push(
         assistId === undefined
-          ? { type: 'GOAL', clubId, playerId: scorer.id }
+          ? { type: 'GOAL', clubId, playerId: scorer.id, minute }
           : {
               type: 'GOAL',
               clubId,
               playerId: scorer.id,
+              minute,
               assistPlayerId: assistId,
             },
       );
@@ -199,17 +203,28 @@ export function simulateMatch(input: SimulateMatchInput): MatchResult {
       const yellowProbability = clamp(
         config.cards.baseYellow *
           (1 +
-            ((50 - player.discipline) / 100) * config.cards.disciplineFactor),
+            ((50 - player.discipline) / 100) * config.cards.disciplineFactor) *
+          (player.cardBias ?? 1),
         0,
         0.6,
       );
       const yellowCards = rng.chance(yellowProbability) ? 1 : 0;
       const redCards = rng.chance(config.cards.baseRed) ? 1 : 0;
       if (yellowCards > 0) {
-        events.push({ type: 'YELLOW_CARD', clubId, playerId: player.id });
+        events.push({
+          type: 'YELLOW_CARD',
+          clubId,
+          playerId: player.id,
+          minute: rng.integer(1, 90),
+        });
       }
       if (redCards > 0) {
-        events.push({ type: 'RED_CARD', clubId, playerId: player.id });
+        events.push({
+          type: 'RED_CARD',
+          clubId,
+          playerId: player.id,
+          minute: rng.integer(1, 90),
+        });
         rating -= 1;
       }
 
@@ -231,11 +246,13 @@ export function simulateMatch(input: SimulateMatchInput): MatchResult {
   buildAppearances(homeStarters, input.home.clubId, homeGoals, awayGoals);
   buildAppearances(awayStarters, input.away.clubId, awayGoals, homeGoals);
 
+  events.sort((a, b) => a.minute - b.minute);
+
   const commentary = [
     `Risultato finale: ${homeGoals}-${awayGoals} (xG ${roundTo(homeXg, 2)}-${roundTo(awayXg, 2)}).`,
     ...events
       .filter((event) => event.type === 'GOAL')
-      .map((event) => `Gol per ${event.clubId}.`),
+      .map((event) => `Gol per ${event.clubId} al ${event.minute}'.`),
   ];
 
   return {

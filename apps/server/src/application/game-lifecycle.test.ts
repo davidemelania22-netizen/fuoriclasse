@@ -39,7 +39,7 @@ describe('game lifecycle (create / load / list / delete)', () => {
     expect(game.save.id).toBeTruthy();
     expect(game.save.seed).toBe('unit-seed');
     expect(game.save.playerPersonId).toBe(game.player.personId);
-    expect(game.player.ageYears).toBe(14);
+    expect(game.player.ageYears).toBe(18);
     expect(game.player.primaryPosition).toBe('FW');
     expect(game.player.currentAbility).toBeGreaterThan(0);
 
@@ -87,10 +87,22 @@ describe('game lifecycle (create / load / list / delete)', () => {
     ).rejects.toThrow();
   });
 
-  it('cascade-deletes the person and player when the save is removed', async () => {
+  it('hides the save instantly and hard-deletes its rows on purge', async () => {
     const game = await createNewGame({ repository }, input);
 
+    // Soft delete: instantly invisible, rows still present.
     await repository.deleteSave(game.save.id);
+    expect(await repository.loadGame(game.save.id)).toBeNull();
+    expect(
+      (await repository.listSaves()).some((s) => s.id === game.save.id),
+    ).toBe(false);
+
+    // Deleting again reports "not found" (already gone from the outside).
+    expect(await repository.deleteSave(game.save.id)).toBe(false);
+
+    // Background purge removes the actual rows.
+    const purged = await repository.purgeDeletedSaves();
+    expect(purged).toBeGreaterThanOrEqual(1);
 
     const person = await db.prisma.person.findUnique({
       where: { id: game.player.personId },
@@ -98,8 +110,15 @@ describe('game lifecycle (create / load / list / delete)', () => {
     const player = await db.prisma.player.findUnique({
       where: { id: game.player.id },
     });
+    const save = await db.prisma.saveGame.findUnique({
+      where: { id: game.save.id },
+    });
 
     expect(person).toBeNull();
     expect(player).toBeNull();
+    expect(save).toBeNull();
+
+    // Purge is idempotent.
+    expect(await repository.purgeDeletedSaves()).toBe(0);
   });
 });

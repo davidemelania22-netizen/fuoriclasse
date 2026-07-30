@@ -78,7 +78,7 @@ describe('world generation and persistence', () => {
     expect(summary.clubs).toBe(4);
     expect(summary.players).toBe(4 * 14);
     expect(summary.coaches).toBe(4);
-    expect(summary.competitions).toBe(2); // youth + tier 1
+    expect(summary.competitions).toBe(5); // youth + national cup + tier 1 + continental + national-team tournament
     expect(summary.seasons).toBe(1);
     expect(summary.fixtures).toBe(4 * 3); // double round-robin of 4 clubs
     expect(summary.standings).toBe(4);
@@ -114,7 +114,9 @@ describe('world generation and persistence', () => {
       { saveGameId: game.save.id, seed: 'another-seed', countries, config },
     );
 
+    // Soft delete hides it; the background purge removes the world's rows.
     await saveRepo.deleteSave(game.save.id);
+    await saveRepo.purgeDeletedSaves();
 
     expect(
       await db.prisma.club.count({ where: { saveGameId: game.save.id } }),

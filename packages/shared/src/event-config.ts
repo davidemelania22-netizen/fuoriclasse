@@ -22,10 +22,25 @@ export const eventConsequenceSchema = z.object({
   money: z.number().optional(),
 });
 
+/**
+ * A choice that is a real gamble: the odds are declared up front so the player
+ * bets with open eyes. `consequences` on the choice still apply whatever
+ * happens (the price of trying); the branch below is what luck decides.
+ */
+export const eventGambleSchema = z.object({
+  /** Probability the bet pays off, 0.05-0.95 — never a certainty either way. */
+  successChance: z.number().min(0.05).max(0.95),
+  successLabel: z.string(),
+  failureLabel: z.string(),
+  success: eventConsequenceSchema,
+  failure: eventConsequenceSchema,
+});
+
 export const eventChoiceSchema = z.object({
   key: z.string(),
   label: z.string(),
   consequences: eventConsequenceSchema,
+  gamble: eventGambleSchema.optional(),
 });
 
 export const gameEventDefinitionSchema = z.object({
@@ -44,10 +59,15 @@ export const gameEventDefinitionSchema = z.object({
 export type EventCondition = z.infer<typeof eventConditionSchema>;
 export type EventTrigger = z.infer<typeof eventTriggerSchema>;
 export type EventConsequence = z.infer<typeof eventConsequenceSchema>;
+export type EventGamble = z.infer<typeof eventGambleSchema>;
 export type EventChoice = z.infer<typeof eventChoiceSchema>;
 export type GameEventDefinition = z.infer<typeof gameEventDefinitionSchema>;
 
-/** The slice of game state evaluated by event triggers. */
+/**
+ * The slice of game state evaluated by event triggers and interpolated into
+ * event text. Numeric/boolean/string fields can all be matched by conditions;
+ * string fields (clubName, leagueName, firstName, …) double as template vars.
+ */
 export interface EventContext {
   age: number;
   morale: number;
@@ -63,4 +83,22 @@ export interface EventContext {
   hasClub: boolean;
   clubReputation: number;
   weekIndex: number;
+  // --- dynamic situation (added in "Eventi vivi") ---
+  form: number;
+  condition: number;
+  fatigue: number;
+  isInjured: boolean;
+  /** PRESEASON | WINTER_WINDOW | RUN_IN | SEASON */
+  seasonPhase: string;
+  marketValue: number;
+  /** Active-contract squad role, or '' when none. */
+  squadRole: string;
+  /** Whole years left on the active contract, or 0. */
+  contractYearsLeft: number;
+  /** Chosen off-pitch lifestyle key, or '' when none (gates media events). */
+  lifestyle: string;
+  // --- narrative vars (also usable in triggers) ---
+  clubName: string;
+  leagueName: string;
+  firstName: string;
 }

@@ -96,7 +96,7 @@ describe('advanceWeeks', () => {
     const progressionRepo = new PrismaProgressionRepository(db.prisma);
     const game = await createNewGame({ repository: saveRepo }, newGame);
 
-    expect(game.player.ageYears).toBe(14);
+    expect(game.player.ageYears).toBe(18);
 
     const report = await advanceWeeks(
       {
@@ -112,7 +112,7 @@ describe('advanceWeeks', () => {
     );
 
     expect(report?.seasonsCrossed).toBeGreaterThanOrEqual(1);
-    expect(report?.ageAfter).toBe(15);
+    expect(report?.ageAfter).toBe(19);
     expect(report?.fatigue).toBeGreaterThanOrEqual(0);
     expect(report?.fatigue).toBeLessThanOrEqual(100);
   });

@@ -52,6 +52,8 @@ export interface NewGamePersistenceInput {
   person: PersistedPersonInput;
   player: PersistedPlayerInput;
   attributes: readonly PersistedAttributeInput[];
+  /** Opening wallet balance, persisted as the first financial transaction. */
+  startingBalance: number;
 }
 
 /**
@@ -62,5 +64,11 @@ export interface SaveGameRepository {
   persistNewGame(input: NewGamePersistenceInput): Promise<LoadedGame>;
   loadGame(saveGameId: string): Promise<LoadedGame | null>;
   listSaves(): Promise<SaveGameSummary[]>;
-  deleteSave(saveGameId: string): Promise<void>;
+  /**
+   * Hides the save immediately (soft delete). Returns false if absent.
+   * Row cleanup happens later via {@link purgeDeletedSaves}.
+   */
+  deleteSave(saveGameId: string): Promise<boolean>;
+  /** Hard-deletes all soft-deleted saves' rows. Returns purged save count. */
+  purgeDeletedSaves(): Promise<number>;
 }

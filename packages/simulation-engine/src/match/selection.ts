@@ -16,7 +16,8 @@ function selectionScore(
     player.currentAbility * w.ability +
     player.form * w.form +
     player.condition * w.condition +
-    rng.next() * 100 * w.randomness
+    rng.next() * 100 * w.randomness +
+    (player.selectionBias ?? 0)
   );
 }
 
@@ -30,10 +31,12 @@ export function selectLineup(
   config: MatchConfig,
   rng: RandomSource,
 ): MatchPlayer[] {
-  const scored = players.map((player) => ({
-    player,
-    score: selectionScore(player, config, rng),
-  }));
+  const scored = players
+    .filter((player) => player.available !== false)
+    .map((player) => ({
+      player,
+      score: selectionScore(player, config, rng),
+    }));
   const used = new Set<string>();
   const starters: MatchPlayer[] = [];
 

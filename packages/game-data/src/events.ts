@@ -14,7 +14,7 @@ export const EVENT_DEFINITIONS: GameEventDefinition[] = [
     category: C.Football,
     title: 'Svolta in allenamento',
     descriptionTemplate:
-      'Una grande settimana sul campo di allenamento attira l’attenzione.',
+      'Una grande settimana sul campo attira l’attenzione su {firstName}.',
     trigger: { all: [{ field: 'age', op: 'gte', value: 14 }] },
     weight: 8,
     cooldownWeeks: 8,
@@ -35,7 +35,8 @@ export const EVENT_DEFINITIONS: GameEventDefinition[] = [
     id: 'fb-bad-week',
     category: C.Football,
     title: 'Periodo difficile',
-    descriptionTemplate: 'Niente gira in allenamento questa settimana.',
+    descriptionTemplate:
+      'Niente gira in allenamento questa settimana per {firstName}.',
     trigger: { all: [{ field: 'age', op: 'gte', value: 14 }] },
     weight: 6,
     cooldownWeeks: 6,
@@ -86,7 +87,16 @@ export const EVENT_DEFINITIONS: GameEventDefinition[] = [
       {
         key: 'accept',
         label: 'Prendi la responsabilità',
-        consequences: { reputation: 20, stress: 4 },
+        consequences: { stress: 4 },
+        gamble: {
+          successChance: 0.72,
+          successLabel:
+            'Palla nell’angolo, portiere spiazzato: da oggi i rigori sono i tuoi.',
+          failureLabel:
+            'Traversa. Lo stadio ammutolisce e tu resti lì impalato.',
+          success: { reputation: 45, morale: 6, popularity: 20 },
+          failure: { reputation: -25, morale: -10, stress: 6 },
+        },
       },
       {
         key: 'decline',
@@ -456,6 +466,15 @@ export const EVENT_DEFINITIONS: GameEventDefinition[] = [
         key: 'leave',
         label: 'Lascia la scuola',
         consequences: { motivation: 5, happiness: -3 },
+        gamble: {
+          successChance: 0.5,
+          successLabel:
+            'Tutto il tempo al campo paga: ti alleni come un professionista e si vede.',
+          failureLabel:
+            'Senza altro a cui pensare, ogni brutta settimana ti pesa il doppio.',
+          success: { motivation: 8, morale: 5 },
+          failure: { mentalHealth: -10, stress: 8 },
+        },
       },
       {
         key: 'stay',
@@ -625,8 +644,17 @@ export const EVENT_DEFINITIONS: GameEventDefinition[] = [
       { key: 'pay', label: 'Paga', consequences: { money: -5000, stress: -2 } },
       {
         key: 'refuse',
-        label: 'Rifiuta',
-        consequences: { stress: 5, reputation: -5 },
+        label: 'Rifiuta e tieni duro',
+        consequences: { stress: 5 },
+        gamble: {
+          successChance: 0.55,
+          successLabel:
+            'Il procuratore fa marcia indietro: la commissione resta quella di prima.',
+          failureLabel:
+            'Ti molla in pieno mercato: trovarne un altro ti costa tempo e occasioni.',
+          success: { money: 3000, motivation: 4 },
+          failure: { reputation: -20, stress: 8, morale: -5 },
+        },
       },
     ],
   },
@@ -717,7 +745,16 @@ export const EVENT_DEFINITIONS: GameEventDefinition[] = [
       {
         key: 'double',
         label: 'Rilancia',
-        consequences: { popularity: 20, reputation: -15, stress: 6 },
+        consequences: { stress: 6 },
+        gamble: {
+          successChance: 0.4,
+          successLabel:
+            'La tua faccia tosta piace: i tifosi ti adottano come simbolo.',
+          failureLabel:
+            'Rilanciare era la mossa sbagliata: ora la frase te la ricorderanno per anni.',
+          success: { popularity: 55, reputation: 15 },
+          failure: { popularity: -15, reputation: -45, mentalHealth: -5 },
+        },
       },
     ],
   },
@@ -795,7 +832,16 @@ export const EVENT_DEFINITIONS: GameEventDefinition[] = [
       {
         key: 'take',
         label: 'Prendi i soldi',
-        consequences: { money: 50000, reputation: -20 },
+        consequences: { money: 50000 },
+        gamble: {
+          successChance: 0.5,
+          successLabel:
+            'Nessuno fa caso al marchio: incassi e la cosa finisce lì.',
+          failureLabel:
+            'I giornali tirano fuori i panni sporchi dello sponsor e il tuo nome ci finisce in mezzo.',
+          success: { happiness: 4 },
+          failure: { reputation: -60, popularity: -25, stress: 8 },
+        },
       },
       {
         key: 'refuse',
@@ -942,8 +988,17 @@ export const EVENT_DEFINITIONS: GameEventDefinition[] = [
     choices: [
       {
         key: 'invest',
-        label: 'Investi',
+        label: 'Investi 10.000 €',
         consequences: { money: -10000, stress: 4 },
+        gamble: {
+          successChance: 0.4,
+          successLabel:
+            'L’affare gira: il tuo amico ti richiama con una cifra a cinque zeri.',
+          failureLabel:
+            'L’affare evapora e con lui i tuoi soldi. Almeno hai imparato qualcosa.',
+          success: { money: 45000, happiness: 6 },
+          failure: { stress: 6, happiness: -5 },
+        },
       },
       { key: 'pass', label: 'Lascia perdere', consequences: { morale: 1 } },
     ],
@@ -1047,7 +1102,16 @@ export const EVENT_DEFINITIONS: GameEventDefinition[] = [
       {
         key: 'keep',
         label: 'Confermalo',
-        consequences: { popularity: 15, reputation: -8 },
+        consequences: { stress: 3 },
+        gamble: {
+          successChance: 0.45,
+          successLabel:
+            'Il web ti dà ragione: diventi quello che dice le cose come stanno.',
+          failureLabel:
+            'Ti travolgono. Il club ti convoca e ti chiede conto del post.',
+          success: { popularity: 45, reputation: 10 },
+          failure: { popularity: -20, reputation: -35, morale: -6 },
+        },
       },
     ],
   },
@@ -1090,6 +1154,337 @@ export const EVENT_DEFINITIONS: GameEventDefinition[] = [
         key: 'relax',
         label: 'Resta rilassato',
         consequences: { happiness: 3 },
+      },
+    ],
+  },
+
+  // ------------------------------------------------ EVENTI SITUAZIONALI (vivi)
+  {
+    id: 'sit-hot-streak',
+    category: C.Media,
+    title: 'In gran forma',
+    descriptionTemplate:
+      'Sei in un grande momento: la stampa elogia le prestazioni di {firstName} in {leagueName}.',
+    trigger: { all: [{ field: 'form', op: 'gte', value: 70 }] },
+    weight: 9,
+    cooldownWeeks: 6,
+    choices: [
+      {
+        key: 'humble',
+        label: 'Resta con i piedi per terra',
+        consequences: { morale: 4, motivation: 3 },
+      },
+      {
+        key: 'enjoy',
+        label: 'Goditi i riflettori',
+        consequences: { popularity: 6, happiness: 4, stress: 2 },
+      },
+    ],
+  },
+  {
+    id: 'sit-form-slump',
+    category: C.Football,
+    title: 'Crisi di forma',
+    descriptionTemplate:
+      'Le prestazioni calano e al {clubName} qualcuno mormora. {firstName} deve reagire.',
+    trigger: {
+      all: [
+        { field: 'form', op: 'lte', value: 35 },
+        { field: 'hasClub', op: 'eq', value: true },
+      ],
+    },
+    weight: 8,
+    cooldownWeeks: 6,
+    choices: [
+      {
+        key: 'work',
+        label: 'Lavora il doppio',
+        consequences: { motivation: 5, stress: 5 },
+      },
+      {
+        key: 'clear',
+        label: 'Libera la testa',
+        consequences: { stress: -6, morale: 3 },
+      },
+    ],
+  },
+  {
+    id: 'sit-injury-recovery',
+    category: C.Health,
+    title: 'In sala medica',
+    descriptionTemplate:
+      'Il recupero dall’infortunio al {clubName} procede. Lo staff medico raccomanda prudenza.',
+    trigger: { all: [{ field: 'isInjured', op: 'eq', value: true }] },
+    weight: 12,
+    cooldownWeeks: 3,
+    choices: [
+      {
+        key: 'rush',
+        label: 'Affretta il rientro',
+        consequences: { motivation: 4, stress: 6 },
+      },
+      {
+        key: 'careful',
+        label: 'Segui i tempi dello staff',
+        consequences: { mentalHealth: 4, morale: 3 },
+      },
+    ],
+  },
+  {
+    id: 'sit-preseason',
+    category: C.Football,
+    title: 'Ritiro pre-campionato',
+    descriptionTemplate:
+      'Il {clubName} apre la preparazione: è il momento di mettere benzina nelle gambe.',
+    trigger: {
+      all: [
+        { field: 'seasonPhase', op: 'eq', value: 'PRESEASON' },
+        { field: 'hasClub', op: 'eq', value: true },
+      ],
+    },
+    weight: 10,
+    cooldownWeeks: 40,
+    choices: [
+      {
+        key: 'grind',
+        label: 'Spingi al massimo',
+        consequences: { motivation: 5, stress: 3 },
+      },
+      {
+        key: 'smart',
+        label: 'Lavora con criterio',
+        consequences: { morale: 3, motivation: 2 },
+      },
+    ],
+  },
+  {
+    id: 'sit-run-in',
+    category: C.Football,
+    title: 'Volata finale',
+    descriptionTemplate:
+      'La stagione in {leagueName} entra nel vivo: ogni partita pesa.',
+    trigger: {
+      all: [
+        { field: 'seasonPhase', op: 'eq', value: 'RUN_IN' },
+        { field: 'hasClub', op: 'eq', value: true },
+      ],
+    },
+    weight: 9,
+    cooldownWeeks: 30,
+    choices: [
+      {
+        key: 'push',
+        label: 'Dai tutto',
+        consequences: { motivation: 5, stress: 4 },
+      },
+      {
+        key: 'manage',
+        label: 'Gestisci le energie',
+        consequences: { stress: -4, morale: 2 },
+      },
+    ],
+  },
+  {
+    id: 'sit-winter-rumors',
+    category: C.Agent,
+    title: 'Voci di mercato',
+    descriptionTemplate:
+      'Mercato di gennaio: si parla di {firstName} fuori dal {clubName}.',
+    trigger: {
+      all: [
+        { field: 'seasonPhase', op: 'eq', value: 'WINTER_WINDOW' },
+        { field: 'hasClub', op: 'eq', value: true },
+        { field: 'currentAbility', op: 'gte', value: 45 },
+      ],
+    },
+    weight: 8,
+    cooldownWeeks: 20,
+    choices: [
+      {
+        key: 'focus',
+        label: 'Testa solo al campo',
+        consequences: { motivation: 4, morale: 2 },
+      },
+      {
+        key: 'flattered',
+        label: 'Lusingato dall’interesse',
+        consequences: { happiness: 4, popularity: 3, stress: 3 },
+      },
+    ],
+  },
+  {
+    id: 'sit-contract-final-year',
+    category: C.Agent,
+    title: 'Ultimo anno di contratto',
+    descriptionTemplate:
+      'Il tuo accordo con il {clubName} scade tra poco: il tuo agente valuta le mosse.',
+    trigger: {
+      all: [
+        { field: 'hasClub', op: 'eq', value: true },
+        { field: 'contractYearsLeft', op: 'lte', value: 1 },
+      ],
+    },
+    weight: 7,
+    cooldownWeeks: 16,
+    choices: [
+      {
+        key: 'renew',
+        label: 'Chiedi il rinnovo',
+        consequences: { morale: 3, motivation: 3 },
+      },
+      {
+        key: 'wait',
+        label: 'Aspetta offerte migliori',
+        consequences: { stress: 3, popularity: 2 },
+      },
+    ],
+  },
+  {
+    id: 'sit-exhaustion',
+    category: C.Health,
+    title: 'Sfinito',
+    descriptionTemplate:
+      'Settimane intense ti hanno svuotato: {firstName} è sull’orlo dell’affaticamento.',
+    trigger: { all: [{ field: 'fatigue', op: 'gte', value: 70 }] },
+    weight: 9,
+    cooldownWeeks: 5,
+    choices: [
+      {
+        key: 'rest',
+        label: 'Riposa davvero',
+        consequences: { stress: -6, happiness: 4 },
+      },
+      {
+        key: 'tough',
+        label: 'Stringi i denti',
+        consequences: { motivation: 3, stress: 5 },
+      },
+    ],
+  },
+  {
+    id: 'sit-rising-star',
+    category: C.Media,
+    title: 'Giovane promessa',
+    descriptionTemplate:
+      'Il tuo nome circola: {firstName} è tra i talenti emergenti di {leagueName}.',
+    trigger: {
+      all: [
+        { field: 'hasClub', op: 'eq', value: true },
+        { field: 'age', op: 'lte', value: 21 },
+        { field: 'currentAbility', op: 'gte', value: 55 },
+      ],
+    },
+    weight: 6,
+    cooldownWeeks: 18,
+    choices: [
+      {
+        key: 'ground',
+        label: 'Lavora in silenzio',
+        consequences: { motivation: 4, morale: 2 },
+      },
+      {
+        key: 'embrace',
+        label: 'Cavalca l’hype',
+        consequences: { popularity: 7, stress: 3 },
+      },
+    ],
+  },
+
+  // -------------------------------------------- GIORNALI / STILE DI VITA
+  {
+    id: 'life-playboy-gossip',
+    category: C.Media,
+    title: 'Gossip in prima pagina',
+    descriptionTemplate:
+      'I giornali sbattono in copertina la vita sentimentale di {firstName}.',
+    trigger: { all: [{ field: 'lifestyle', op: 'eq', value: 'PLAYBOY' }] },
+    weight: 10,
+    cooldownWeeks: 6,
+    choices: [
+      {
+        key: 'enjoy',
+        label: 'Goditi i riflettori',
+        consequences: { popularity: 8, happiness: 4, stress: 4 },
+      },
+      {
+        key: 'deny',
+        label: 'Smentisci tutto',
+        consequences: { mentalHealth: 4, popularity: -4, stress: -2 },
+      },
+    ],
+  },
+  {
+    id: 'life-family-portrait',
+    category: C.Media,
+    title: 'Ritratto di famiglia',
+    descriptionTemplate:
+      'Una rivista dipinge {firstName} come un modello di serietà e famiglia.',
+    trigger: { all: [{ field: 'lifestyle', op: 'eq', value: 'FAMILY' }] },
+    weight: 10,
+    cooldownWeeks: 6,
+    choices: [
+      {
+        key: 'embrace',
+        label: 'Apri le porte di casa',
+        consequences: { happiness: 6, mentalHealth: 4, popularity: 3 },
+      },
+      {
+        key: 'private',
+        label: 'Difendi la privacy',
+        consequences: { mentalHealth: 6, popularity: -2 },
+      },
+    ],
+  },
+  {
+    id: 'life-party-scandal',
+    category: C.Media,
+    title: 'Foto notturne',
+    descriptionTemplate:
+      'Scatti di {firstName} a una festa fino all’alba finiscono sui giornali.',
+    trigger: { all: [{ field: 'lifestyle', op: 'eq', value: 'PARTY' }] },
+    weight: 10,
+    cooldownWeeks: 5,
+    choices: [
+      {
+        key: 'partyon',
+        label: 'Nessun rimpianto',
+        consequences: { happiness: 5, stress: 5 },
+        gamble: {
+          successChance: 0.5,
+          successLabel:
+            'Passa come una serata come tante: nessuno ci costruisce sopra un caso.',
+          failureLabel:
+            'La foto diventa una copertina e il club ti multa per comportamento non professionale.',
+          success: { popularity: 25 },
+          failure: { money: -15000, reputation: -30, morale: -6 },
+        },
+      },
+      {
+        key: 'laylow',
+        label: 'Scuse e basso profilo',
+        consequences: { mentalHealth: 5, motivation: 3, popularity: -5 },
+      },
+    ],
+  },
+  {
+    id: 'life-pro-respect',
+    category: C.Media,
+    title: 'Elogio alla professionalità',
+    descriptionTemplate:
+      'La stampa loda la dedizione e la disciplina di {firstName}.',
+    trigger: { all: [{ field: 'lifestyle', op: 'eq', value: 'PROFESSIONAL' }] },
+    weight: 9,
+    cooldownWeeks: 6,
+    choices: [
+      {
+        key: 'focus',
+        label: 'Resta concentrato',
+        consequences: { motivation: 6, mentalHealth: 3 },
+      },
+      {
+        key: 'credit',
+        label: 'Ringrazia lo staff',
+        consequences: { morale: 4, popularity: 3 },
       },
     ],
   },

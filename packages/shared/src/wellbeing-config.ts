@@ -27,6 +27,9 @@ export const wellbeingConfigSchema = z.object({
     severityBands: z.array(severityBandSchema).min(1),
     recurrenceBase: z.number().min(0),
     attributeImpactPerSeverity: z.number().min(0),
+    recurrenceWindowWeeks: z.number().int().min(0),
+    rushDurationFactor: z.number().min(0).max(1),
+    rushRecurrencePenalty: z.number().min(0),
   }),
   morale: z.object({
     baseline: z.number(),

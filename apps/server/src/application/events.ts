@@ -3,9 +3,14 @@ import {
   applyConsequence,
   createRandomSource,
   getChoice,
+  renderTemplate,
+  resolveChoiceOutcome,
   selectEvent,
 } from '@football-life/simulation-engine';
-import type { EventRepository } from '../repositories/event-repository';
+import type {
+  EventChoiceView,
+  EventRepository,
+} from '../repositories/event-repository';
 
 const WEEK_MS = 7 * 86_400_000;
 
@@ -19,7 +24,7 @@ export interface GeneratedEvent {
   definitionId: string;
   title: string;
   description: string;
-  choices: { key: string; label: string }[];
+  choices: EventChoiceView[];
 }
 
 export async function generateWeeklyEvent(
@@ -41,16 +46,26 @@ export async function generateWeeklyEvent(
   );
   if (!definition) return null;
 
-  const choices = definition.choices.map((choice) => ({
+  const vars = generation.context as unknown as Record<
+    string,
+    string | number | boolean
+  >;
+  // Everything the choice does travels with it: the player decides knowing
+  // both what it costs for certain and, for a gamble, the odds.
+  const choices: EventChoiceView[] = definition.choices.map((choice) => ({
     key: choice.key,
-    label: choice.label,
+    label: renderTemplate(choice.label, vars),
+    consequences: choice.consequences,
+    ...(choice.gamble ? { gamble: choice.gamble } : {}),
   }));
+  const title = renderTemplate(definition.title, vars);
+  const description = renderTemplate(definition.descriptionTemplate, vars);
   const gameEventId = await deps.repository.createPendingEvent({
     saveGameId: input.saveGameId,
     definitionKey: definition.id,
     category: definition.category,
-    title: definition.title,
-    description: definition.descriptionTemplate,
+    title,
+    description,
     occurredAt: generation.currentDate,
     choices,
   });
@@ -68,8 +83,8 @@ export async function generateWeeklyEvent(
   return {
     gameEventId,
     definitionId: definition.id,
-    title: definition.title,
-    description: definition.descriptionTemplate,
+    title,
+    description,
     choices,
   };
 }
@@ -79,6 +94,8 @@ export interface ResolveEventResult {
   stress: number;
   reputation: number;
   moneyDelta: number;
+  /** How the bet went, or null when the choice was a sure thing. */
+  gamble: { succeeded: boolean; outcomeLabel: string } | null;
 }
 
 export async function resolvePendingEvent(
@@ -99,6 +116,14 @@ export async function resolvePendingEvent(
   if (!state) return null;
 
   const choice = getChoice(definition, input.choiceKey);
+  // Seeded per event and choice: the same career always gets the same answer
+  // from the dice, and it is the odds the player was shown that decide.
+  const outcome = resolveChoiceOutcome(
+    choice,
+    createRandomSource(
+      `${state.seed}:event-outcome:${input.gameEventId}:${input.choiceKey}`,
+    ),
+  );
   const effect = applyConsequence(
     {
       morale: state.morale,
@@ -110,7 +135,7 @@ export async function resolvePendingEvent(
       popularity: state.popularity,
       moneyDelta: 0,
     },
-    choice.consequences,
+    outcome.consequences,
   );
 
   await deps.repository.applyEventOutcome({
@@ -119,8 +144,11 @@ export async function resolvePendingEvent(
     gameEventId: input.gameEventId,
     choiceKey: input.choiceKey,
     occurredAt: state.currentDate,
-    description: `${definition.title}: ${choice.label}`,
+    description: outcome.outcomeLabel
+      ? `${definition.title}: ${choice.label} — ${outcome.outcomeLabel}`
+      : `${definition.title}: ${choice.label}`,
     effect,
+    ...(outcome.outcomeLabel ? { outcomeLabel: outcome.outcomeLabel } : {}),
   });
 
   return {
@@ -128,5 +156,9 @@ export async function resolvePendingEvent(
     stress: effect.stress,
     reputation: effect.reputation,
     moneyDelta: effect.moneyDelta,
+    gamble:
+      outcome.succeeded === null || outcome.outcomeLabel === null
+        ? null
+        : { succeeded: outcome.succeeded, outcomeLabel: outcome.outcomeLabel },
   };
 }

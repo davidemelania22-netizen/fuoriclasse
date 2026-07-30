@@ -1,5 +1,9 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
-import type { LoadedGame, SaveGameSummary } from '@football-life/shared';
+import {
+  FinancialTransactionType,
+  type LoadedGame,
+  type SaveGameSummary,
+} from '@football-life/shared';
 import {
   toPlayerSummary,
   toSaveGameSummary,
@@ -16,7 +20,7 @@ export class PrismaSaveGameRepository implements SaveGameRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async persistNewGame(input: NewGamePersistenceInput): Promise<LoadedGame> {
-    const { save, person, player, attributes } = input;
+    const { save, person, player, attributes, startingBalance } = input;
 
     return this.prisma.$transaction(async (tx) => {
       const createdSave = await tx.saveGame.create({
@@ -76,6 +80,20 @@ export class PrismaSaveGameRepository implements SaveGameRepository {
         },
       });
 
+      if (startingBalance !== 0) {
+        await tx.financialTransaction.create({
+          data: {
+            saveGameId: createdSave.id,
+            playerId: createdPlayer.id,
+            occurredAt: createdSave.currentDate,
+            type: FinancialTransactionType.Bonus,
+            amount: Math.round(startingBalance),
+            description: 'Indennità iniziale',
+            referenceType: 'System',
+          },
+        });
+      }
+
       const updatedSave = await tx.saveGame.update({
         where: { id: createdSave.id },
         data: { playerPersonId: createdPerson.id },
@@ -96,13 +114,13 @@ export class PrismaSaveGameRepository implements SaveGameRepository {
     const save = await this.prisma.saveGame.findUnique({
       where: { id: saveGameId },
     });
-    if (!save || !save.playerPersonId) {
+    if (!save || save.isDeleted || !save.playerPersonId) {
       return null;
     }
 
     const person = await this.prisma.person.findUnique({
       where: { id: save.playerPersonId },
-      include: { player: true },
+      include: { player: { include: { club: true } } },
     });
     if (!person || !person.player) {
       return null;
@@ -110,18 +128,87 @@ export class PrismaSaveGameRepository implements SaveGameRepository {
 
     return {
       save: toSaveGameSummary(save),
-      player: toPlayerSummary(person.player, person, save.currentDate),
+      player: toPlayerSummary(
+        person.player,
+        person,
+        save.currentDate,
+        person.player.club?.name ?? null,
+      ),
     };
   }
 
   async listSaves(): Promise<SaveGameSummary[]> {
     const saves = await this.prisma.saveGame.findMany({
+      where: { isDeleted: false },
       orderBy: { lastPlayedAt: 'desc' },
     });
     return saves.map(toSaveGameSummary);
   }
 
-  async deleteSave(saveGameId: string): Promise<void> {
-    await this.prisma.saveGame.delete({ where: { id: saveGameId } });
+  /**
+   * Soft-deletes: the save disappears from every list instantly. The heavy
+   * row cleanup (a career can span ~100k interleaved rows — minutes of page
+   * churn on a big SQLite file) is done later by {@link purgeDeletedSaves}.
+   */
+  async deleteSave(saveGameId: string): Promise<boolean> {
+    // Guard against the catastrophic Prisma footgun: an undefined/empty id in
+    // a `where` is silently DROPPED by Prisma, turning this updateMany into
+    // "soft-delete EVERY save". Never allow a non-specific delete through.
+    if (typeof saveGameId !== 'string' || saveGameId.length === 0) {
+      throw new Error('deleteSave requires a specific save id');
+    }
+    const result = await this.prisma.saveGame.updateMany({
+      where: { id: saveGameId, isDeleted: false },
+      data: { isDeleted: true },
+    });
+    return result.count > 0;
+  }
+
+  /**
+   * Hard-deletes every soft-deleted save's rows, leaves-first so no FK
+   * cascade ever fires. Each statement commits on its own, letting the WAL
+   * checkpoint between steps. Safe to re-run; meant to be fired in the
+   * background (never awaited by a request handler).
+   */
+  async purgeDeletedSaves(): Promise<number> {
+    const deleted = await this.prisma.saveGame.findMany({
+      where: { isDeleted: true },
+      select: { id: true },
+    });
+
+    for (const { id } of deleted) {
+      const where = { saveGameId: id };
+      await this.prisma.matchAppearance.deleteMany({
+        where: { fixture: { saveGameId: id } },
+      });
+      await this.prisma.playerAttribute.deleteMany({
+        where: { player: { saveGameId: id } },
+      });
+      await this.prisma.playerSeasonStats.deleteMany({
+        where: { player: { saveGameId: id } },
+      });
+      await this.prisma.standing.deleteMany({
+        where: { season: { saveGameId: id } },
+      });
+      await this.prisma.injury.deleteMany({ where });
+      await this.prisma.contract.deleteMany({ where });
+      await this.prisma.transferOffer.deleteMany({ where });
+      await this.prisma.financialTransaction.deleteMany({ where });
+      await this.prisma.decisionLog.deleteMany({ where });
+      await this.prisma.simulationLog.deleteMany({ where });
+      await this.prisma.fixture.deleteMany({ where });
+      await this.prisma.season.deleteMany({ where });
+      await this.prisma.gameEvent.deleteMany({ where });
+      await this.prisma.eventCooldown.deleteMany({ where });
+      await this.prisma.relationship.deleteMany({ where });
+      await this.prisma.newsItem.deleteMany({ where });
+      await this.prisma.honour.deleteMany({ where });
+      await this.prisma.player.deleteMany({ where });
+      await this.prisma.club.deleteMany({ where });
+      await this.prisma.person.deleteMany({ where });
+      await this.prisma.competition.deleteMany({ where });
+      await this.prisma.saveGame.delete({ where: { id } });
+    }
+    return deleted.length;
   }
 }

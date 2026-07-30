@@ -9,5 +9,5 @@ export const COUNTRIES: readonly CountryRecord[] = [
   { id: 'EN', code: 'EN', name: 'Inghilterra', reputation: 92 },
   { id: 'ES', code: 'ES', name: 'Spagna', reputation: 90 },
   { id: 'FR', code: 'FR', name: 'Francia', reputation: 84 },
-  { id: 'US', code: 'US', name: 'Stati Uniti', reputation: 60 },
+  { id: 'DE', code: 'DE', name: 'Germania', reputation: 89 },
 ];

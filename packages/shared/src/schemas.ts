@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { COUNTRY_CODES, PlayerPosition, PreferredFoot } from './enums';
+import { QUICK_START_KEYS } from './quick-start';
 
 const enumValues = <T extends string>(obj: Record<string, T>): [T, ...T[]] =>
   Object.values(obj) as [T, ...T[]];
@@ -16,6 +17,7 @@ export const newGameInputSchema = z.object({
   name: z.string().trim().min(1).max(60),
   seed: z.string().trim().min(1).max(120).optional(),
   player: newGamePlayerInputSchema,
+  quickStart: z.enum(QUICK_START_KEYS).optional(),
 });
 
 export type NewGamePlayerInput = z.infer<typeof newGamePlayerInputSchema>;

@@ -10,6 +10,7 @@ import type {
   AcceptOfferInput,
   CandidateClub,
   CareerRepository,
+  ClubDirectoryEntry,
   OfferInput,
   PendingOffer,
   ProtagonistCareer,
@@ -100,6 +101,27 @@ export class PrismaCareerRepository implements CareerRepository {
     });
   }
 
+  async listClubDirectory(saveGameId: string): Promise<ClubDirectoryEntry[]> {
+    const clubs = await this.prisma.club.findMany({
+      where: { saveGameId },
+      include: { competition: true },
+      orderBy: { reputation: 'desc' },
+    });
+    return clubs.map((club) => {
+      const philosophy = club.philosophy as { strength?: number } | null;
+      return {
+        clubId: club.id,
+        name: club.name,
+        shortName: club.shortName,
+        logo: club.logo,
+        reputation: club.reputation,
+        strength: Math.round(philosophy?.strength ?? club.reputation / 40),
+        competitionName: club.competition?.name ?? null,
+        countryId: club.countryId,
+      };
+    });
+  }
+
   async signContract(input: SignContractInput): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       await tx.contract.updateMany({
@@ -170,6 +192,13 @@ export class PrismaCareerRepository implements CareerRepository {
       ids.push(id);
     }
     return ids;
+  }
+
+  async expirePendingOffers(playerId: string): Promise<void> {
+    await this.prisma.transferOffer.updateMany({
+      where: { playerId, status: TransferOfferStatus.Pending },
+      data: { status: TransferOfferStatus.Expired },
+    });
   }
 
   async listPendingOffers(playerId: string): Promise<PendingOffer[]> {

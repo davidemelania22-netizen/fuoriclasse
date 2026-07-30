@@ -31,4 +31,40 @@ describe('EVENT_DEFINITIONS', () => {
       expect(definition.choices.length).toBeGreaterThanOrEqual(1);
     }
   });
+
+  it('offers real gambles, and every one is an honest bet', () => {
+    const gambles = EVENT_DEFINITIONS.flatMap((definition) =>
+      definition.choices
+        .filter((choice) => choice.gamble)
+        .map((choice) => ({ id: definition.id, gamble: choice.gamble! })),
+    );
+    expect(gambles.length).toBeGreaterThanOrEqual(5);
+
+    for (const { id, gamble } of gambles) {
+      // Never a sure thing in either direction, and always explained.
+      expect(gamble.successChance, id).toBeGreaterThanOrEqual(0.05);
+      expect(gamble.successChance, id).toBeLessThanOrEqual(0.95);
+      expect(gamble.successLabel.length, id).toBeGreaterThan(10);
+      expect(gamble.failureLabel.length, id).toBeGreaterThan(10);
+      // The two branches must actually differ: a bet with nothing at stake
+      // is just a button.
+      expect(Object.keys(gamble.success).length, id).toBeGreaterThan(0);
+      expect(Object.keys(gamble.failure).length, id).toBeGreaterThan(0);
+      expect(gamble.success, id).not.toEqual(gamble.failure);
+    }
+  });
+
+  it('never dresses a gamble up as a free win', () => {
+    for (const definition of EVENT_DEFINITIONS) {
+      for (const choice of definition.choices) {
+        if (!choice.gamble) continue;
+        const failure = Object.values(choice.gamble.failure);
+        // Losing must cost something, otherwise the odds are decoration.
+        expect(
+          failure.some((value) => (value ?? 0) < 0),
+          `${definition.id}/${choice.key}`,
+        ).toBe(true);
+      }
+    }
+  });
 });

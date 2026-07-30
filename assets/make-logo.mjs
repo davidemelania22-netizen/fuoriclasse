@@ -49,14 +49,15 @@ const pentagons = [central, ...outers]
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" width="${S}" height="${S}">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#27c06a"/>
-      <stop offset="0.55" stop-color="#129a4d"/>
-      <stop offset="1" stop-color="#0a3d22"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#232a3a"/>
+      <stop offset="0.5" stop-color="#141922"/>
+      <stop offset="1" stop-color="#0a0d12"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.34" r="0.7">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    <radialGradient id="sunset" cx="0.5" cy="0.9" r="0.8">
+      <stop offset="0" stop-color="#f59a2e" stop-opacity="0.6"/>
+      <stop offset="0.5" stop-color="#e2581e" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#e2581e" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="gold" x1="0" y1="1" x2="1" y2="0">
       <stop offset="0" stop-color="#ffd54a"/>
@@ -69,7 +70,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" wid
   </defs>
 
   <rect x="40" y="40" width="944" height="944" rx="224" fill="url(#bg)"/>
-  <rect x="40" y="40" width="944" height="944" rx="224" fill="url(#glow)"/>
+  <rect x="40" y="40" width="944" height="944" rx="224" fill="url(#sunset)"/>
 
   <!-- rising career arc -->
   <path d="M 196 812 C 360 720 470 470 596 300 L 700 232 L 612 360 C 520 520 420 720 256 856 Z"
@@ -80,11 +81,14 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" wid
   </g>
 
   <!-- football -->
-  <circle cx="${C.x}" cy="${C.y}" r="${R + 8}" fill="#0a3320" opacity="0.35"/>
+  <circle cx="${C.x}" cy="${C.y}" r="${R + 8}" fill="#000000" opacity="0.4"/>
   <circle cx="${C.x}" cy="${C.y}" r="${R}" fill="url(#ball)" stroke="#16221c" stroke-width="6"/>
   <g fill="#16221c">
       ${pentagons}
   </g>
+
+  <!-- gold frame -->
+  <rect x="40" y="40" width="944" height="944" rx="224" fill="none" stroke="url(#gold)" stroke-width="10" opacity="0.55"/>
 </svg>
 `;
 

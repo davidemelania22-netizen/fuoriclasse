@@ -16,6 +16,7 @@ import {
   createRandomSource,
   recoverInjuryWeek,
   rollInjury,
+  rollRelapseInjury,
   seasonIndexSince,
   shouldRetire,
   updateMentalHealth,
@@ -46,6 +47,11 @@ export interface AdvanceWeeksInput {
   intensity?: TrainingIntensity | undefined;
   focus?: AttributeCategory | null | undefined;
   usefulMinutes?: number | undefined;
+  /**
+   * How much the league develops a player (1 = neutral). Training against
+   * better opponents pays off; a provincial division holds you back a little.
+   */
+  leagueGrowthModifier?: number | undefined;
 }
 
 export interface WeeklyAdvanceReport {
@@ -61,6 +67,7 @@ export interface WeeklyAdvanceReport {
   stress: number;
   injured: boolean;
   injuriesSustained: number;
+  injuryRelapse: boolean;
   retired: boolean;
   newCurrentDate: string;
 }
@@ -85,8 +92,11 @@ export async function advanceWeeks(
   const weeks = Math.max(1, input.weeks ?? 1);
   const intensity = input.intensity ?? TrainingIntensity.Normal;
   const focus = input.focus ?? null;
-  const usefulMinutes = input.usefulMinutes ?? 0;
-  const difficultyModifier = deps.difficultyModifier ?? 1;
+  // Match minutes drive growth: default to the protagonist's recent playing
+  // time unless an explicit override is supplied.
+  const usefulMinutes = input.usefulMinutes ?? snapshot.recentMinutes;
+  const difficultyModifier =
+    (deps.difficultyModifier ?? 1) * (input.leagueGrowthModifier ?? 1);
   const injuryTypeKeys =
     deps.injuryTypeKeys && deps.injuryTypeKeys.length > 0
       ? deps.injuryTypeKeys
@@ -130,6 +140,8 @@ export async function advanceWeeks(
     : null;
   const injuriesToCreate: InjuryToCreate[] = [];
   const healedInjuryIds: { id: string; actualEndAt: Date }[] = [];
+  let relapseOccurred = false;
+  let relapseConsumed = false;
 
   for (let week = 0; week < weeks; week += 1) {
     const age = calendarAge(snapshot.birthDate, currentDate);
@@ -167,7 +179,7 @@ export async function advanceWeeks(
         config: deps.config,
       }).player;
 
-      const roll = rollInjury(
+      let roll = rollInjury(
         {
           injuryProneness: snapshot.injuryProneness,
           fatigue: player.fatigue,
@@ -182,6 +194,29 @@ export async function advanceWeeks(
         deps.wellbeingConfig,
         rng,
       );
+      let isRelapse = false;
+      if (!roll && !relapseConsumed && snapshot.recentlyHealedInjury) {
+        const weeksSinceHealed =
+          Math.floor(
+            (currentDate.getTime() -
+              snapshot.recentlyHealedInjury.actualEndAt.getTime()) /
+              (7 * 86_400_000),
+          ) + 1;
+        const relapse = rollRelapseInjury(
+          {
+            typeKey: snapshot.recentlyHealedInjury.typeKey,
+            recurrenceRisk: snapshot.recentlyHealedInjury.recurrenceRisk,
+            weeksSinceHealed,
+          },
+          deps.wellbeingConfig,
+          rng,
+        );
+        if (relapse) {
+          roll = relapse;
+          isRelapse = true;
+          relapseConsumed = true;
+        }
+      }
       if (roll) {
         const record: InjuryToCreate = {
           typeKey: roll.typeKey,
@@ -198,6 +233,7 @@ export async function advanceWeeks(
           existingId: null,
           record,
         };
+        if (isRelapse) relapseOccurred = true;
       }
     }
 
@@ -289,6 +325,7 @@ export async function advanceWeeks(
     stress,
     injured: injury !== null,
     injuriesSustained: injuriesToCreate.length,
+    injuryRelapse: relapseOccurred,
     retired,
     newCurrentDate: currentDate.toISOString(),
   };

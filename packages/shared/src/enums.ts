@@ -63,6 +63,7 @@ export const CompetitionType = {
   Cup: 'CUP',
   YouthLeague: 'YOUTH_LEAGUE',
   International: 'INTERNATIONAL',
+  Continental: 'CONTINENTAL',
 } as const;
 export type CompetitionType =
   (typeof CompetitionType)[keyof typeof CompetitionType];
@@ -171,5 +172,5 @@ export type SimulationLogLevel =
   (typeof SimulationLogLevel)[keyof typeof SimulationLogLevel];
 
 /** ISO-style country codes supported by the MVP world. */
-export const COUNTRY_CODES = ['IT', 'EN', 'ES', 'FR', 'US'] as const;
+export const COUNTRY_CODES = ['IT', 'EN', 'ES', 'FR', 'DE'] as const;
 export type CountryCode = (typeof COUNTRY_CODES)[number];

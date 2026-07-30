@@ -38,6 +38,7 @@ export function toPlayerSummary(
   player: Player,
   person: Person,
   at: Date,
+  clubName: string | null = null,
 ): PlayerSummary {
   return {
     id: player.id,
@@ -53,6 +54,7 @@ export function toPlayerSummary(
     currentAbility: player.currentAbility,
     potentialAbility: player.potentialAbility,
     clubId: player.clubId,
+    clubName,
     condition: player.condition,
     fatigue: player.fatigue,
     morale: player.morale,

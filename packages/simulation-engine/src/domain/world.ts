@@ -63,7 +63,8 @@ export interface GeneratedClub {
 export interface GeneratedCompetition {
   key: string;
   name: string;
-  countryId: string;
+  /** null for competitions that span all countries (e.g. a continental cup). */
+  countryId: string | null;
   type: CompetitionType;
   tier: number;
   reputation: number;

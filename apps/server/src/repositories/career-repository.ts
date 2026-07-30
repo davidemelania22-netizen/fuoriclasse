@@ -28,6 +28,18 @@ export interface CandidateClub {
   transferBudget: number;
 }
 
+/** Rich club info for the club-selection UI. */
+export interface ClubDirectoryEntry {
+  clubId: string;
+  name: string;
+  shortName: string;
+  logo: string | null;
+  reputation: number;
+  strength: number;
+  competitionName: string | null;
+  countryId: string;
+}
+
 export interface SignContractInput {
   saveGameId: string;
   playerId: string;
@@ -79,9 +91,12 @@ export interface AcceptOfferInput {
 export interface CareerRepository {
   loadProtagonist(saveGameId: string): Promise<ProtagonistCareer | null>;
   listCandidateClubs(saveGameId: string): Promise<CandidateClub[]>;
+  listClubDirectory(saveGameId: string): Promise<ClubDirectoryEntry[]>;
   signContract(input: SignContractInput): Promise<void>;
   renewContract(input: RenewContractInput): Promise<void>;
   createOffers(playerId: string, offers: OfferInput[]): Promise<string[]>;
+  /** Mark all currently-pending offers for the player as expired. */
+  expirePendingOffers(playerId: string): Promise<void>;
   listPendingOffers(playerId: string): Promise<PendingOffer[]>;
   acceptOffer(input: AcceptOfferInput): Promise<boolean>;
   rejectOffer(offerId: string): Promise<void>;

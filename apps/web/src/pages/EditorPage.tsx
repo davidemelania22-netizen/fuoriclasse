@@ -9,6 +9,10 @@ import {
   careerStatusLabels,
   label,
 } from '../i18n';
+import { from20, to20 } from '../utils/scale';
+
+/** Fields shown on the Football-Manager-style 0-20 scale. */
+const RATING_FIELDS = new Set(['currentAbility', 'potentialAbility']);
 
 interface EditorPageProps {
   saveId: string;
@@ -40,7 +44,7 @@ function EditorForm({
   player: EditablePlayer;
 }) {
   const queryClient = useQueryClient();
-  const closeEditor = useGameStore((s) => s.closeEditor);
+  const closeEditor = useGameStore((s) => s.closeOverlay);
 
   const [stats, setStats] = useState<Record<StatKey, number>>(() => ({
     currentAbility: player.currentAbility,
@@ -73,6 +77,17 @@ function EditorForm({
 
   const categories = [...new Set(player.attributes.map((a) => a.category))];
 
+  const maxAllRatings = () => {
+    setStats((prev) => ({
+      ...prev,
+      currentAbility: from20(20),
+      potentialAbility: from20(20),
+    }));
+    setAttrs(
+      Object.fromEntries(player.attributes.map((a) => [a.key, from20(20)])),
+    );
+  };
+
   return (
     <form
       className="form"
@@ -89,25 +104,37 @@ function EditorForm({
       }}
     >
       <section className="card">
-        <h2>
-          Modifica di {player.firstName} {player.lastName}
-        </h2>
+        <div className="card-head">
+          <h2>
+            Modifica di {player.firstName} {player.lastName}
+          </h2>
+          <button type="button" className="ghost" onClick={maxAllRatings}>
+            Tutti 20
+          </button>
+        </div>
         <div className="grid">
-          {STAT_FIELDS.map(([key, text]) => (
-            <label key={key}>
-              {text}
-              <input
-                type="number"
-                value={stats[key]}
-                onChange={(e) =>
-                  setStats((prev) => ({
-                    ...prev,
-                    [key]: Number(e.target.value),
-                  }))
-                }
-              />
-            </label>
-          ))}
+          {STAT_FIELDS.map(([key, text]) => {
+            const rating = RATING_FIELDS.has(key);
+            return (
+              <label key={key}>
+                {text}
+                {rating ? ' (0-20)' : ''}
+                <input
+                  type="number"
+                  min={rating ? 0 : undefined}
+                  max={rating ? 20 : undefined}
+                  value={rating ? to20(stats[key]) : stats[key]}
+                  onChange={(e) => {
+                    const raw = Number(e.target.value);
+                    setStats((prev) => ({
+                      ...prev,
+                      [key]: rating ? from20(raw) : raw,
+                    }));
+                  }}
+                />
+              </label>
+            );
+          })}
           <label>
             Stato di carriera
             <select
@@ -126,7 +153,7 @@ function EditorForm({
 
       {categories.map((category) => (
         <section className="card" key={category}>
-          <h3>{label(attributeCategoryLabels, category)}</h3>
+          <h3>{label(attributeCategoryLabels, category)} (0-20)</h3>
           <div className="grid">
             {player.attributes
               .filter((a) => a.category === category)
@@ -135,11 +162,13 @@ function EditorForm({
                   {label(attributeLabels, a.key)}
                   <input
                     type="number"
-                    value={attrs[a.key] ?? a.value}
+                    min={0}
+                    max={20}
+                    value={to20(attrs[a.key] ?? a.value)}
                     onChange={(e) =>
                       setAttrs((prev) => ({
                         ...prev,
-                        [a.key]: Number(e.target.value),
+                        [a.key]: from20(Number(e.target.value)),
                       }))
                     }
                   />
@@ -165,7 +194,7 @@ function EditorForm({
 }
 
 export function EditorPage({ saveId }: EditorPageProps) {
-  const closeEditor = useGameStore((s) => s.closeEditor);
+  const closeEditor = useGameStore((s) => s.closeOverlay);
   const query = useQuery({
     queryKey: ['editable-player', saveId],
     queryFn: () => api.getEditablePlayer(saveId),

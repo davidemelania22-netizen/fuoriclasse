@@ -37,6 +37,7 @@ export interface PlayerSummary {
   currentAbility: number;
   potentialAbility: number;
   clubId: string | null;
+  clubName: string | null;
   condition: number;
   fatigue: number;
   morale: number;

@@ -29,6 +29,8 @@ export interface GenerateClubParams {
   countryId: string;
   /** Stable index used for collision-free, deterministic club naming. */
   cityIndex: number;
+  /** Exact club name to use instead of the procedural city+suffix one. */
+  forcedName?: string | undefined;
   namePool: NamePool;
   divisionMean: number;
   baseReputation: number;
@@ -65,8 +67,8 @@ export function generateClub(params: GenerateClubParams): GeneratedClub {
     key: params.key,
     competitionKey: params.competitionKey,
     countryId: params.countryId,
-    name: `${city} ${suffix}`,
-    shortName: city.slice(0, 3).toUpperCase(),
+    name: params.forcedName ?? `${city} ${suffix}`,
+    shortName: (params.forcedName ?? city).slice(0, 3).toUpperCase(),
     reputation,
     balance: Math.round(reputation * 1000 + rng.integer(0, 2_000_000)),
     wageBudget: Math.round(reputation * 500 + rng.integer(0, 500_000)),
