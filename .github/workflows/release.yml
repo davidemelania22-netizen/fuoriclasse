@@ -1,0 +1,87 @@
+# Builds the installers players download, one per platform, and publishes them
+# as a GitHub Release — the release page is the link you hand out.
+#
+# There is no way around building each platform on its own machine: the app
+# ships a native Prisma engine, and the engine for Windows only exists on a
+# Windows runner. Hence three jobs for three artefacts:
+#
+#   macOS (Apple Silicon)  → Football Life-<ver>-arm64.dmg
+#   macOS (Intel)          → Football Life-<ver>.dmg
+#   Windows                → Football Life Setup <ver>.exe
+#
+# To publish a version: bump `version` in package.json, then
+#   git tag v0.1.0 && git push origin v0.1.0
+# Or run this workflow by hand from the Actions tab (it then publishes a
+# release named after the run).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            name: mac-apple-silicon
+            command: desktop:package:mac
+          - os: macos-13
+            name: mac-intel
+            command: desktop:package:mac
+          - os: windows-latest
+            name: windows
+            command: desktop:package:win
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run ${{ matrix.command }}
+        env:
+          # No Apple Developer certificate: the app ships unsigned, and the
+          # install guide explains the one-time right-click → Open.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.name }}
+          path: |
+            apps/desktop/release/*.dmg
+            apps/desktop/release/*.exe
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+      - name: Pubblica la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_type == 'tag' && github.ref_name || format('build-{0}', github.run_number) }}
+        run: |
+          ls -lh installers
+          gh release create "$TAG" installers/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Football Life $TAG" \
+            --notes "Scarica il file adatto al tuo computer:
+
+          - **Mac con chip Apple (M1/M2/M3/M4)** → il file \`.dmg\` che finisce per \`arm64\`
+          - **Mac Intel** → l'altro file \`.dmg\`
+          - **Windows** → il file \`.exe\`
+
+          Su Mac, la prima volta: tasto destro sull'app → Apri → Apri.
+
+          Gioco di esclusiva proprietà di Davide Simonetti. Tutti i diritti riservati."

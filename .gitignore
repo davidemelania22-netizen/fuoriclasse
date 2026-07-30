@@ -18,3 +18,11 @@ dev.db*
 .DS_Store
 .vite/
 *.log
+
+# backup del database e build dell'app desktop: pesanti e personali,
+# non vanno condivisi
+prisma/backups/
+apps/desktop/release/
+
+# staging della build desktop (rigenerata da npm run desktop:stage)
+apps/desktop/build/

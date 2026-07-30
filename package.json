@@ -29,15 +29,55 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio",
-    "db:reset": "prisma migrate reset --force"
+    "db:reset": "prisma migrate reset --force",
+    "desktop:dev": "electron apps/desktop",
+    "desktop:stage": "node scripts/build-desktop.mjs",
+    "desktop:package": "npm run desktop:stage && electron-builder",
+    "desktop:package:mac": "npm run desktop:stage && electron-builder --mac",
+    "desktop:package:win": "npm run desktop:stage && electron-builder --win"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "build": {
+    "appId": "com.davidesimonetti.footballlife",
+    "productName": "Football Life",
+    "copyright": "© Davide Simonetti — tutti i diritti riservati",
+    "directories": {
+      "app": "apps/desktop/build/app",
+      "output": "apps/desktop/release",
+      "buildResources": "apps/desktop"
+    },
+    "files": ["**/*"],
+    "extraResources": [{ "from": "apps/desktop/build/resources", "to": "." }],
+    "asar": false,
+    "mac": {
+      "category": "public.app-category.sports",
+      "icon": "apps/desktop/icon.icns",
+      "target": ["dmg", "zip"],
+      "identity": null
+    },
+    "dmg": {
+      "title": "Football Life"
+    },
+    "win": {
+      "icon": "apps/desktop/icon.png",
+      "target": [{ "target": "nsis", "arch": ["x64"] }]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Football Life"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@types/node": "^20.17.10",
     "concurrently": "^9.1.0",
+    "electron": "^41.7.1",
+    "electron-builder": "^26.15.3",
     "eslint": "^9.17.0",
     "prettier": "^3.4.2",
     "prisma": "^6.1.0",

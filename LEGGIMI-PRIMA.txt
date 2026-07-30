@@ -1,0 +1,57 @@
+FOOTBALL LIFE — come installare e giocare
+=========================================
+
+Gioco di esclusiva proprieta' di Davide Simonetti. Tutti i diritti riservati.
+
+
+COSA SERVE (una volta sola)
+---------------------------
+
+Node.js versione 20 o superiore.
+Si scarica gratis da:  https://nodejs.org
+Scegli il pulsante grande a sinistra (la versione "LTS") e installa
+normalmente, avanti-avanti, senza cambiare niente.
+
+
+COME SI AVVIA
+-------------
+
+Su Mac:      apri la cartella "scripts" e fai doppio clic su
+             start-game.command
+
+Su Windows:  apri la cartella "scripts" e fai doppio clic su
+             start-game.bat
+
+Si apre una finestra nera con del testo che scorre: e' normale, lasciala
+aperta. La PRIMA volta ci vogliono qualche minuto perche' il gioco si
+prepara e scarica quello che gli serve (serve la connessione a internet).
+Dalla seconda volta parte in pochi secondi.
+
+Quando e' pronto si apre il browser da solo sul gioco. Se non si aprisse,
+apri tu il browser e vai su:  http://localhost:5173
+
+
+PER SMETTERE DI GIOCARE
+-----------------------
+
+Chiudi la finestra nera. I salvataggi restano sul tuo computer e li
+ritrovi al prossimo avvio.
+
+
+SE MAC DICE "NON PUO' ESSERE APERTO"
+------------------------------------
+
+Succede con i file scaricati da internet. Si risolve una volta sola:
+
+  1. tasto destro (o Control + clic) su start-game.command
+  2. scegli "Apri"
+  3. nella finestra che avvisa, clicca ancora "Apri"
+
+Dalla volta dopo il doppio clic funziona normalmente.
+
+
+SE QUALCOSA NON VA
+------------------
+
+Nella finestra nera compare un messaggio che dice cosa manca.
+Il caso piu' comune e' Node.js non installato: torna al primo paragrafo.

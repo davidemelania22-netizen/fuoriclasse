@@ -37,7 +37,11 @@ fi
 
 if [ ! -f prisma/dev.db ]; then
   echo "•  Preparazione database…"
-  npx prisma migrate deploy
+  # `db push` e non `migrate deploy`: allinea il database allo schema attuale
+  # qualunque sia lo storico delle migrazioni. Su un database nuovo e vuoto è
+  # l'opzione giusta, e non si rompe se lo schema è stato modificato con
+  # `db push` durante lo sviluppo (com'è già successo con i loghi dei club).
+  npx prisma db push --skip-generate
   npm run prisma:seed
 fi
 

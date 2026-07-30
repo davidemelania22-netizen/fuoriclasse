@@ -26,6 +26,68 @@ npm install
 cp .env.example .env
 ```
 
+## Distribuire il gioco (installer per Mac e Windows)
+
+Il modo pensato per chi riceve il gioco: un file da scaricare, doppio clic,
+installato. Niente Node, niente terminale, niente cartelle del progetto.
+
+```bash
+npm run desktop:package:mac    # .dmg (sul Mac su cui giri il comando)
+npm run desktop:package:win    # installer .exe (da eseguire su Windows)
+```
+
+I file finiti compaiono in `apps/desktop/release/`. Ogni piattaforma va
+costruita sulla propria macchina: il gioco include il motore nativo di Prisma,
+che esiste in una versione diversa per ogni sistema operativo. Per questo
+`.github/workflows/release.yml` costruisce le tre versioni (Mac Apple Silicon,
+Mac Intel, Windows) e le pubblica in una **Release di GitHub**: quella pagina è
+il link da dare a chi vuole giocare. Basta creare un tag:
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+Cosa fa `npm run desktop:stage` (il passaggio prima dell'impacchettamento,
+in `scripts/build-desktop.mjs`): compila il client web, riduce il server a un
+unico file JavaScript con esbuild, copia il client Prisma con il suo motore
+nativo e prepara un database vuoto già seedato. L'app installata lo copia al
+primo avvio nella cartella dati dell'utente — le carriere non stanno mai dentro
+il pacchetto dell'applicazione, che è di sola lettura.
+
+L'app **non è firmata** (serve un certificato Apple a pagamento): la prima
+volta, su Mac, occorre **tasto destro sull'app → Apri → Apri**. Su Windows
+SmartScreen mostra "Altre informazioni" → "Esegui comunque".
+
+I salvataggi vivono in `~/Library/Application Support/Football Life/` su macOS
+e in `%APPDATA%\Football Life\` su Windows, con backup automatici a ogni avvio.
+
+## Giocare dalla cartella del progetto (senza installer)
+
+Alternativa se si preferisce passare i sorgenti. Servono due cose: **Node.js 20
+o superiore** (si scarica da [nodejs.org](https://nodejs.org), installazione
+normale "avanti-avanti") e la cartella del gioco.
+
+Poi:
+
+| Sistema     | Cosa fare                                                         |
+| ----------- | ----------------------------------------------------------------- |
+| **macOS**   | doppio clic su `scripts/start-game.command`                       |
+| **Windows** | doppio clic su `scripts/start-game.bat`                           |
+
+Il primo avvio installa le dipendenze e prepara il database: ci vogliono
+qualche minuto e serve la connessione a internet. Dalla volta successiva il
+gioco parte in pochi secondi. Il browser si apre da solo su
+`http://localhost:5173`; per fermare il gioco basta chiudere la finestra del
+terminale.
+
+**Su macOS**, la prima volta il sistema può rifiutarsi di aprire un file
+scaricato da internet. In quel caso: **tasto destro** sul file →
+**Apri** → **Apri** di nuovo nella finestra di conferma. Va fatto una volta
+sola.
+
+I salvataggi restano sul computer di chi gioca, in `prisma/dev.db`: ogni
+installazione ha le sue carriere, separate da quelle di chiunque altro.
+
 ## Comandi
 
 | Comando                    | Descrizione                                                |
