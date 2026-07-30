@@ -37,7 +37,8 @@ export function LifestylePage({ saveId }: LifestylePageProps) {
         <h2>Come vivi fuori dal campo</h2>
         <p className="shop-intro">
           La tua vita privata finisce sui giornali: ogni stile sblocca storie
-          diverse sui media, che influenzano popolarità, morale e concentrazione.
+          diverse sui media, che influenzano popolarità, morale e
+          concentrazione.
         </p>
         {query.isLoading && <p className="empty">Caricamento…</p>}
         <ul className="lifestyle-list">

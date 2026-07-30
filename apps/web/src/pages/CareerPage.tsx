@@ -60,7 +60,9 @@ export function CareerPage({ saveId }: CareerPageProps) {
     try {
       setCardUrl(await renderCareerCard(cardData));
     } catch {
-      setCardError('Non è stato possibile generare l’immagine su questo device.');
+      setCardError(
+        'Non è stato possibile generare l’immagine su questo device.',
+      );
     } finally {
       setRendering(false);
     }
@@ -200,7 +202,10 @@ export function CareerPage({ saveId }: CareerPageProps) {
                   <tr key={`${row.seasonLabel}-${row.competitionName}`}>
                     <td>
                       {row.seasonLabel}
-                      <span className="season-comp"> {row.competitionName}</span>
+                      <span className="season-comp">
+                        {' '}
+                        {row.competitionName}
+                      </span>
                     </td>
                     <td>{row.clubName}</td>
                     <td>{row.appearances}</td>

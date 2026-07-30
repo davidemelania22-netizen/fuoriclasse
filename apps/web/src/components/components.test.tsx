@@ -103,7 +103,9 @@ describe('SavesList', () => {
         onDelete={onDelete}
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: /Elimina Test Career/ }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /Elimina Test Career/ }),
+    );
     expect(onDelete).toHaveBeenCalledWith(save);
   });
 });

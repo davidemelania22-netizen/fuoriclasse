@@ -34,7 +34,11 @@ export function ProfileImage({
   const inputId = useId();
 
   const inner = src ? (
-    <img src={src} alt={title ?? 'Foto profilo'} className="profile-img-photo" />
+    <img
+      src={src}
+      alt={title ?? 'Foto profilo'}
+      className="profile-img-photo"
+    />
   ) : (
     <Placeholder />
   );

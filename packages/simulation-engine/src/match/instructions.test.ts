@@ -15,7 +15,12 @@ const config: MatchConfig = {
   assistProbability: 0.72,
   formation: { GK: 1, DF: 4, MF: 3, WG: 2, FW: 1 },
   departmentWeights: { attack: 0.6, midfield: 0.4, defense: 0.6 },
-  selectionWeights: { ability: 0.62, form: 0.2, condition: 0.13, randomness: 0.05 },
+  selectionWeights: {
+    ability: 0.62,
+    form: 0.2,
+    condition: 0.13,
+    randomness: 0.05,
+  },
   rating: {
     base: 6.1,
     noise: 0.5,
@@ -31,7 +36,10 @@ const config: MatchConfig = {
   cards: { baseYellow: 0.14, baseRed: 0.012, disciplineFactor: 0.8 },
 };
 
-function makeSquad(clubId: string, biased?: Partial<MatchPlayer>): MatchPlayer[] {
+function makeSquad(
+  clubId: string,
+  biased?: Partial<MatchPlayer>,
+): MatchPlayer[] {
   return buildSquadPositions(14).map((position, index) => ({
     id: `${clubId}-p${index}`,
     position,
@@ -48,7 +56,10 @@ function makeSquad(clubId: string, biased?: Partial<MatchPlayer>): MatchPlayer[]
 
 describe('biasesFor', () => {
   it('maps the two axes onto multiplicative engine biases', () => {
-    const shootAggressive = biasesFor({ style: 'SHOOT', temperament: 'AGGRESSIVE' });
+    const shootAggressive = biasesFor({
+      style: 'SHOOT',
+      temperament: 'AGGRESSIVE',
+    });
     expect(shootAggressive.goalBias).toBeCloseTo(1.6 * 1.1);
     expect(shootAggressive.assistBias).toBeCloseTo(0.7 * 1.1);
     expect(shootAggressive.cardBias).toBe(1.6);
@@ -56,7 +67,10 @@ describe('biasesFor', () => {
     const neutral = biasesFor(DEFAULT_INSTRUCTIONS);
     expect(neutral).toEqual({ goalBias: 1, assistBias: 1, cardBias: 1 });
 
-    const createDisciplined = biasesFor({ style: 'CREATE', temperament: 'DISCIPLINED' });
+    const createDisciplined = biasesFor({
+      style: 'CREATE',
+      temperament: 'DISCIPLINED',
+    });
     expect(createDisciplined.goalBias).toBeCloseTo(0.7 * 0.95);
     expect(createDisciplined.assistBias).toBeCloseTo(1.6 * 0.95);
     expect(createDisciplined.cardBias).toBe(0.6);

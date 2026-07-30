@@ -118,7 +118,13 @@ export async function getCalendarMonth(
       isHome: fixture.isHome,
       status: fixture.status,
       scoreLine: played ? `${ours}-${theirs}` : null,
-      outcome: played ? (ours! > theirs! ? 'W' : ours! < theirs! ? 'L' : 'D') : null,
+      outcome: played
+        ? ours! > theirs!
+          ? 'W'
+          : ours! < theirs!
+            ? 'L'
+            : 'D'
+        : null,
       rating: fixture.appearance ? fixture.appearance.rating : null,
       goals: fixture.appearance?.goals ?? 0,
       assists: fixture.appearance?.assists ?? 0,
@@ -153,7 +159,8 @@ export async function getCalendarMonth(
       date,
       isToday: date === today,
       injured: data.injuries.some(
-        (injury) => isoDay(injury.startedAt) <= date && date <= isoDay(injury.endAt),
+        (injury) =>
+          isoDay(injury.startedAt) <= date && date <= isoDay(injury.endAt),
       ),
       entries: buckets.get(date) ?? [],
     });

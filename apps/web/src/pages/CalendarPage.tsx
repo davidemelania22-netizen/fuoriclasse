@@ -20,7 +20,11 @@ const monthLabel = (month: string) =>
 const weekdayOf = (date: string) =>
   (new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7;
 
-function MatchEntry({ entry }: { entry: Extract<CalendarEntry, { kind: 'MATCH' }> }) {
+function MatchEntry({
+  entry,
+}: {
+  entry: Extract<CalendarEntry, { kind: 'MATCH' }>;
+}) {
   const played = entry.outcome !== null;
   const outcomeClass = played
     ? `cal-match-${entry.outcome!.toLowerCase()}`
@@ -42,7 +46,9 @@ function MatchEntry({ entry }: { entry: Extract<CalendarEntry, { kind: 'MATCH' }
           {entry.rating !== null && (
             <span className="cal-rating">{entry.rating.toFixed(1)}</span>
           )}
-          {entry.goals > 0 && <span>⚽{entry.goals > 1 ? `×${entry.goals}` : ''}</span>}
+          {entry.goals > 0 && (
+            <span>⚽{entry.goals > 1 ? `×${entry.goals}` : ''}</span>
+          )}
           {entry.assists > 0 && (
             <span>🅰️{entry.assists > 1 ? `×${entry.assists}` : ''}</span>
           )}
@@ -56,7 +62,13 @@ function MatchEntry({ entry }: { entry: Extract<CalendarEntry, { kind: 'MATCH' }
   );
 }
 
-function DayCell({ day, currentDate }: { day: CalendarDayView; currentDate: string }) {
+function DayCell({
+  day,
+  currentDate,
+}: {
+  day: CalendarDayView;
+  currentDate: string;
+}) {
   const matches = day.entries.filter((e) => e.kind === 'MATCH');
   const injuries = day.entries.filter((e) => e.kind === 'INJURY');
   const news = day.entries.filter((e) => e.kind === 'NEWS');
@@ -187,7 +199,11 @@ export function CalendarPage({ saveId }: CalendarPageProps) {
               />
             )}
             {view.days.map((day) => (
-              <DayCell key={day.date} day={day} currentDate={view.currentDate} />
+              <DayCell
+                key={day.date}
+                day={day}
+                currentDate={view.currentDate}
+              />
             ))}
           </div>
 

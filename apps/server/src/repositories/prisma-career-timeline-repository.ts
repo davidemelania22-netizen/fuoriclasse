@@ -38,7 +38,8 @@ export class PrismaCareerTimelineRepository implements CareerTimelineRepository 
       },
     });
     const sortedAppearances = [...appearances].sort(
-      (a, b) => a.fixture.scheduledAt.getTime() - b.fixture.scheduledAt.getTime(),
+      (a, b) =>
+        a.fixture.scheduledAt.getTime() - b.fixture.scheduledAt.getTime(),
     );
 
     const opponentIds = new Set<string>();

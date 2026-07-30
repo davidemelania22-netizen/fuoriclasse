@@ -91,11 +91,15 @@ describe('continental competition', () => {
     const repo = new PrismaContinentalRepository(db.prisma);
 
     const summaryBefore = await getContinental(repo, saveGameId);
-    expect(summaryBefore?.name).toBe('Champions League');
+    expect(summaryBefore?.name).toBe('Coppa Continentale');
     expect(summaryBefore?.holderClubName).toBeNull();
 
     const result = await simulateContinental(
-      { repository: repo, config: DEFAULT_MATCH_CONFIG, qualifiersPerCountry: 2 },
+      {
+        repository: repo,
+        config: DEFAULT_MATCH_CONFIG,
+        qualifiersPerCountry: 2,
+      },
       { saveGameId },
     );
 
@@ -110,7 +114,7 @@ describe('continental competition', () => {
     expect(honour!.clubName).toBe(result!.championName);
   });
 
-  it('qualifies the top clubs from each country\'s last completed season standings, not just reputation', async () => {
+  it("qualifies the top clubs from each country's last completed season standings, not just reputation", async () => {
     const saveGameId = await setupWorld(db);
     const repo = new PrismaContinentalRepository(db.prisma);
 
@@ -159,6 +163,8 @@ describe('continental competition', () => {
     const italianEntrantsInField = field!.entrants.filter((id) =>
       italianClubs.some((c) => c.id === id),
     );
-    expect(new Set(italianEntrantsInField)).toEqual(new Set(expectedQualifiers));
+    expect(new Set(italianEntrantsInField)).toEqual(
+      new Set(expectedQualifiers),
+    );
   });
 });

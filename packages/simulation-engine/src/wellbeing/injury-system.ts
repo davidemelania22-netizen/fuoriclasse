@@ -167,11 +167,7 @@ export function rollRelapseInjury(
     typeKey: input.typeKey,
     severity: band.severity,
     durationWeeks,
-    recurrenceRisk: clamp(
-      config.injury.recurrenceBase * band.severity,
-      0,
-      0.6,
-    ),
+    recurrenceRisk: clamp(config.injury.recurrenceBase * band.severity, 0, 0.6),
     attributeImpact: band.severity * config.injury.attributeImpactPerSeverity,
   };
 }

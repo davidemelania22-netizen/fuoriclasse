@@ -25,7 +25,13 @@ const worldConfig: WorldGenerationConfig = {
   clubsPerSecondDivision: 4,
   rosterSize: 14,
   age: { min: 16, max: 36, mean: 24, spread: 4 },
-  ability: { topDivisionMean: 60, divisionStep: 12, spread: 9, min: 20, max: 95 },
+  ability: {
+    topDivisionMean: 60,
+    divisionStep: 12,
+    spread: 9,
+    min: 20,
+    max: 95,
+  },
   reputation: { topDivision: 3000, secondDivision: 1200, youth: 400 },
   namePools: {
     IT: {
@@ -178,7 +184,7 @@ describe('news builders', () => {
   it('only reports the protagonist when the match was standout', () => {
     const base: MatchdayReport = {
       date: '2024-09-01T00:00:00.000Z',
-      competitionName: 'Serie A',
+      competitionName: 'Prima Divisione',
       homeClubName: 'Us',
       awayClubName: 'Them',
       homeGoals: 3,

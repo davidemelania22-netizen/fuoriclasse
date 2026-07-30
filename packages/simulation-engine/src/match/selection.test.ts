@@ -14,7 +14,12 @@ const config: MatchConfig = {
   assistProbability: 0.72,
   formation: { GK: 1, DF: 4, MF: 3, WG: 2, FW: 1 },
   departmentWeights: { attack: 0.6, midfield: 0.4, defense: 0.6 },
-  selectionWeights: { ability: 0.62, form: 0.2, condition: 0.13, randomness: 0.05 },
+  selectionWeights: {
+    ability: 0.62,
+    form: 0.2,
+    condition: 0.13,
+    randomness: 0.05,
+  },
   rating: {
     base: 6.1,
     noise: 0.5,

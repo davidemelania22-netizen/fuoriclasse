@@ -52,7 +52,10 @@ function Choice({
       onClick={onChoose}
     >
       <span className="choice-label">{choice.label}</span>
-      <Chips consequences={choice.consequences} {...(gamble ? { prefix: 'Comunque vada' } : {})} />
+      <Chips
+        consequences={choice.consequences}
+        {...(gamble ? { prefix: 'Comunque vada' } : {})}
+      />
       {gamble && (
         <span className="gamble">
           <span className="gamble-bar" aria-hidden="true">

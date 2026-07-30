@@ -142,7 +142,7 @@ describe('generateWorld', () => {
         namePools: {
           AA: {
             ...namePool,
-            featuredClubs: ['Inter', 'Stella Rossa'],
+            featuredClubs: ['Milano Nerazzurra', 'Belgrado Rossa'],
             secondDivisionClubs: ['Palermo', 'Sampdoria'],
           },
           BB: namePool,
@@ -152,10 +152,10 @@ describe('generateWorld', () => {
     const topAA = world.clubs.filter(
       (club) => club.competitionKey === 'comp-AA-t1',
     );
-    expect(topAA.map((club) => club.name)).toContain('Inter');
-    expect(topAA.map((club) => club.name)).toContain('Stella Rossa');
-    const inter = topAA.find((club) => club.name === 'Inter')!;
-    expect(inter.shortName).toBe('INT');
+    expect(topAA.map((club) => club.name)).toContain('Milano Nerazzurra');
+    expect(topAA.map((club) => club.name)).toContain('Belgrado Rossa');
+    const forced = topAA.find((club) => club.name === 'Milano Nerazzurra')!;
+    expect(forced.shortName).toBe('MIL');
     const secondAA = world.clubs.filter(
       (club) => club.competitionKey === 'comp-AA-t2',
     );
@@ -164,7 +164,9 @@ describe('generateWorld', () => {
     // Forced names never leak into the other division or country.
     expect(
       world.clubs.filter(
-        (club) => club.competitionKey !== 'comp-AA-t1' && club.name === 'Inter',
+        (club) =>
+          club.competitionKey !== 'comp-AA-t1' &&
+          club.name === 'Milano Nerazzurra',
       ),
     ).toHaveLength(0);
     expect(

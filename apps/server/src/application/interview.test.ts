@@ -85,9 +85,9 @@ describe('press conference tied to the news', () => {
     expect(
       newsQs.some((q) => q.prompt.includes('Osservatori del Torino')),
     ).toBe(true);
-    expect(
-      newsQs.some((q) => q.prompt.includes('esonera Mister Costa')),
-    ).toBe(true);
+    expect(newsQs.some((q) => q.prompt.includes('esonera Mister Costa'))).toBe(
+      true,
+    );
     // The third question is a generic one.
     expect(session!.questions.filter((q) => !q.fromNews)).toHaveLength(1);
 

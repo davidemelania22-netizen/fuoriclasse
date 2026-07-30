@@ -28,7 +28,13 @@ const worldConfig: WorldGenerationConfig = {
   clubsPerSecondDivision: 4,
   rosterSize: 14,
   age: { min: 16, max: 36, mean: 24, spread: 4 },
-  ability: { topDivisionMean: 60, divisionStep: 12, spread: 9, min: 20, max: 95 },
+  ability: {
+    topDivisionMean: 60,
+    divisionStep: 12,
+    spread: 9,
+    min: 20,
+    max: 95,
+  },
   reputation: { topDivision: 3000, secondDivision: 1200, youth: 400 },
   namePools: {
     IT: {
@@ -166,10 +172,7 @@ describe('league context', () => {
     const inSecond = await applyMatchReputation(second.repository, {
       saveGameId: second.game.save.id,
       matches: [greatGame()],
-      spotlight: await resolveSpotlight(
-        second.repository,
-        second.game.save.id,
-      ),
+      spotlight: await resolveSpotlight(second.repository, second.game.save.id),
       gameDate,
     });
 

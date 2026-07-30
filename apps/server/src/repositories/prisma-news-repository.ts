@@ -24,10 +24,7 @@ export class PrismaNewsRepository implements NewsRepository {
     });
   }
 
-  async listNews(
-    saveGameId: string,
-    limit: number,
-  ): Promise<NewsItemRecord[]> {
+  async listNews(saveGameId: string, limit: number): Promise<NewsItemRecord[]> {
     const rows = await this.prisma.newsItem.findMany({
       where: { saveGameId },
       orderBy: [{ gameDate: 'desc' }, { createdAt: 'desc' }],

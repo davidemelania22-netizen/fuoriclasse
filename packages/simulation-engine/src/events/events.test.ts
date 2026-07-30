@@ -212,8 +212,10 @@ describe('choices with declared odds', () => {
   it('respects the declared odds over many rolls', () => {
     let wins = 0;
     for (let i = 0; i < 2000; i += 1) {
-      if (resolveChoiceOutcome(gambleChoice, createRandomSource(`roll-${i}`))
-        .succeeded) {
+      if (
+        resolveChoiceOutcome(gambleChoice, createRandomSource(`roll-${i}`))
+          .succeeded
+      ) {
         wins += 1;
       }
     }
@@ -243,9 +245,16 @@ describe('renderTemplate', () => {
   it('interpolates context fields into event text', () => {
     const text = renderTemplate(
       'Il mercato parla di {firstName} al {clubName} in {leagueName}.',
-      { ...ctx, firstName: 'Leo', clubName: 'Roma', leagueName: 'Serie A' },
+      {
+        ...ctx,
+        firstName: 'Leo',
+        clubName: 'Roma Giallorossa',
+        leagueName: 'Prima Divisione',
+      },
     );
-    expect(text).toBe('Il mercato parla di Leo al Roma in Serie A.');
+    expect(text).toBe(
+      'Il mercato parla di Leo al Roma Giallorossa in Prima Divisione.',
+    );
   });
 
   it('drops empty/unknown fields and tidies whitespace and punctuation', () => {

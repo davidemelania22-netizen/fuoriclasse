@@ -22,7 +22,9 @@ export class PrismaLeagueContextRepository implements LeagueContextRepository {
 
     const person = await this.prisma.person.findUnique({
       where: { id: save.playerPersonId },
-      select: { player: { select: { club: { select: { competitionId: true } } } } },
+      select: {
+        player: { select: { club: { select: { competitionId: true } } } },
+      },
     });
     const competitionId = person?.player?.club?.competitionId;
     if (!competitionId) return null;

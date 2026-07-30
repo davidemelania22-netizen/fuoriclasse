@@ -1,4 +1,7 @@
-import type { QuickStartDefinition, QuickStartKey } from '@football-life/shared';
+import type {
+  QuickStartDefinition,
+  QuickStartKey,
+} from '@football-life/shared';
 
 /**
  * Career quick-start modes, FM-style. CLASSIC mirrors the historical
@@ -36,7 +39,7 @@ export const QUICK_STARTS: readonly QuickStartDefinition[] = [
     icon: '⚡',
     label: 'Titolare subito',
     description:
-      'Hai 21 anni e un posto da giocarti in Serie A: parti già pronto in un club di metà classifica.',
+      'Hai 21 anni e un posto da giocarti in prima divisione: parti già pronto in un club di metà classifica.',
     ageYears: 21,
     visibleBaseline: 62,
     potential: 78,
@@ -59,6 +62,8 @@ export const QUICK_STARTS: readonly QuickStartDefinition[] = [
   },
 ];
 
-export function quickStartOf(key: QuickStartKey | undefined): QuickStartDefinition {
+export function quickStartOf(
+  key: QuickStartKey | undefined,
+): QuickStartDefinition {
   return QUICK_STARTS.find((qs) => qs.key === key) ?? QUICK_STARTS[0]!;
 }

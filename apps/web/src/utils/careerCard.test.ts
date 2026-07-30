@@ -12,7 +12,7 @@ const season = (
   extra: Partial<SeasonStatsRow> = {},
 ): SeasonStatsRow => ({
   seasonLabel,
-  competitionName: 'Italia Serie A',
+  competitionName: 'Italia Prima Divisione',
   clubName,
   appearances: 30,
   goals: 12,
@@ -35,7 +35,10 @@ const legacy: CareerLegacy = {
     trophies: 6,
     personalAwards: 2,
   },
-  bestSeason: season('2031/2032', 'Inter', { goals: 28, appearances: 34 }),
+  bestSeason: season('2031/2032', 'Milano Nerazzurra', {
+    goals: 28,
+    appearances: 34,
+  }),
   grade: {
     key: 'LEGGENDA',
     label: 'Leggenda',
@@ -45,11 +48,11 @@ const legacy: CareerLegacy = {
 
 // The API returns seasons newest-first.
 const seasons: SeasonStatsRow[] = [
-  season('2033/2034', 'Inter'),
-  season('2032/2033', 'Inter'),
-  season('2031/2032', 'Inter'),
-  season('2029/2030', 'Milan'),
-  season('2026/2027', 'Bologna'),
+  season('2033/2034', 'Milano Nerazzurra'),
+  season('2032/2033', 'Milano Nerazzurra'),
+  season('2031/2032', 'Milano Nerazzurra'),
+  season('2029/2030', 'Milano Rossonera'),
+  season('2026/2027', 'Bologna Felsinea'),
 ];
 
 const timeline: CareerTimelineEvent[] = [
@@ -62,10 +65,15 @@ const timeline: CareerTimelineEvent[] = [
   {
     date: '2032-06-01',
     type: 'AWARD',
-    title: "Pallone d'Oro",
+    title: "Sfera d'Oro",
     description: '',
   },
-  { date: '2028-01-01', type: 'TRANSFER', title: 'Passa al Milan', description: '' },
+  {
+    date: '2028-01-01',
+    type: 'TRANSFER',
+    title: 'Passa al Milan',
+    description: '',
+  },
   { date: '2026-09-01', type: 'DEBUT', title: 'Debutto', description: '' },
 ];
 
@@ -82,12 +90,16 @@ describe('buildCareerCardData', () => {
   });
 
   it('lists the shirts in the order they were worn, without repeats', () => {
-    expect(card.clubs).toEqual(['Bologna', 'Milan', 'Inter']);
+    expect(card.clubs).toEqual([
+      'Bologna Felsinea',
+      'Milano Rossonera',
+      'Milano Nerazzurra',
+    ]);
   });
 
   it('puts personal awards above club trophies, and drops the rest', () => {
     expect(card.honours).toEqual([
-      { icon: '🥇', title: "Pallone d'Oro" },
+      { icon: '🥇', title: "Sfera d'Oro" },
       { icon: '🏆', title: 'Coppa Nazionale con il Bologna' },
     ]);
   });
@@ -131,7 +143,7 @@ describe('buildCareerCardData', () => {
   it('collapses a single-season career into one label', () => {
     const one = buildCareerCardData({
       legacy,
-      seasons: [season('2026/2027', 'Bologna')],
+      seasons: [season('2026/2027', 'Bologna Felsinea')],
       timeline: [],
       avatarDataUrl: null,
     });

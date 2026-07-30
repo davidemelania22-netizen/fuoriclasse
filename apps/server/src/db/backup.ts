@@ -40,10 +40,7 @@ export async function backupDatabaseOnce(keep = 8): Promise<string | null> {
   if (!db) return null;
   const dir = path.join(path.dirname(db), 'backups');
   await fs.promises.mkdir(dir, { recursive: true });
-  const stamp = new Date()
-    .toISOString()
-    .slice(0, 16)
-    .replace(/[:T]/g, '-');
+  const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
   const dest = path.join(dir, `dev-${stamp}.db`);
 
   if (!fs.existsSync(dest)) {

@@ -46,9 +46,7 @@ export function App() {
       {currentSaveId && view === 'match' && (
         <MatchPreparePage saveId={currentSaveId} />
       )}
-      {currentSaveId && view === 'news' && (
-        <NewsPage saveId={currentSaveId} />
-      )}
+      {currentSaveId && view === 'news' && <NewsPage saveId={currentSaveId} />}
       {currentSaveId && view === 'career' && (
         <CareerPage saveId={currentSaveId} />
       )}

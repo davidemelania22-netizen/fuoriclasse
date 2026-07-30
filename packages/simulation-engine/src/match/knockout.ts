@@ -109,12 +109,15 @@ function resolveTie(
  * entrant count is not a power of two. Produces one champion; the number of
  * ties is always `entrants - 1`.
  */
-export function simulateKnockout(
-  input: SimulateKnockoutInput,
-): KnockoutResult {
+export function simulateKnockout(input: SimulateKnockoutInput): KnockoutResult {
   const entrants = [...input.entrants];
   if (entrants.length === 0) {
-    return { ties: [], roundsCount: 0, championClubId: '', runnerUpClubId: null };
+    return {
+      ties: [],
+      roundsCount: 0,
+      championClubId: '',
+      runnerUpClubId: null,
+    };
   }
   if (entrants.length === 1) {
     return {

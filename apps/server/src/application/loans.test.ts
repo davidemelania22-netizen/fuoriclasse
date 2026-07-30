@@ -25,7 +25,13 @@ const worldConfig: WorldGenerationConfig = {
   clubsPerSecondDivision: 4,
   rosterSize: 14,
   age: { min: 16, max: 36, mean: 24, spread: 4 },
-  ability: { topDivisionMean: 60, divisionStep: 12, spread: 9, min: 20, max: 95 },
+  ability: {
+    topDivisionMean: 60,
+    divisionStep: 12,
+    spread: 9,
+    min: 20,
+    max: 95,
+  },
   reputation: { topDivision: 3000, secondDivision: 1200, youth: 400 },
   namePools: {
     IT: {
@@ -158,7 +164,9 @@ describe('loans', () => {
       where: { id: game.player.id },
     });
     expect(back.clubId).toBe(topClub.id);
-    expect((await deps.profile.getProfile(game.save.id))!.activeLoan).toBeNull();
+    expect(
+      (await deps.profile.getProfile(game.save.id))!.activeLoan,
+    ).toBeNull();
   });
 
   it('declining closes the door for the season', async () => {
@@ -183,7 +191,8 @@ describe('loans', () => {
     ).toBeNull();
     // A second decision has nothing to answer.
     expect(
-      (await decideLoan(deps, { saveGameId: game.save.id, accept: true })).status,
+      (await decideLoan(deps, { saveGameId: game.save.id, accept: true }))
+        .status,
     ).toBe('no-offer');
   });
 

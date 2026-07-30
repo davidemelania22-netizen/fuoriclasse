@@ -235,8 +235,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   {
     key: 'mansion',
     name: 'Villa con vista',
-    description:
-      'La casa che si fotografa dall’elicottero. Costa come sembra.',
+    description: 'La casa che si fotografa dall’elicottero. Costa come sembra.',
     category: 'HOME',
     price: 250_000,
     effects: { happiness: 20, popularity: 80 },

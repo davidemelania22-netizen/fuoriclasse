@@ -64,7 +64,10 @@ export class PrismaInterviewRepository implements InterviewRepository {
       morale: clamp(player.morale + (deltas.morale ?? 0), 100),
       stress: clamp(player.stress + (deltas.stress ?? 0), 100),
       happiness: clamp(player.happiness + (deltas.happiness ?? 0), 100),
-      mentalHealth: clamp(player.mentalHealth + (deltas.mentalHealth ?? 0), 100),
+      mentalHealth: clamp(
+        player.mentalHealth + (deltas.mentalHealth ?? 0),
+        100,
+      ),
       motivation: clamp(player.motivation + (deltas.motivation ?? 0), 100),
       popularity: clamp(player.popularity + (deltas.popularity ?? 0), 10_000),
       reputation: clamp(player.reputation + (deltas.reputation ?? 0), 10_000),

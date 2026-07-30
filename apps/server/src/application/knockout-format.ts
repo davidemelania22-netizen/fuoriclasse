@@ -1,4 +1,7 @@
-import type { KnockoutResult, KnockoutTie } from '@football-life/simulation-engine';
+import type {
+  KnockoutResult,
+  KnockoutTie,
+} from '@football-life/simulation-engine';
 
 /** Round names counting back from the final (0 = final). */
 export function roundLabel(round: number, roundsCount: number): string {

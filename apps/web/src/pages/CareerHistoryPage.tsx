@@ -46,8 +46,7 @@ export function CareerHistoryPage({ saveId }: CareerHistoryPageProps) {
         {query.isLoading && <p className="empty">Caricamento…</p>}
         {query.data && query.data.length === 0 && (
           <p className="empty">
-            La tua storia comincia adesso: nessun momento ancora da
-            raccontare.
+            La tua storia comincia adesso: nessun momento ancora da raccontare.
           </p>
         )}
         <ol className="timeline-list">

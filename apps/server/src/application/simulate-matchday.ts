@@ -457,9 +457,10 @@ export async function simulateDueMatchdays(
             homeGoals: result.homeGoals,
             awayGoals: result.awayGoals,
             isHome,
-            isDerby: input.matchPlan?.fixtureId === fixture.id
-              ? input.matchPlan.isDerby
-              : false,
+            isDerby:
+              input.matchPlan?.fixtureId === fixture.id
+                ? input.matchPlan.isDerby
+                : false,
             approach:
               input.matchPlan?.fixtureId === fixture.id
                 ? (input.matchPlan.approach as MatchApproach)

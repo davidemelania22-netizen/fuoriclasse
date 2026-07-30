@@ -26,7 +26,7 @@ const newGame: NewGameInput = {
 function reportWith(pagella: MatchdayReport['pagella']): MatchdayReport {
   return {
     date: '2024-09-01T00:00:00.000Z',
-    competitionName: 'Serie A',
+    competitionName: 'Prima Divisione',
     homeClubName: 'Noi',
     awayClubName: 'Loro',
     homeGoals: 3,

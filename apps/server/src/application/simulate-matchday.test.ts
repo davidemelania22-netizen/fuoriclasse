@@ -119,7 +119,9 @@ describe('simulateDueMatchdays', () => {
     expect(report.homeLineup).toHaveLength(11);
     expect(report.awayLineup).toHaveLength(11);
     expect(
-      report.tabellino.every((e, i, arr) => i === 0 || arr[i - 1]!.minute <= e.minute),
+      report.tabellino.every(
+        (e, i, arr) => i === 0 || arr[i - 1]!.minute <= e.minute,
+      ),
     ).toBe(true);
 
     // The live feed opens with kickoff and closes with the final whistle,

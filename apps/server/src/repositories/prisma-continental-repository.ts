@@ -131,7 +131,10 @@ export class PrismaContinentalRepository implements ContinentalRepository {
     count: number,
   ): Promise<string[]> {
     const lastCompleted = await this.prisma.season.findFirst({
-      where: { competitionId: leagueCompetitionId, status: SeasonStatus.Completed },
+      where: {
+        competitionId: leagueCompetitionId,
+        status: SeasonStatus.Completed,
+      },
       orderBy: { endDate: 'desc' },
     });
 

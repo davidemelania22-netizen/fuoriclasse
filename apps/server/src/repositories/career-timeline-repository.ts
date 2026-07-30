@@ -35,5 +35,7 @@ export interface CareerTimelineData {
 }
 
 export interface CareerTimelineRepository {
-  loadCareerTimelineData(saveGameId: string): Promise<CareerTimelineData | null>;
+  loadCareerTimelineData(
+    saveGameId: string,
+  ): Promise<CareerTimelineData | null>;
 }

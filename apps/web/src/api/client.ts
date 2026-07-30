@@ -689,11 +689,7 @@ export const api = {
       `/saves/${id}/calendar${month ? `?month=${month}` : ''}`,
     ),
   getTactics: (id: string) => http<TacticsView | null>(`/saves/${id}/tactics`),
-  setInstructions: (
-    id: string,
-    style: AttackStyle,
-    temperament: Temperament,
-  ) =>
+  setInstructions: (id: string, style: AttackStyle, temperament: Temperament) =>
     http<{ ok: boolean }>(`/saves/${id}/tactics`, {
       method: 'POST',
       body: JSON.stringify({ style, temperament }),
@@ -821,8 +817,7 @@ export const api = {
     }),
   getCareerTimeline: (id: string) =>
     http<CareerTimelineEvent[]>(`/saves/${id}/career-timeline`),
-  getStandings: (id: string) =>
-    http<LeagueTable[]>(`/saves/${id}/standings`),
+  getStandings: (id: string) => http<LeagueTable[]>(`/saves/${id}/standings`),
   decideLoan: (id: string, accept: boolean, clubId?: string) =>
     http<{ status: string; accepted: boolean; clubName: string | null }>(
       `/saves/${id}/loan`,

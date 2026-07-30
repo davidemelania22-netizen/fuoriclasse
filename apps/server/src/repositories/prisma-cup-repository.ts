@@ -1,8 +1,5 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
-import {
-  CompetitionType,
-  type PlayerPosition,
-} from '@football-life/shared';
+import { CompetitionType, type PlayerPosition } from '@football-life/shared';
 import type { MatchPlayer } from '@football-life/simulation-engine';
 import type {
   CupField,

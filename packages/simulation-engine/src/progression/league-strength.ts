@@ -41,7 +41,11 @@ export function leagueStrengthStars(factor: number): number {
 }
 
 /** Maps a factor in [FLOOR, 1] onto an arbitrary output range. */
-function scaleFromFactor(factor: number, atFloor: number, atTop: number): number {
+function scaleFromFactor(
+  factor: number,
+  atFloor: number,
+  atTop: number,
+): number {
   const share = clamp((factor - FLOOR) / (1 - FLOOR), 0, 1);
   return atFloor + (atTop - atFloor) * share;
 }

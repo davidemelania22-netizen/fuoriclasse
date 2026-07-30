@@ -38,11 +38,16 @@ function Lineup({ title, players }: { title: string; players: LineupEntry[] }) {
         {players.map((p) => (
           <li
             key={p.playerId}
-            className={p.isProtagonist ? 'lineup-row lineup-row-you' : 'lineup-row'}
+            className={
+              p.isProtagonist ? 'lineup-row lineup-row-you' : 'lineup-row'
+            }
           >
             <span className="lineup-pos">{p.position}</span>
             <span className="lineup-name">{p.playerName}</span>
-            {(p.goals > 0 || p.assists > 0 || p.yellowCards > 0 || p.redCards > 0) && (
+            {(p.goals > 0 ||
+              p.assists > 0 ||
+              p.yellowCards > 0 ||
+              p.redCards > 0) && (
               <span className="lineup-events">
                 {p.goals > 0 && `⚽×${p.goals} `}
                 {p.assists > 0 && `🅰️×${p.assists} `}
@@ -50,7 +55,9 @@ function Lineup({ title, players }: { title: string; players: LineupEntry[] }) {
                 {p.redCards > 0 && '🟥 '}
               </span>
             )}
-            <span className={`chip ${ratingTone(p.rating)}`}>{p.rating.toFixed(1)}</span>
+            <span className={`chip ${ratingTone(p.rating)}`}>
+              {p.rating.toFixed(1)}
+            </span>
           </li>
         ))}
       </ul>
@@ -100,11 +107,10 @@ export function MatchdayCard({ match }: MatchdayCardProps) {
           <h4>Momenti chiave</h4>
           <ul className="key-moments-list">
             {match.keyMoments.map((m, i) => (
-              <li
-                key={i}
-                className={`key-moment ${m.success ? 'ok' : 'ko'}`}
-              >
-                <span className="key-moment-icon">{m.success ? '✅' : '❌'}</span>
+              <li key={i} className={`key-moment ${m.success ? 'ok' : 'ko'}`}>
+                <span className="key-moment-icon">
+                  {m.success ? '✅' : '❌'}
+                </span>
                 <span className="key-moment-text">
                   <em>{m.choiceLabel}:</em> {m.text}
                 </span>
@@ -131,7 +137,9 @@ export function MatchdayCard({ match }: MatchdayCardProps) {
         <div className="pagella">
           <div className="pagella-head">
             <span className="pagella-label">Pagella</span>
-            <span className={`pagella-rating ${ratingTone(match.pagella.rating)}`}>
+            <span
+              className={`pagella-rating ${ratingTone(match.pagella.rating)}`}
+            >
               {match.pagella.rating.toFixed(1)}
             </span>
           </div>
@@ -151,7 +159,9 @@ export function MatchdayCard({ match }: MatchdayCardProps) {
                 <span>{EVENT_ICON[e.type]}</span>
                 <span className="tabellino-player">{e.playerName}</span>
                 {e.assistPlayerName && (
-                  <span className="tabellino-assist">(ass. {e.assistPlayerName})</span>
+                  <span className="tabellino-assist">
+                    (ass. {e.assistPlayerName})
+                  </span>
                 )}
                 <span className="tabellino-club">{e.clubName}</span>
               </li>

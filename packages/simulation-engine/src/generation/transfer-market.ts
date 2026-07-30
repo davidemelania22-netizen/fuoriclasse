@@ -60,7 +60,10 @@ export function selectTransfers(
     const eligibleBuyers = clubs.filter((c) => (budgets.get(c.id) ?? 0) > 0);
     if (eligibleBuyers.length === 0) break;
     const buyer = rng.weightedPick(
-      eligibleBuyers.map((c) => ({ value: c, weight: Math.max(1, c.reputation) })),
+      eligibleBuyers.map((c) => ({
+        value: c,
+        weight: Math.max(1, c.reputation),
+      })),
     );
     const budget = budgets.get(buyer.id) ?? 0;
 

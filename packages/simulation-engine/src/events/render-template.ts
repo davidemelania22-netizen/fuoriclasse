@@ -19,5 +19,8 @@ export function renderTemplate(
     }
     return '';
   });
-  return rendered.replace(/\s{2,}/g, ' ').replace(/\s+([.,;:!?])/g, '$1').trim();
+  return rendered
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([.,;:!?])/g, '$1')
+    .trim();
 }

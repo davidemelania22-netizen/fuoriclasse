@@ -31,7 +31,9 @@ export async function runTransferWindow(
   const state = await deps.repository.loadMarketState(input.saveGameId);
   if (!state) return [];
 
-  const rng = createRandomSource(`${state.seed}:transfers:${input.seasonLabel}`);
+  const rng = createRandomSource(
+    `${state.seed}:transfers:${input.seasonLabel}`,
+  );
   const transfers = selectTransfers(
     state.clubs,
     state.players,

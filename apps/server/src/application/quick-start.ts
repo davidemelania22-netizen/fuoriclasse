@@ -15,7 +15,7 @@ export function pickAutoSignClub(
   if (clubs.length === 0) return null;
 
   const topDivision = clubs.filter((club) =>
-    club.competitionName?.endsWith('Serie A'),
+    club.competitionName?.endsWith('Prima Divisione'),
   );
   const home = topDivision.filter((club) => club.countryId === nationalityId);
   const pool =

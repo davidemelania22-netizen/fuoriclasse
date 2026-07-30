@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  api,
-  type AttackStyle,
-  type Temperament,
-} from '../api/client';
+import { api, type AttackStyle, type Temperament } from '../api/client';
 import { useGameStore } from '../stores/useGameStore';
 
 interface TacticsPageProps {
@@ -32,7 +28,11 @@ export function TacticsPage({ saveId }: TacticsPageProps) {
 
   const saveMutation = useMutation({
     mutationFn: () =>
-      api.setInstructions(saveId, style as AttackStyle, temperament as Temperament),
+      api.setInstructions(
+        saveId,
+        style as AttackStyle,
+        temperament as Temperament,
+      ),
     onSuccess: async () => {
       setSaved(true);
       await queryClient.invalidateQueries({ queryKey: ['tactics', saveId] });
@@ -59,8 +59,7 @@ export function TacticsPage({ saveId }: TacticsPageProps) {
       {query.data === null && (
         <section className="card">
           <p className="empty">
-            Firma per una squadra per vedere il sistema di gioco e le
-            gerarchie.
+            Firma per una squadra per vedere il sistema di gioco e le gerarchie.
           </p>
         </section>
       )}
@@ -86,8 +85,7 @@ export function TacticsPage({ saveId }: TacticsPageProps) {
                   <h3 className="depth-title">
                     {group.label}
                     <span className="depth-slots">
-                      {group.slots}{' '}
-                      {group.slots === 1 ? 'maglia' : 'maglie'}
+                      {group.slots} {group.slots === 1 ? 'maglia' : 'maglie'}
                     </span>
                   </h3>
                   <ul className="depth-list">

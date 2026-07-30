@@ -1,9 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
 import { calendarAge } from '@football-life/simulation-engine';
-import type {
-  ScoutingRepository,
-  ScoutingState,
-} from './scouting-repository';
+import type { ScoutingRepository, ScoutingState } from './scouting-repository';
 
 export class PrismaScoutingRepository implements ScoutingRepository {
   constructor(private readonly prisma: PrismaClient) {}

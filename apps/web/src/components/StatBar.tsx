@@ -14,7 +14,12 @@ function toneColor(pct: number, invert: boolean): string {
   return '#ef4444';
 }
 
-export function StatBar({ label, value, max = 100, invert = false }: StatBarProps) {
+export function StatBar({
+  label,
+  value,
+  max = 100,
+  invert = false,
+}: StatBarProps) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   const color = toneColor(pct, invert);
   return (

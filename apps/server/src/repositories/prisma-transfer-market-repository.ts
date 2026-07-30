@@ -6,9 +6,7 @@ import type {
   TransferMarketRepository,
 } from './transfer-market-repository';
 
-export class PrismaTransferMarketRepository
-  implements TransferMarketRepository
-{
+export class PrismaTransferMarketRepository implements TransferMarketRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async loadMarketState(saveGameId: string): Promise<MarketState | null> {

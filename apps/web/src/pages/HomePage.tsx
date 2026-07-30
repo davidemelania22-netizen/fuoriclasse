@@ -83,157 +83,163 @@ export function HomePage() {
       <div className="home">
         <section className="card">
           <h2>Nuova carriera</h2>
-        <form
-          className="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            createMutation.mutate({
-              name,
-              seed,
-              quickStart,
-              player: {
-                firstName,
-                lastName,
-                nationalityId,
-                primaryPosition,
-                preferredFoot,
-              } as NewGameInput['player'],
-            });
-          }}
-        >
-          {quickStartsQuery.data && (
-            <div className="qs-picker">
-              <span className="qs-picker-label">Come vuoi cominciare?</span>
-              <div className="qs-options">
-                {quickStartsQuery.data.map((qs) => (
-                  <button
-                    key={qs.key}
-                    type="button"
-                    className={`qs-option ${
-                      quickStart === qs.key ? 'qs-selected' : ''
-                    }`}
-                    onClick={() => setQuickStart(qs.key)}
-                  >
-                    <span className="qs-head">
-                      <span aria-hidden>{qs.icon}</span> {qs.label}
-                      <span className="qs-age">{qs.ageYears} anni</span>
-                    </span>
-                    <span className="qs-desc">{qs.description}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          <label>
-            Nome del salvataggio
-            <input value={name} onChange={(e) => setName(e.target.value)} />
-          </label>
-          <label>
-            Nome
-            <input
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-          </label>
-          <label>
-            Cognome
-            <input
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
-          </label>
-          <label>
-            Nazionalità
-            <select
-              value={nationalityId}
-              onChange={(e) => setNationalityId(e.target.value)}
-            >
-              {COUNTRY_CODES.map((code) => (
-                <option key={code} value={code}>
-                  {label(countryLabels, code)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Ruolo
-            <select
-              value={primaryPosition}
-              onChange={(e) => setPrimaryPosition(e.target.value)}
-            >
-              {Object.values(PlayerPosition).map((p) => (
-                <option key={p} value={p}>
-                  {label(positionLabels, p)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Piede preferito
-            <select
-              value={preferredFoot}
-              onChange={(e) => setPreferredFoot(e.target.value)}
-            >
-              {Object.values(PreferredFoot).map((f) => (
-                <option key={f} value={f}>
-                  {label(footLabels, f)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending
-              ? 'Creazione del mondo…'
-              : 'Inizia carriera'}
-          </button>
-          {createMutation.isError && (
-            <p className="error">Impossibile creare la carriera. Riprova.</p>
-          )}
-        </form>
-      </section>
-
-      <section className="card">
-        <h2>Continua</h2>
-        {savesQuery.data && savesQuery.data.length > 0 && (
-          <button
-            type="button"
-            className="resume-hero"
-            onClick={() => selectSave(savesQuery.data[0]!.id)}
+          <form
+            className="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              createMutation.mutate({
+                name,
+                seed,
+                quickStart,
+                player: {
+                  firstName,
+                  lastName,
+                  nationalityId,
+                  primaryPosition,
+                  preferredFoot,
+                } as NewGameInput['player'],
+              });
+            }}
           >
-            <span className="resume-label">Riprendi la carriera più recente</span>
-            <span className="resume-name">{savesQuery.data[0]!.name}</span>
-            <span className="resume-meta">
-              <span>
-                Data del gioco{' '}
-                <strong>{savesQuery.data[0]!.currentDate.slice(0, 10)}</strong>
+            {quickStartsQuery.data && (
+              <div className="qs-picker">
+                <span className="qs-picker-label">Come vuoi cominciare?</span>
+                <div className="qs-options">
+                  {quickStartsQuery.data.map((qs) => (
+                    <button
+                      key={qs.key}
+                      type="button"
+                      className={`qs-option ${
+                        quickStart === qs.key ? 'qs-selected' : ''
+                      }`}
+                      onClick={() => setQuickStart(qs.key)}
+                    >
+                      <span className="qs-head">
+                        <span aria-hidden>{qs.icon}</span> {qs.label}
+                        <span className="qs-age">{qs.ageYears} anni</span>
+                      </span>
+                      <span className="qs-desc">{qs.description}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <label>
+              Nome del salvataggio
+              <input value={name} onChange={(e) => setName(e.target.value)} />
+            </label>
+            <label>
+              Nome
+              <input
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </label>
+            <label>
+              Cognome
+              <input
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </label>
+            <label>
+              Nazionalità
+              <select
+                value={nationalityId}
+                onChange={(e) => setNationalityId(e.target.value)}
+              >
+                {COUNTRY_CODES.map((code) => (
+                  <option key={code} value={code}>
+                    {label(countryLabels, code)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Ruolo
+              <select
+                value={primaryPosition}
+                onChange={(e) => setPrimaryPosition(e.target.value)}
+              >
+                {Object.values(PlayerPosition).map((p) => (
+                  <option key={p} value={p}>
+                    {label(positionLabels, p)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Piede preferito
+              <select
+                value={preferredFoot}
+                onChange={(e) => setPreferredFoot(e.target.value)}
+              >
+                {Object.values(PreferredFoot).map((f) => (
+                  <option key={f} value={f}>
+                    {label(footLabels, f)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button type="submit" disabled={createMutation.isPending}>
+              {createMutation.isPending
+                ? 'Creazione del mondo…'
+                : 'Inizia carriera'}
+            </button>
+            {createMutation.isError && (
+              <p className="error">Impossibile creare la carriera. Riprova.</p>
+            )}
+          </form>
+        </section>
+
+        <section className="card">
+          <h2>Continua</h2>
+          {savesQuery.data && savesQuery.data.length > 0 && (
+            <button
+              type="button"
+              className="resume-hero"
+              onClick={() => selectSave(savesQuery.data[0]!.id)}
+            >
+              <span className="resume-label">
+                Riprendi la carriera più recente
               </span>
-              <span>
-                Ultima partita{' '}
-                <strong>{savesQuery.data[0]!.lastPlayedAt.slice(0, 10)}</strong>
+              <span className="resume-name">{savesQuery.data[0]!.name}</span>
+              <span className="resume-meta">
+                <span>
+                  Data del gioco{' '}
+                  <strong>
+                    {savesQuery.data[0]!.currentDate.slice(0, 10)}
+                  </strong>
+                </span>
+                <span>
+                  Ultima partita{' '}
+                  <strong>
+                    {savesQuery.data[0]!.lastPlayedAt.slice(0, 10)}
+                  </strong>
+                </span>
               </span>
-            </span>
-            <span className="resume-cta">Riprendi »</span>
-          </button>
-        )}
-        {savesQuery.isLoading && <p>Caricamento…</p>}
-        {savesQuery.isError && (
-          <p className="error">Impossibile caricare i salvataggi.</p>
-        )}
-        {savesQuery.data && (
-          <SavesList
-            saves={savesQuery.data}
-            onSelect={selectSave}
-            onDelete={handleDelete}
-            deletingId={
-              deleteMutation.isPending
-                ? (deleteMutation.variables ?? null)
-                : null
-            }
-          />
-        )}
-        {deleteMutation.isError && (
-          <p className="error">Impossibile eliminare il salvataggio.</p>
-        )}
+              <span className="resume-cta">Riprendi »</span>
+            </button>
+          )}
+          {savesQuery.isLoading && <p>Caricamento…</p>}
+          {savesQuery.isError && (
+            <p className="error">Impossibile caricare i salvataggi.</p>
+          )}
+          {savesQuery.data && (
+            <SavesList
+              saves={savesQuery.data}
+              onSelect={selectSave}
+              onDelete={handleDelete}
+              deletingId={
+                deleteMutation.isPending
+                  ? (deleteMutation.variables ?? null)
+                  : null
+              }
+            />
+          )}
+          {deleteMutation.isError && (
+            <p className="error">Impossibile eliminare il salvataggio.</p>
+          )}
         </section>
       </div>
     </div>

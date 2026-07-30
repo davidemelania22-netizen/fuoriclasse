@@ -1,9 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
 import { CareerStatus } from '@football-life/shared';
-import type {
-  TacticsRepository,
-  TacticsState,
-} from './tactics-repository';
+import type { TacticsRepository, TacticsState } from './tactics-repository';
 
 export class PrismaTacticsRepository implements TacticsRepository {
   constructor(private readonly prisma: PrismaClient) {}

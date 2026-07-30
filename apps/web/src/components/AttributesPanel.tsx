@@ -71,7 +71,9 @@ export function AttributesPanel({ saveId }: AttributesPanelProps) {
                       <span className="attr-name">
                         {label(attributeLabels, a.key)}
                       </span>
-                      <span className={`attr-word ${ratingTone(to20(a.value))}`}>
+                      <span
+                        className={`attr-word ${ratingTone(to20(a.value))}`}
+                      >
                         {ratingWord(to20(a.value))}
                       </span>
                     </li>

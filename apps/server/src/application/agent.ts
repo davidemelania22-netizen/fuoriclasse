@@ -65,7 +65,10 @@ export async function negotiateWage(
 
   const old = career.currentContract.weeklyWage;
   const factor = 1 + 0.03 * agent.contacts + career.currentAbility / 1000;
-  const newWage = Math.max(old, Math.min(Math.round(old * factor), Math.round(old * 1.6)));
+  const newWage = Math.max(
+    old,
+    Math.min(Math.round(old * factor), Math.round(old * 1.6)),
+  );
 
   await deps.repository.renewContract({
     contractId: career.currentContract.id,

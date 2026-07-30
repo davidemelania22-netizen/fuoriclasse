@@ -60,14 +60,14 @@ export function generateWorld(input: WorldGenerationInput): GeneratedWorld {
       clubCount: config.clubsPerTopDivision,
       abilityMean: config.ability.topDivisionMean,
       reputation: config.reputation.topDivision,
-      label: 'Serie A',
+      label: 'Prima Divisione',
     },
     {
       tier: 2,
       clubCount: config.clubsPerSecondDivision,
       abilityMean: config.ability.topDivisionMean - config.ability.divisionStep,
       reputation: config.reputation.secondDivision,
-      label: 'Serie B',
+      label: 'Seconda Divisione',
     },
   ];
 
@@ -94,7 +94,7 @@ export function generateWorld(input: WorldGenerationInput): GeneratedWorld {
     // National knockout cup (all the country's clubs enter; resolved per season).
     competitions.push({
       key: `comp-${country.id}-cup`,
-      name: `Coppa ${country.name}`,
+      name: `Coppa Nazionale ${country.name}`,
       countryId: country.id,
       type: CompetitionType.Cup,
       tier: 0,
@@ -203,7 +203,7 @@ export function generateWorld(input: WorldGenerationInput): GeneratedWorld {
   if (input.countries.length > 0) {
     competitions.push({
       key: 'comp-continental',
-      name: 'Champions League',
+      name: 'Coppa Continentale',
       countryId: null,
       type: CompetitionType.Continental,
       tier: 0,
@@ -214,7 +214,7 @@ export function generateWorld(input: WorldGenerationInput): GeneratedWorld {
 
     competitions.push({
       key: 'comp-national-teams',
-      name: 'Europei',
+      name: 'Torneo delle Nazioni',
       countryId: null,
       type: CompetitionType.International,
       tier: 0,

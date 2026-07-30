@@ -69,7 +69,9 @@ export function PlayerCard({
             <span className="chip chip-accent">
               {label(positionLabels, player.primaryPosition)}
             </span>
-            <span className="chip">{label(footLabels, player.preferredFoot)}</span>
+            <span className="chip">
+              {label(footLabels, player.preferredFoot)}
+            </span>
             <span className={`badge ${statusTone[player.careerStatus] ?? ''}`}>
               {label(careerStatusLabels, player.careerStatus)}
             </span>

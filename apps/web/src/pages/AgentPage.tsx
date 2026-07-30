@@ -34,7 +34,11 @@ function intentOf(text: string): Intent {
   const t = text.toLowerCase();
   if (/stipendio|aumento|paga|guadagn|ingaggio/.test(t)) return 'wage';
   if (/sponsor|pubblicit|spot|testimonial|brand/.test(t)) return 'sponsor';
-  if (/trasferiment|cambiare squadra|cambiare club|andare via|cedere|vendere|cessione|nuovo club|nuova squadra/.test(t))
+  if (
+    /trasferiment|cambiare squadra|cambiare club|andare via|cedere|vendere|cessione|nuovo club|nuova squadra/.test(
+      t,
+    )
+  )
     return 'transfer';
   if (/rinnov|prolung|restare|resto/.test(t)) return 'renewal';
   return null;
@@ -144,7 +148,9 @@ export function AgentPage({ saveId }: AgentPageProps) {
                 <div className="agent-info">
                   <strong>{agent.name}</strong>
                   <span className="agent-meta">
-                    <span className="chip">Commissione {agent.commissionPct}%</span>
+                    <span className="chip">
+                      Commissione {agent.commissionPct}%
+                    </span>
                     <span className="agent-contacts" title="Contatti">
                       {contactDots(agent.contacts)}
                     </span>

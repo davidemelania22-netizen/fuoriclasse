@@ -19,8 +19,8 @@ const honourTypeLabels: Record<string, string> = {
   NATIONAL_CUP: 'Coppa Nazionale',
   CONTINENTAL_CUP: 'Coppa Continentale',
   INTERNATIONAL: 'Torneo Internazionale',
-  BALLON_DOR: "Pallone d'Oro",
-  GOLDEN_BOOT: "Scarpa d'Oro",
+  BALLON_DOR: "Sfera d'Oro",
+  GOLDEN_BOOT: 'Scarpa Dorata',
 };
 
 function KnockoutResultView({
@@ -70,9 +70,7 @@ function KnockoutResultView({
 export function CupsPage({ saveId }: CupsPageProps) {
   const queryClient = useQueryClient();
   const close = useGameStore((s) => s.closeOverlay);
-  const [results, setResults] = useState<Record<string, SimulateCupResult>>(
-    {},
-  );
+  const [results, setResults] = useState<Record<string, SimulateCupResult>>({});
   const [continentalResult, setContinentalResult] =
     useState<SimulateContinentalResult | null>(null);
   const [nationalTeamResult, setNationalTeamResult] =
@@ -116,7 +114,9 @@ export function CupsPage({ saveId }: CupsPageProps) {
     mutationFn: () => api.simulateContinental(saveId),
     onSuccess: async (result) => {
       setContinentalResult(result);
-      await queryClient.invalidateQueries({ queryKey: ['continental', saveId] });
+      await queryClient.invalidateQueries({
+        queryKey: ['continental', saveId],
+      });
       await queryClient.invalidateQueries({ queryKey: ['honours', saveId] });
     },
   });
@@ -287,7 +287,9 @@ export function CupsPage({ saveId }: CupsPageProps) {
                   {'★'.repeat(
                     Math.max(
                       1,
-                      Math.round(1 + (awardsResult.leagueStrength - 0.45) * 7.3),
+                      Math.round(
+                        1 + (awardsResult.leagueStrength - 0.45) * 7.3,
+                      ),
                     ),
                   )}{' '}
                   {awardsResult.leagueStrengthLabel}

@@ -117,7 +117,11 @@ describe('manager status', () => {
 
     // Initial status: trust anchored to the ROTATION baseline (48), a weak club
     // fighting for survival, season not started yet.
-    const initial = await getManagerStatus(profileRepo, statusRepo, game.save.id);
+    const initial = await getManagerStatus(
+      profileRepo,
+      statusRepo,
+      game.save.id,
+    );
     expect(initial).not.toBeNull();
     expect(initial!.trust).toBe(48);
     expect(initial!.role.key).toBe('ROTATION');
@@ -150,7 +154,11 @@ describe('manager status', () => {
     // Being fit but benched drifts trust back toward the baseline (downward).
     const benched = await updateManagerTrust(
       { profile: profileRepo, status: statusRepo },
-      { saveGameId: game.save.id, matches: [{ pagella: null }], injured: false },
+      {
+        saveGameId: game.save.id,
+        matches: [{ pagella: null }],
+        injured: false,
+      },
     );
     expect(benched!.value).toBeLessThan(up!.value);
 

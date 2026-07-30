@@ -7,10 +7,7 @@ import type {
   CupRepository,
   HonourRecord,
 } from '../repositories/cup-repository';
-import {
-  buildProtagonistRun,
-  type KnockoutRunStep,
-} from './knockout-format';
+import { buildProtagonistRun, type KnockoutRunStep } from './knockout-format';
 
 export interface CupWithHolder {
   competitionId: string;

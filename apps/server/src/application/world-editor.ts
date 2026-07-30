@@ -6,11 +6,7 @@ import type {
 
 // Crests are small client-resized images; cap the data URL well below the
 // avatar limit since these render at list size.
-const logoSchema = z
-  .string()
-  .startsWith('data:image/')
-  .max(300_000)
-  .nullable();
+const logoSchema = z.string().startsWith('data:image/').max(300_000).nullable();
 
 export const clubEditSchema = z
   .object({
@@ -49,7 +45,9 @@ export async function getEditableWorld(
 
 export async function editClub(
   deps: WorldEditorDeps,
-  input: { saveGameId: string; clubId: string } & z.infer<typeof clubEditSchema>,
+  input: { saveGameId: string; clubId: string } & z.infer<
+    typeof clubEditSchema
+  >,
 ): Promise<boolean> {
   // Guard: Prisma silently drops undefined where-fields, so an empty id
   // would otherwise turn this into a mass update.

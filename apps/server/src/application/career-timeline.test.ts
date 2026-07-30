@@ -122,7 +122,10 @@ describe('buildCareerTimeline', () => {
     });
 
     const season = await db.prisma.season.findFirstOrThrow({
-      where: { saveGameId: game.save.id, competitionId: firstClub.competitionId! },
+      where: {
+        saveGameId: game.save.id,
+        competitionId: firstClub.competitionId!,
+      },
     });
     const opponentClub = clubs.find((c) => c.id !== firstClub.id)!;
     const fixture1 = await db.prisma.fixture.create({
@@ -191,7 +194,7 @@ describe('buildCareerTimeline', () => {
         seasonLabel: '2024/25',
         type: 'GOLDEN_BOOT',
         competitionId: firstClub.competitionId,
-        competitionName: 'Italia Serie A',
+        competitionName: 'Italia Prima Divisione',
         playerId: game.player.id,
         playerName: 'Test Player',
         createdAt: new Date('2025-05-01'),
@@ -202,7 +205,7 @@ describe('buildCareerTimeline', () => {
         saveGameId: game.save.id,
         seasonLabel: '2024/25',
         type: 'NATIONAL_CUP',
-        competitionName: 'Coppa Italia',
+        competitionName: 'Coppa Nazionale',
         clubId: firstClub.id,
         clubName: firstClub.name,
         createdAt: new Date('2025-05-15'),
@@ -214,7 +217,7 @@ describe('buildCareerTimeline', () => {
         saveGameId: game.save.id,
         seasonLabel: '2024/25',
         type: 'CONTINENTAL_CUP',
-        competitionName: 'Champions League',
+        competitionName: 'Coppa Continentale',
         clubId: opponentClub.id,
         clubName: opponentClub.name,
         createdAt: new Date('2025-05-20'),
@@ -236,7 +239,7 @@ describe('buildCareerTimeline', () => {
     expect(events![0]!.title).toBe('Esordio da professionista');
     expect(events![0]!.description).toContain(firstClub.name);
     expect(events![1]!.description).toContain(opponentClub.name);
-    expect(events![3]!.title).toBe("Scarpa d'Oro");
+    expect(events![3]!.title).toBe('Scarpa Dorata');
     expect(events![4]!.title).toBe('Coppa Nazionale');
     expect(events![5]!.description).toContain(secondClub.name);
 

@@ -8,9 +8,19 @@ import {
 
 function makeWorld(): { clubs: MarketClub[]; players: MarketPlayer[] } {
   const clubs: MarketClub[] = [
-    { id: 'big', name: 'Big FC', reputation: 5000, transferBudget: 100_000_000 },
+    {
+      id: 'big',
+      name: 'Big FC',
+      reputation: 5000,
+      transferBudget: 100_000_000,
+    },
     { id: 'mid', name: 'Mid FC', reputation: 2500, transferBudget: 10_000_000 },
-    { id: 'small', name: 'Small FC', reputation: 800, transferBudget: 1_000_000 },
+    {
+      id: 'small',
+      name: 'Small FC',
+      reputation: 800,
+      transferBudget: 1_000_000,
+    },
   ];
   const players: MarketPlayer[] = [];
   for (const club of clubs) {
@@ -89,7 +99,12 @@ describe('selectTransfers', () => {
 
   it('respects buyer budgets', () => {
     const clubs: MarketClub[] = [
-      { id: 'buyer', name: 'Buyer', reputation: 9000, transferBudget: 2_500_000 },
+      {
+        id: 'buyer',
+        name: 'Buyer',
+        reputation: 9000,
+        transferBudget: 2_500_000,
+      },
       { id: 'seller', name: 'Seller', reputation: 500, transferBudget: 0 },
     ];
     const players: MarketPlayer[] = [];

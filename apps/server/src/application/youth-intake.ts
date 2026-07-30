@@ -86,10 +86,7 @@ export async function runYouthIntake(
         countryId: club.countryId,
         namePool,
         position,
-        clubStrength: academyIntakeStrength(
-          club.strength,
-          club.academyQuality,
-        ),
+        clubStrength: academyIntakeStrength(club.strength, club.academyQuality),
         config: youthConfig,
         seasonStart: state.currentDate,
       });
@@ -123,10 +120,7 @@ export async function runYouthIntake(
   if (myClubGraduates.length > 0) {
     const myClub = state.clubs.find((c) => c.id === state.protagonistClubId);
     const names = myClubGraduates
-      .map(
-        (g) =>
-          `${g.name} (${POSITION_LABELS[g.position] ?? g.position})`,
-      )
+      .map((g) => `${g.name} (${POSITION_LABELS[g.position] ?? g.position})`)
       .join(', ');
     const rival = myClubGraduates.find((g) => g.rivalOfProtagonist);
     news.push({

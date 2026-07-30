@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { allaCountry, dellaCountry, laCountry } from './i18n';
 
 describe('Italian articles for country names', () => {
-  it("uses the elided form before a vowel", () => {
+  it('uses the elided form before a vowel', () => {
     expect(laCountry('Italia')).toBe("l'Italia");
     expect(allaCountry('Italia')).toBe("all'Italia");
     expect(dellaCountry('Inghilterra')).toBe("dell'Inghilterra");

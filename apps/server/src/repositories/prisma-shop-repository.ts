@@ -1,9 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
 import { FinancialTransactionType } from '@football-life/shared';
-import type {
-  ApplyPurchaseInput,
-  ShopRepository,
-} from './shop-repository';
+import type { ApplyPurchaseInput, ShopRepository } from './shop-repository';
 
 /** Wellbeing stats live on 0-100. */
 const clamp = (value: number): number => Math.max(0, Math.min(100, value));
@@ -53,7 +50,9 @@ export class PrismaShopRepository implements ShopRepository {
       await tx.player.update({
         where: { id: player.id },
         data: {
-          ...(e.morale !== undefined && { morale: clamp(player.morale + e.morale) }),
+          ...(e.morale !== undefined && {
+            morale: clamp(player.morale + e.morale),
+          }),
           ...(e.happiness !== undefined && {
             happiness: clamp(player.happiness + e.happiness),
           }),
@@ -63,7 +62,9 @@ export class PrismaShopRepository implements ShopRepository {
           ...(e.mentalHealth !== undefined && {
             mentalHealth: clamp(player.mentalHealth + e.mentalHealth),
           }),
-          ...(e.stress !== undefined && { stress: clamp(player.stress + e.stress) }),
+          ...(e.stress !== undefined && {
+            stress: clamp(player.stress + e.stress),
+          }),
           ...(e.popularity !== undefined && {
             popularity: clampFame(player.popularity + e.popularity),
           }),

@@ -93,7 +93,7 @@ describe('national team tournament', () => {
     const repo = new PrismaNationalTeamRepository(db.prisma);
 
     const summary = await getNationalTeamTournament(repo, saveGameId);
-    expect(summary?.name).toBe('Europei');
+    expect(summary?.name).toBe('Torneo delle Nazioni');
     expect(summary?.holderCountryName).toBeNull();
 
     const result = await simulateNationalTeamTournament(

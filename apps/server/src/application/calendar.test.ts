@@ -23,7 +23,13 @@ const worldConfig: WorldGenerationConfig = {
   clubsPerSecondDivision: 0,
   rosterSize: 14,
   age: { min: 16, max: 36, mean: 24, spread: 4 },
-  ability: { topDivisionMean: 60, divisionStep: 12, spread: 9, min: 20, max: 95 },
+  ability: {
+    topDivisionMean: 60,
+    divisionStep: 12,
+    spread: 9,
+    min: 20,
+    max: 95,
+  },
   reputation: { topDivision: 3000, secondDivision: 1200, youth: 400 },
   namePools: {
     IT: {
@@ -162,9 +168,7 @@ describe('monthly calendar', () => {
     }
     expect(matchDay!.entries.some((e) => e.kind === 'NEWS')).toBe(true);
     expect(
-      matchDay!.entries.some(
-        (e) => e.kind === 'INJURY' && e.phase === 'START',
-      ),
+      matchDay!.entries.some((e) => e.kind === 'INJURY' && e.phase === 'START'),
     ).toBe(true);
 
     // Future fixtures show as scheduled, without a score.

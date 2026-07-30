@@ -5,14 +5,10 @@ import type {
   NaturalizationRepository,
 } from './naturalization-repository';
 
-export class PrismaNaturalizationRepository
-  implements NaturalizationRepository
-{
+export class PrismaNaturalizationRepository implements NaturalizationRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async loadContext(
-    saveGameId: string,
-  ): Promise<NaturalizationContext | null> {
+  async loadContext(saveGameId: string): Promise<NaturalizationContext | null> {
     const save = await this.prisma.saveGame.findUnique({
       where: { id: saveGameId },
     });
@@ -39,9 +35,8 @@ export class PrismaNaturalizationRepository
         select: { fixture: { select: { seasonId: true } } },
         distinct: ['fixtureId'],
       });
-      seasonsInClubCountry = new Set(
-        played.map((row) => row.fixture.seasonId),
-      ).size;
+      seasonsInClubCountry = new Set(played.map((row) => row.fixture.seasonId))
+        .size;
     }
 
     return {

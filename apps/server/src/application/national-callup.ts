@@ -11,7 +11,7 @@ import type { NaturalizationRepository } from '../repositories/naturalization-re
 import type { NewsItemInput } from '../repositories/news-repository';
 
 const DAY_MS = 86_400_000;
-/** The CT announces the provisional list this many days before the Europei. */
+/** The CT announces the provisional list this many days before the international tournament. */
 const ANNOUNCE_DAYS_BEFORE = 21;
 
 export interface NationalCallupDeps {
@@ -27,7 +27,7 @@ export interface CallupAnnouncement {
 }
 
 /**
- * Three weeks before the Europei the CT names the provisional squad. If the
+ * Three weeks before the international tournament the CT names the provisional squad. If the
  * protagonist makes the cut (same call-up scoring the tournament itself uses)
  * a PENDING call-up lands on their dashboard: accept it for pride and
  * exposure, or decline it to rest — and be left out of the tournament.

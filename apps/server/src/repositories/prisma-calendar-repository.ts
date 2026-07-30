@@ -116,7 +116,9 @@ export class PrismaCalendarRepository implements CalendarRepository {
         healed: injury.status === 'HEALED',
       })),
       bounds:
-        first && last ? { first: first.scheduledAt, last: last.scheduledAt } : null,
+        first && last
+          ? { first: first.scheduledAt, last: last.scheduledAt }
+          : null,
     };
   }
 }

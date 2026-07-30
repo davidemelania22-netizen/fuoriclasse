@@ -70,12 +70,15 @@ describe('what the league does to a career', () => {
       { rating: 8, goals: 0, assists: 0 },
       1,
     );
-    const bad = reputationGainFromMatch({ rating: 4.8, goals: 0, assists: 0 }, 1);
+    const bad = reputationGainFromMatch(
+      { rating: 4.8, goals: 0, assists: 0 },
+      1,
+    );
     expect(bad).toBeLessThan(0);
     expect(Math.abs(bad)).toBeLessThan(good);
     // A 6.4 with nothing to show for it leaves the player where they were.
-    expect(reputationGainFromMatch({ rating: 6.4, goals: 0, assists: 0 }, 1)).toBe(
-      0,
-    );
+    expect(
+      reputationGainFromMatch({ rating: 6.4, goals: 0, assists: 0 }, 1),
+    ).toBe(0);
   });
 });

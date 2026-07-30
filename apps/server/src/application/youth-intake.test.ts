@@ -24,7 +24,13 @@ const worldConfig: WorldGenerationConfig = {
   clubsPerSecondDivision: 0,
   rosterSize: 12,
   age: { min: 16, max: 36, mean: 24, spread: 4 },
-  ability: { topDivisionMean: 60, divisionStep: 12, spread: 9, min: 20, max: 95 },
+  ability: {
+    topDivisionMean: 60,
+    divisionStep: 12,
+    spread: 9,
+    min: 20,
+    max: 95,
+  },
   reputation: { topDivision: 3000, secondDivision: 1200, youth: 400 },
   namePools: {
     IT: {
@@ -105,9 +111,11 @@ describe('youth intake day', () => {
       include: { person: true },
       orderBy: { id: 'asc' },
     });
-    const currentDate = (await db.prisma.saveGame.findUniqueOrThrow({
-      where: { id: game.save.id },
-    })).currentDate;
+    const currentDate = (
+      await db.prisma.saveGame.findUniqueOrThrow({
+        where: { id: game.save.id },
+      })
+    ).currentDate;
     const kids = newest.filter(
       (p) =>
         currentDate.getTime() - p.person.birthDate.getTime() <
@@ -119,9 +127,7 @@ describe('youth intake day', () => {
     expect(result.myClubGraduates.length).toBeGreaterThanOrEqual(1);
     expect(result.news.length).toBeGreaterThanOrEqual(2);
     expect(result.news[0]!.category).toBe('YOUTH');
-    expect(
-      result.news.some((n) => n.headline.includes(club.name)),
-    ).toBe(true);
+    expect(result.news.some((n) => n.headline.includes(club.name))).toBe(true);
     // The same-position flag matches the data.
     for (const kid of result.myClubGraduates) {
       expect(kid.rivalOfProtagonist).toBe(kid.position === 'FW');

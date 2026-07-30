@@ -22,8 +22,11 @@ const GOAL_MILESTONES = [5, 10, 25, 50, 100];
 const trophyLabel: Record<string, string> = {
   NATIONAL_CUP: 'Coppa Nazionale',
   CONTINENTAL_CUP: 'Coppa Continentale',
-  INTERNATIONAL: 'Europei',
+  INTERNATIONAL: 'Torneo delle Nazioni',
 };
+
+/** Trophy names are not all feminine: "la Coppa" but "il Torneo". */
+const trophyArticle: Record<string, string> = { INTERNATIONAL: 'il' };
 
 export async function buildCareerTimeline(
   repository: CareerTimelineRepository,
@@ -73,7 +76,10 @@ export async function buildCareerTimeline(
       });
     }
     for (const milestone of APPEARANCE_MILESTONES) {
-      if (appearanceNumber === milestone && !seenAppearanceMilestones.has(milestone)) {
+      if (
+        appearanceNumber === milestone &&
+        !seenAppearanceMilestones.has(milestone)
+      ) {
         seenAppearanceMilestones.add(milestone);
         events.push({
           date: appearance.date,
@@ -102,7 +108,7 @@ export async function buildCareerTimeline(
       (honour.type === 'GOLDEN_BOOT' || honour.type === 'BALLON_DOR')
     ) {
       const awardName =
-        honour.type === 'GOLDEN_BOOT' ? "Scarpa d'Oro" : "Pallone d'Oro";
+        honour.type === 'GOLDEN_BOOT' ? 'Scarpa Dorata' : "Sfera d'Oro";
       events.push({
         date: honour.createdAt,
         type: 'AWARD',
@@ -138,13 +144,15 @@ export async function buildCareerTimeline(
         type: 'TROPHY',
         title: label,
         description:
-          `Vince ${label === 'Europei' ? 'gli Europei' : `la ${label}`}` +
+          `Vince ${trophyArticle[honour.type] ?? 'la'} ${label}` +
           (honour.competitionName ? ` (${honour.competitionName})` : '') +
           ` — stagione ${honour.seasonLabel}.`,
       });
     }
   }
 
-  events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  events.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  );
   return events;
 }

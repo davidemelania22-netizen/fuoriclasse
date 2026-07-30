@@ -24,7 +24,13 @@ const worldConfig: WorldGenerationConfig = {
   clubsPerSecondDivision: 0,
   rosterSize: 12,
   age: { min: 16, max: 36, mean: 24, spread: 4 },
-  ability: { topDivisionMean: 60, divisionStep: 12, spread: 9, min: 20, max: 95 },
+  ability: {
+    topDivisionMean: 60,
+    divisionStep: 12,
+    spread: 9,
+    min: 20,
+    max: 95,
+  },
   reputation: { topDivision: 3000, secondDivision: 1200, youth: 400 },
   namePools: {
     IT: {
@@ -143,9 +149,7 @@ describe('reviewCompletedSeason', () => {
     // The giant that finished last is certainly sacked.
     const giant = clubs[0]!;
     const sackingNews = news.filter((n) => n.category === 'SACKING');
-    expect(sackingNews.some((n) => n.headline.includes(giant.name))).toBe(
-      true,
-    );
+    expect(sackingNews.some((n) => n.headline.includes(giant.name))).toBe(true);
 
     // The new manager name is persisted in the club philosophy.
     const updatedGiant = await db.prisma.club.findUniqueOrThrow({

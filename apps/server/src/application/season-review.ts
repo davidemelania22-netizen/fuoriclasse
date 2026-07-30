@@ -66,8 +66,7 @@ export async function reviewCompletedSeason(
           name: club.name,
           reputationRank: reputationRank.get(club.id) ?? index + 1,
           finalPosition: index + 1,
-          managerName:
-            club.managerName ?? defaultManagerName(club.id, pool),
+          managerName: club.managerName ?? defaultManagerName(club.id, pool),
         };
       })
       .filter((c): c is SackingClub => c !== null);

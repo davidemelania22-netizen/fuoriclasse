@@ -24,7 +24,13 @@ const testWorldConfig: WorldGenerationConfig = {
   clubsPerSecondDivision: 0,
   rosterSize: 14,
   age: { min: 16, max: 36, mean: 24, spread: 4 },
-  ability: { topDivisionMean: 60, divisionStep: 12, spread: 9, min: 20, max: 95 },
+  ability: {
+    topDivisionMean: 60,
+    divisionStep: 12,
+    spread: 9,
+    min: 20,
+    max: 95,
+  },
   reputation: { topDivision: 3000, secondDivision: 1200, youth: 400 },
   namePools: {
     IT: {
@@ -73,7 +79,10 @@ describe('HTTP API', () => {
   });
 
   it('lists the quick-start modes', async () => {
-    const response = await app.inject({ method: 'GET', url: '/api/quick-starts' });
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/quick-starts',
+    });
     expect(response.statusCode).toBe(200);
     const modes = response.json();
     expect(modes.map((m: { key: string }) => m.key)).toEqual([
@@ -113,7 +122,7 @@ describe('HTTP API', () => {
     const clubEdit = await app.inject({
       method: 'POST',
       url: `/api/saves/${saveId}/world/club/${club.clubId}`,
-      payload: { name: 'Inter', shortName: 'int', logo },
+      payload: { name: 'Milano Nerazzurra', shortName: 'int', logo },
     });
     expect(clubEdit.statusCode).toBe(200);
 
@@ -124,7 +133,7 @@ describe('HTTP API', () => {
     const compEdit = await app.inject({
       method: 'POST',
       url: `/api/saves/${saveId}/world/competition/${league.competitionId}`,
-      payload: { name: 'Serie A TIM', logo },
+      payload: { name: 'Prima Divisione', logo },
     });
     expect(compEdit.statusCode).toBe(200);
 
@@ -134,7 +143,7 @@ describe('HTTP API', () => {
     const editedClub = after.clubs.find(
       (c: { clubId: string }) => c.clubId === club.clubId,
     );
-    expect(editedClub.name).toBe('Inter');
+    expect(editedClub.name).toBe('Milano Nerazzurra');
     expect(editedClub.shortName).toBe('INT');
     expect(editedClub.logo).toBe(logo);
     expect(
@@ -142,7 +151,7 @@ describe('HTTP API', () => {
         (c: { competitionId: string }) =>
           c.competitionId === league.competitionId,
       ).name,
-    ).toBe('Serie A TIM');
+    ).toBe('Prima Divisione');
 
     // The new name flows into the club directory used by the rest of the app.
     const clubs = (
@@ -151,7 +160,7 @@ describe('HTTP API', () => {
     const inDirectory = clubs.find(
       (c: { clubId: string }) => c.clubId === club.clubId,
     );
-    expect(inDirectory.name).toBe('Inter');
+    expect(inDirectory.name).toBe('Milano Nerazzurra');
     expect(inDirectory.logo).toBe(logo);
 
     // Guard rails: empty edit and foreign ids are rejected.
@@ -564,8 +573,9 @@ describe('HTTP API', () => {
     });
     expect(set.statusCode).toBe(200);
     expect(
-      (await app.inject({ method: 'GET', url: `/api/saves/${id}/avatar` })).json()
-        .avatarDataUrl,
+      (
+        await app.inject({ method: 'GET', url: `/api/saves/${id}/avatar` })
+      ).json().avatarDataUrl,
     ).toBe(dataUrl);
 
     const cleared = await app.inject({

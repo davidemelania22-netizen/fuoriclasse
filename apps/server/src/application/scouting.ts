@@ -70,9 +70,7 @@ export async function runScoutingWeek(
   const watchedIds = new Set<string>();
 
   if (played) {
-    const opponent = played.isHome
-      ? played.awayClubName
-      : played.homeClubName;
+    const opponent = played.isHome ? played.awayClubName : played.homeClubName;
     const watchers = pickScoutingClubs(
       state.candidates,
       dossiers,

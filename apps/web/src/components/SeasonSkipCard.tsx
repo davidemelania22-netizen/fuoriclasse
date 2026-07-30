@@ -85,9 +85,8 @@ export function SeasonSkipCard({
 
       {band && (
         <p className="season-skip-verdict">
-          Il tuo rendimento:{' '}
-          <strong className={band.tone}>{band.word}</strong> in{' '}
-          {summary.appearances}{' '}
+          Il tuo rendimento: <strong className={band.tone}>{band.word}</strong>{' '}
+          in {summary.appearances}{' '}
           {summary.appearances === 1 ? 'partita' : 'partite'} su{' '}
           {summary.matchesPlayedByClub} della squadra.
         </p>

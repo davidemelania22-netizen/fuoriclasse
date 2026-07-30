@@ -171,7 +171,8 @@ export async function getCareerLegacy(
     (appearances > 0 ? averageRating * 20 : 0) +
     trophies * 40 +
     personalAwards * 60;
-  const grade = GRADES.find((g) => score >= g.min) ?? GRADES[GRADES.length - 1]!;
+  const grade =
+    GRADES.find((g) => score >= g.min) ?? GRADES[GRADES.length - 1]!;
 
   const bestSeason =
     seasons.length > 0

@@ -141,10 +141,7 @@ export class PrismaProfileRepository implements ProfileRepository {
     return this.patch(saveGameId, { loanOffer: offer });
   }
 
-  setCappedForCountry(
-    saveGameId: string,
-    countryId: string,
-  ): Promise<boolean> {
+  setCappedForCountry(saveGameId: string, countryId: string): Promise<boolean> {
     return this.patch(saveGameId, { cappedForCountryId: countryId });
   }
 

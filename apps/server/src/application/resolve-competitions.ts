@@ -100,9 +100,7 @@ export async function resolveDueCompetitions(
       });
     } else if (competition.type === CompetitionType.International) {
       // A declined call-up: the squad is assembled without the protagonist.
-      const profile = await deps.profileRepository.getProfile(
-        input.saveGameId,
-      );
+      const profile = await deps.profileRepository.getProfile(input.saveGameId);
       const declined =
         profile?.nationalCallup?.seasonLabel === seasonLabel &&
         profile.nationalCallup.status === 'DECLINED';

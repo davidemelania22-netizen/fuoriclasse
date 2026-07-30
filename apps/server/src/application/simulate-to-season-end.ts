@@ -54,8 +54,8 @@ export interface SimulateToSeasonEndDeps {
 }
 
 const AWARD_LABELS: Record<string, string> = {
-  BALLON_DOR: 'Giocatore della stagione',
-  GOLDEN_BOOT: "Scarpa d'oro",
+  BALLON_DOR: "Sfera d'Oro",
+  GOLDEN_BOOT: 'Scarpa Dorata',
 };
 
 const TITLE_TYPES = new Set([
@@ -201,9 +201,7 @@ export async function simulateToSeasonEnd(
     goals,
     assists,
     averageRating:
-      appearances > 0
-        ? Math.round((ratingSum / appearances) * 10) / 10
-        : null,
+      appearances > 0 ? Math.round((ratingSum / appearances) * 10) / 10 : null,
     yellowCards,
     redCards,
     won,

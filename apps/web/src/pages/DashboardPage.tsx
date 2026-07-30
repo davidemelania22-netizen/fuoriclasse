@@ -365,7 +365,9 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
               </label>
               <button
                 type="button"
-                disabled={advanceMutation.isPending || seasonSkipMutation.isPending}
+                disabled={
+                  advanceMutation.isPending || seasonSkipMutation.isPending
+                }
                 onClick={() =>
                   advanceMutation.mutate({
                     weeks: 1,
@@ -449,8 +451,8 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
               {newSeason.youthIntakeCount > 0 && (
                 <p className="season-aging">
                   🌱 Intake day: le accademie promuovono{' '}
-                  {newSeason.youthIntakeCount} nuovi talenti in prima squadra
-                  — dettagli nelle Notizie.
+                  {newSeason.youthIntakeCount} nuovi talenti in prima squadra —
+                  dettagli nelle Notizie.
                 </p>
               )}
             </section>
@@ -483,8 +485,8 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
             <section className="card legacy-banner">
               <h2>🏛 Carriera conclusa</h2>
               <p>
-                Hai appeso gli scarpini al chiodo. È il momento di scoprire
-                cosa lasci al calcio.
+                Hai appeso gli scarpini al chiodo. È il momento di scoprire cosa
+                lasci al calcio.
               </p>
               <button type="button" onClick={openCareer}>
                 Vedi la tua eredità
@@ -588,8 +590,8 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
                 </p>
                 {managerStatus.objective.currentPosition !== null && (
                   <p className="manager-objective-pos">
-                    Posizione attuale: {managerStatus.objective.currentPosition}ª
-                    · attesa: {managerStatus.objective.targetPosition}ª
+                    Posizione attuale: {managerStatus.objective.currentPosition}
+                    ª · attesa: {managerStatus.objective.targetPosition}ª
                   </p>
                 )}
               </div>
@@ -669,8 +671,7 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
                   >
                     <span className="loan-club">{option.clubName}</span>
                     <span className="loan-meta">
-                      {option.competitionName} · reputazione{' '}
-                      {option.reputation}
+                      {option.competitionName} · reputazione {option.reputation}
                     </span>
                   </button>
                 ))}
@@ -725,8 +726,8 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
               {nationalCallup.status === 'DECLINED' && (
                 <p className="callup-status">
                   Hai rinunciato alla convocazione per gli{' '}
-                  {nationalCallup.competitionName}: riposo per il club, ma il
-                  CT non dimentica.
+                  {nationalCallup.competitionName}: riposo per il club, ma il CT
+                  non dimentica.
                 </p>
               )}
             </section>
@@ -736,8 +737,8 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
             <section className="card scout-card">
               <h2>🔭 Osservatori</h2>
               <p className="scout-intro">
-                Club che ti stanno seguendo: continua a brillare quando sono
-                in tribuna.
+                Club che ti stanno seguendo: continua a brillare quando sono in
+                tribuna.
               </p>
               <ul className="scout-list">
                 {scoutWatchers.map((w) => (

@@ -127,10 +127,7 @@ export function InterviewPage({ saveId }: InterviewPageProps) {
             <strong>Intervista pubblicata.</strong>{' '}
             {Object.entries(result.deltas)
               .filter(([, v]) => v !== 0)
-              .map(
-                ([k, v]) =>
-                  `${statLabels[k] ?? k} ${v > 0 ? '+' : ''}${v}`,
-              )
+              .map(([k, v]) => `${statLabels[k] ?? k} ${v > 0 ? '+' : ''}${v}`)
               .join(' · ')}
           </div>
         )}

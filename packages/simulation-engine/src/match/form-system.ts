@@ -23,5 +23,9 @@ export function formAfterMatch(currentForm: number, rating: number): number {
 
 /** New form after a week without playing: a drift back toward the baseline. */
 export function formWhenIdle(currentForm: number): number {
-  return clamp(currentForm + (IDLE_BASELINE - currentForm) * IDLE_DECAY, 0, 100);
+  return clamp(
+    currentForm + (IDLE_BASELINE - currentForm) * IDLE_DECAY,
+    0,
+    100,
+  );
 }

@@ -32,7 +32,9 @@ export function MatchPreparePage({ saveId }: MatchPreparePageProps) {
       api.saveMatchPlan(saveId, approach as MatchApproach, choices),
     onSuccess: async () => {
       setSaved(true);
-      await queryClient.invalidateQueries({ queryKey: ['next-fixture', saveId] });
+      await queryClient.invalidateQueries({
+        queryKey: ['next-fixture', saveId],
+      });
     },
   });
 

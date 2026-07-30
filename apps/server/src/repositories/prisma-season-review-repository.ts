@@ -58,8 +58,7 @@ export class PrismaSeasonReviewRepository implements SeasonReviewRepository {
             id: club.id,
             name: club.name,
             reputation: club.reputation,
-            managerName:
-              typeof managerName === 'string' ? managerName : null,
+            managerName: typeof managerName === 'string' ? managerName : null,
           };
         }),
         standings: standingRows.map((s) => ({

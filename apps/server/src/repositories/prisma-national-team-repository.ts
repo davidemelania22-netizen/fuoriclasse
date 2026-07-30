@@ -115,7 +115,9 @@ export class PrismaNationalTeamRepository implements NationalTeamRepository {
       const chosenIds = new Set<string>();
       for (const [position, count] of quota) {
         const candidates = scored.filter(
-          (s) => !chosenIds.has(s.player.id) && s.player.primaryPosition === position,
+          (s) =>
+            !chosenIds.has(s.player.id) &&
+            s.player.primaryPosition === position,
         );
         for (let i = 0; i < count && i < candidates.length; i += 1) {
           chosenIds.add(candidates[i]!.player.id);
@@ -123,7 +125,11 @@ export class PrismaNationalTeamRepository implements NationalTeamRepository {
       }
       if (chosenIds.size < squadSize) {
         const leftover = scored.filter((s) => !chosenIds.has(s.player.id));
-        for (let i = 0; i < leftover.length && chosenIds.size < squadSize; i += 1) {
+        for (
+          let i = 0;
+          i < leftover.length && chosenIds.size < squadSize;
+          i += 1
+        ) {
           chosenIds.add(leftover[i]!.player.id);
         }
       }

@@ -84,12 +84,11 @@ import {
   type AgentActionResult,
 } from '../application/agent';
 import { chooseLifestyle, listLifestyles } from '../application/lifestyle';
+import { listCups, listHonours, simulateNationalCup } from '../application/cup';
 import {
-  listCups,
-  listHonours,
-  simulateNationalCup,
-} from '../application/cup';
-import { getContinental, simulateContinental } from '../application/continental';
+  getContinental,
+  simulateContinental,
+} from '../application/continental';
 import {
   getNationalTeamTournament,
   simulateNationalTeamTournament,
@@ -103,10 +102,7 @@ import {
   answerPostMatch,
   getPendingPostMatch,
 } from '../application/post-match';
-import {
-  getCareerLegacy,
-  getSeasonStats,
-} from '../application/career-legacy';
+import { getCareerLegacy, getSeasonStats } from '../application/career-legacy';
 import { getScoutWatchers } from '../application/scouting';
 import { getLeagueSpotlight } from '../application/league-context';
 import { getTactics, setInstructions } from '../application/tactics';
@@ -115,10 +111,7 @@ import { decideNationalCallup } from '../application/national-callup';
 import { decideNaturalization } from '../application/naturalization';
 import { PrismaNaturalizationRepository } from '../repositories/prisma-naturalization-repository';
 import { getNews, markNewsRead, recordNews } from '../application/news';
-import {
-  getInterviewSession,
-  submitInterview,
-} from '../application/interview';
+import { getInterviewSession, submitInterview } from '../application/interview';
 import { PrismaInterviewRepository } from '../repositories/prisma-interview-repository';
 import { resolvePendingEvent } from '../application/events';
 import { chooseInjuryTreatment } from '../application/injury-treatment';
@@ -264,7 +257,10 @@ export function registerApiRoutes(
     squadSize: 23,
   };
   const matchdayRepo = new PrismaMatchdayRepository(prisma);
-  const matchdayDeps = { repository: matchdayRepo, config: DEFAULT_MATCH_CONFIG };
+  const matchdayDeps = {
+    repository: matchdayRepo,
+    config: DEFAULT_MATCH_CONFIG,
+  };
   const managerStatusRepo = new PrismaManagerStatusRepository(prisma);
   const managerTrustDeps = { profile: profileRepo, status: managerStatusRepo };
   const nextFixtureRepo = new PrismaNextFixtureRepository(prisma);
@@ -503,7 +499,12 @@ export function registerApiRoutes(
       );
       await generateAndPersistWorld(
         { worldRepository: worldRepo },
-        { saveGameId: id, seed: game.save.seed, countries, config: worldConfig },
+        {
+          saveGameId: id,
+          seed: game.save.seed,
+          countries,
+          config: worldConfig,
+        },
       );
       clubs = await listClubs(careerRepo, id);
     }
@@ -974,7 +975,10 @@ export function registerApiRoutes(
     const body = parseBody(injuryTreatmentSchema, request.body, reply);
     if (!body) return reply;
     const result = await chooseInjuryTreatment(
-      { repository: progressionRepo, wellbeingConfig: DEFAULT_WELLBEING_CONFIG },
+      {
+        repository: progressionRepo,
+        wellbeingConfig: DEFAULT_WELLBEING_CONFIG,
+      },
       { saveGameId: id, choice: body.choice },
     );
     if (!result) return reply.code(400).send({ error: 'NoTreatableInjury' });
@@ -1007,9 +1011,7 @@ export function registerApiRoutes(
       },
       {
         saveGameId: id,
-        ...(body.intensity !== undefined
-          ? { intensity: body.intensity }
-          : {}),
+        ...(body.intensity !== undefined ? { intensity: body.intensity } : {}),
       },
     );
     if (summary === 'not-found') {

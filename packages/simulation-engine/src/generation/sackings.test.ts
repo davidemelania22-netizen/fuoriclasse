@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createRandomSource } from '../random/seeded-random';
-import {
-  defaultManagerName,
-  planSackings,
-  type SackingClub,
-} from './sackings';
+import { defaultManagerName, planSackings, type SackingClub } from './sackings';
 
 const NAMES = ['Mister Bianchi', 'Mister Verdi', 'Mister Neri', 'Mister Blu'];
 

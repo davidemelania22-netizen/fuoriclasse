@@ -39,7 +39,10 @@ function deriveObjective(
   if (frac <= 0.3)
     return { tier: 'EUROPE', text: 'Qualificarsi alla coppa europea' };
   if (frac <= 0.65)
-    return { tier: 'MIDTABLE', text: 'Un piazzamento tranquillo a metà classifica' };
+    return {
+      tier: 'MIDTABLE',
+      text: 'Un piazzamento tranquillo a metà classifica',
+    };
   return { tier: 'SURVIVAL', text: 'Conquistare una salvezza serena' };
 }
 

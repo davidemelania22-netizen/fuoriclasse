@@ -160,7 +160,9 @@ export function ShopPage({ saveId }: ShopPageProps) {
                     <EffectChips effects={item.effects} />
                   </div>
                   <div className="shop-buy">
-                    <span className="shop-price">{euro.format(item.price)}</span>
+                    <span className="shop-price">
+                      {euro.format(item.price)}
+                    </span>
                     <button
                       type="button"
                       disabled={!affordable || buyMutation.isPending}

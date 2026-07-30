@@ -65,7 +65,7 @@ describe('assignSeasonAwards', () => {
     await db.cleanup();
   });
 
-  it('returns null when the protagonist\'s league has no completed season yet', async () => {
+  it("returns null when the protagonist's league has no completed season yet", async () => {
     const saveRepo = new PrismaSaveGameRepository(db.prisma);
     const worldRepo = new PrismaWorldRepository(db.prisma);
     const awardsRepo = new PrismaAwardsRepository(db.prisma);
@@ -153,7 +153,7 @@ describe('assignSeasonAwards', () => {
     expect(first!.leagueStrength).toBeGreaterThan(0.78);
   });
 
-  it('a weak league still crowns its top scorer but no Ballon d\'Or', async () => {
+  it("a weak league still crowns its top scorer but no Ballon d'Or", async () => {
     const saveRepo = new PrismaSaveGameRepository(db.prisma);
     const worldRepo = new PrismaWorldRepository(db.prisma);
     const seasonRepo = new PrismaSeasonRepository(db.prisma);

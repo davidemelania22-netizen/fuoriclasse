@@ -7,9 +7,7 @@ import type {
 export class PrismaYouthIntakeRepository implements YouthIntakeRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async loadIntakeState(
-    saveGameId: string,
-  ): Promise<YouthIntakeState | null> {
+  async loadIntakeState(saveGameId: string): Promise<YouthIntakeState | null> {
     const save = await this.prisma.saveGame.findUnique({
       where: { id: saveGameId },
     });
