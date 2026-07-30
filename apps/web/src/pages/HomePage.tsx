@@ -72,8 +72,8 @@ export function HomePage() {
           </span>
           <div>
             <h1>
-              <span className="brand-top">Football</span>
-              <span className="brand-bottom">Life</span>
+              <span className="brand-top">Fuori</span>
+              <span className="brand-bottom">classe</span>
             </h1>
             <p>Vivi la tua carriera. Scegli il tuo destino.</p>
           </div>

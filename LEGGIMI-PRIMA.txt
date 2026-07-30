@@ -1,26 +1,43 @@
-FOOTBALL LIFE — come installare e giocare
-=========================================
+FUORICLASSE — come installare e giocare
+=======================================
 
 Gioco di esclusiva proprieta' di Davide Simonetti. Tutti i diritti riservati.
 
 
-COSA SERVE (una volta sola)
----------------------------
+IL MODO PIU' SEMPLICE
+---------------------
 
-Node.js versione 20 o superiore.
-Si scarica gratis da:  https://nodejs.org
-Scegli il pulsante grande a sinistra (la versione "LTS") e installa
-normalmente, avanti-avanti, senza cambiare niente.
+Scarica l'installer dalla pagina delle release e fai doppio clic:
+
+  Mac con chip Apple (M1/M2/M3/M4)  ->  il file .dmg che finisce per arm64
+  Mac Intel                         ->  l'altro file .dmg
+  Windows                           ->  il file .exe
+
+Su Mac: apri il .dmg e trascina Fuoriclasse nella cartella Applicazioni.
+La PRIMA volta, invece del doppio clic, fai tasto destro sull'app e scegli
+"Apri", poi "Apri" di nuovo nella finestra che avvisa. Serve una volta sola
+ed e' normale: il gioco non e' firmato con un certificato Apple a pagamento.
+
+Su Windows: Windows Defender puo' avvisare che l'autore e' sconosciuto.
+Clicca "Altre informazioni" e poi "Esegui comunque". Stesso motivo.
+
+Fatto questo, il gioco si apre come qualunque altro programma. I salvataggi
+restano sul tuo computer e li ritrovi al prossimo avvio.
 
 
-COME SI AVVIA
--------------
+L'ALTRO MODO: DALLA CARTELLA DEL PROGETTO
+-----------------------------------------
 
-Su Mac:      apri la cartella "scripts" e fai doppio clic su
-             start-game.command
+Serve solo se hai ricevuto i sorgenti invece dell'installer.
 
-Su Windows:  apri la cartella "scripts" e fai doppio clic su
-             start-game.bat
+Prima installa Node.js versione 20 o superiore, gratis da:
+https://nodejs.org — scegli il pulsante grande a sinistra (la versione
+"LTS") e installa normalmente, avanti-avanti, senza cambiare niente.
+
+Poi apri la cartella "scripts" e fai doppio clic su:
+
+  Mac:      start-game.command
+  Windows:  start-game.bat
 
 Si apre una finestra nera con del testo che scorre: e' normale, lasciala
 aperta. La PRIMA volta ci vogliono qualche minuto perche' il gioco si
@@ -30,28 +47,14 @@ Dalla seconda volta parte in pochi secondi.
 Quando e' pronto si apre il browser da solo sul gioco. Se non si aprisse,
 apri tu il browser e vai su:  http://localhost:5173
 
-
-PER SMETTERE DI GIOCARE
------------------------
-
-Chiudi la finestra nera. I salvataggi restano sul tuo computer e li
-ritrovi al prossimo avvio.
-
-
-SE MAC DICE "NON PUO' ESSERE APERTO"
-------------------------------------
-
-Succede con i file scaricati da internet. Si risolve una volta sola:
-
-  1. tasto destro (o Control + clic) su start-game.command
-  2. scegli "Apri"
-  3. nella finestra che avvisa, clicca ancora "Apri"
-
-Dalla volta dopo il doppio clic funziona normalmente.
+Per smettere di giocare, chiudi la finestra nera.
 
 
 SE QUALCOSA NON VA
 ------------------
 
-Nella finestra nera compare un messaggio che dice cosa manca.
-Il caso piu' comune e' Node.js non installato: torna al primo paragrafo.
+Con l'installer: se il gioco non si avvia, compare una finestra con il
+motivo e il percorso di un file di testo con i dettagli.
+
+Con la cartella del progetto: il messaggio compare nella finestra nera.
+Il caso piu' comune e' Node.js non installato.

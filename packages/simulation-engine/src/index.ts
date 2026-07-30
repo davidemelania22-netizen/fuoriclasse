@@ -1,5 +1,5 @@
 /**
- * Football Life simulation engine.
+ * Fuoriclasse simulation engine.
  *
  * This package is intentionally free of any framework, database or I/O
  * dependency. It must never import React, Fastify or Prisma, never read

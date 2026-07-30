@@ -106,11 +106,11 @@ fs.writeFileSync(
   path.join(APP, 'package.json'),
   `${JSON.stringify(
     {
-      name: 'football-life',
-      productName: 'Football Life',
+      name: 'fuoriclasse',
+      productName: 'Fuoriclasse',
       version,
       description:
-        'Football Life — gioco di esclusiva proprietà di Davide Simonetti.',
+        'Fuoriclasse — gioco di esclusiva proprietà di Davide Simonetti.',
       author: 'Davide Simonetti',
       main: 'main.mjs',
       type: 'module',

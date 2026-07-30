@@ -7,7 +7,7 @@ const app = buildApp({ logger: true, backupDb: true });
 
 try {
   const address = await app.listen({ port, host });
-  app.log.info(`Football Life server listening on ${address}`);
+  app.log.info(`Fuoriclasse server listening on ${address}`);
 } catch (error) {
   app.log.error(error);
   process.exit(1);

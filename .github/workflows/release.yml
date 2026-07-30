@@ -5,9 +5,9 @@
 # ships a native Prisma engine, and the engine for Windows only exists on a
 # Windows runner. Hence three jobs for three artefacts:
 #
-#   macOS (Apple Silicon)  → Football Life-<ver>-arm64.dmg
-#   macOS (Intel)          → Football Life-<ver>.dmg
-#   Windows                → Football Life Setup <ver>.exe
+#   macOS (Apple Silicon)  → Fuoriclasse-<ver>-arm64.dmg
+#   macOS (Intel)          → Fuoriclasse-<ver>.dmg
+#   Windows                → Fuoriclasse Setup <ver>.exe
 #
 # To publish a version: bump `version` in package.json, then
 #   git tag v0.1.0 && git push origin v0.1.0
@@ -75,7 +75,7 @@ jobs:
           ls -lh installers
           gh release create "$TAG" installers/* \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Football Life $TAG" \
+            --title "Fuoriclasse $TAG" \
             --notes "Scarica il file adatto al tuo computer:
 
           - **Mac con chip Apple (M1/M2/M3/M4)** → il file \`.dmg\` che finisce per \`arm64\`

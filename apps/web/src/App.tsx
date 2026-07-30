@@ -65,7 +65,7 @@ export function App() {
 
       {/* Ownership notice, on every screen of the game. */}
       <footer className="app-footer">
-        Football Life — gioco di esclusiva proprietà di{' '}
+        Fuoriclasse — gioco di esclusiva proprietà di{' '}
         <strong>Davide Simonetti</strong>. Tutti i diritti riservati.
       </footer>
     </div>

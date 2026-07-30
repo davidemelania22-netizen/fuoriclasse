@@ -28,7 +28,27 @@ const REPO_ROOT = packaged ? null : path.resolve(HERE, '..', '..');
 /** Where the player's careers live. Never inside the app bundle: that is read-only. */
 function resolveDatabaseFile() {
   if (!packaged) return path.join(REPO_ROOT, 'prisma', 'dev.db');
-  return path.join(app.getPath('userData'), 'football-life.db');
+  return path.join(app.getPath('userData'), 'carriere.db');
+}
+
+/**
+ * The game was called Football Life until July 2026. Electron derives the
+ * user-data folder from the app name, so a renamed build would look in a
+ * brand-new empty folder and silently present itself as a fresh install —
+ * with every career still sitting in the old one. Carry them over once.
+ */
+function migrateFromPreviousName(dbFile) {
+  if (fs.existsSync(dbFile)) return;
+  const legacy = path.join(
+    path.dirname(app.getPath('userData')),
+    'Football Life',
+    'football-life.db',
+  );
+  if (!fs.existsSync(legacy)) return;
+  fs.mkdirSync(path.dirname(dbFile), { recursive: true });
+  fs.copyFileSync(legacy, dbFile);
+  // The old file stays where it is: if this migration ever goes wrong, the
+  // player's careers are still one folder away rather than gone.
 }
 
 /**
@@ -82,6 +102,7 @@ async function loadBuildApp() {
 
 async function startServer() {
   const dbFile = resolveDatabaseFile();
+  if (packaged) migrateFromPreviousName(dbFile);
   ensureDatabase(dbFile);
   process.env.DATABASE_URL ??= `file:${dbFile}`;
 
@@ -113,7 +134,7 @@ async function createWindow() {
     height: 860,
     minWidth: 1024,
     minHeight: 700,
-    title: 'Football Life',
+    title: 'Fuoriclasse',
     backgroundColor: '#0a0d13',
     webPreferences: {
       contextIsolation: true,
@@ -142,7 +163,7 @@ function reportFatal(error) {
     // Nothing else we can do; the dialog below still carries the message.
   }
   dialog.showErrorBox(
-    'Football Life non è riuscito ad avviarsi',
+    'Fuoriclasse non è riuscito ad avviarsi',
     `${detail}\n\nDettagli salvati in:\n${logFile}`,
   );
   app.quit();

@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Football Life — one-click launcher.
+# Fuoriclasse — one-click launcher.
 # First run: installs dependencies, sets up the database, then starts the game.
 # Later runs: just starts the game. Opens the browser automatically.
 
@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_DIR"
 
-echo "⚽  Football Life — $PROJECT_DIR"
+echo "⚽  Fuoriclasse — $PROJECT_DIR"
 
 # --- make sure Node is available (nvm or any installed version) ---
 export NVM_DIR="$HOME/.nvm"

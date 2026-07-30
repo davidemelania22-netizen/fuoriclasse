@@ -1,4 +1,4 @@
-# Football Life: Player Career Simulator
+# Fuoriclasse: simulatore di carriera calcistica
 
 Simulatore gestionale e narrativo della carriera di un calciatore (14 → 42
 anni). Le partite non sono giocate direttamente: vengono simulate da un motore
@@ -58,8 +58,8 @@ L'app **non è firmata** (serve un certificato Apple a pagamento): la prima
 volta, su Mac, occorre **tasto destro sull'app → Apri → Apri**. Su Windows
 SmartScreen mostra "Altre informazioni" → "Esegui comunque".
 
-I salvataggi vivono in `~/Library/Application Support/Football Life/` su macOS
-e in `%APPDATA%\Football Life\` su Windows, con backup automatici a ogni avvio.
+I salvataggi vivono in `~/Library/Application Support/Fuoriclasse/` su macOS
+e in `%APPDATA%\Fuoriclasse\` su Windows, con backup automatici a ogni avvio.
 
 ## Giocare dalla cartella del progetto (senza installer)
 

@@ -2,7 +2,7 @@
   "name": "football-life",
   "version": "0.1.0",
   "private": true,
-  "description": "Football Life: Player Career Simulator — monorepo",
+  "description": "Fuoriclasse: simulatore di carriera calcistica — monorepo",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -40,8 +40,8 @@
     "seed": "tsx prisma/seed.ts"
   },
   "build": {
-    "appId": "com.davidesimonetti.footballlife",
-    "productName": "Football Life",
+    "appId": "com.davidesimonetti.fuoriclasse",
+    "productName": "Fuoriclasse",
     "copyright": "© Davide Simonetti — tutti i diritti riservati",
     "directories": {
       "app": "apps/desktop/build/app",
@@ -58,7 +58,7 @@
       "identity": null
     },
     "dmg": {
-      "title": "Football Life"
+      "title": "Fuoriclasse"
     },
     "win": {
       "icon": "apps/desktop/icon.png",
@@ -69,7 +69,7 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "Football Life"
+      "shortcutName": "Fuoriclasse"
     }
   },
   "devDependencies": {

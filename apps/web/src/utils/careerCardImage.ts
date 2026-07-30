@@ -146,7 +146,7 @@ export async function renderCareerCard(data: CareerCardData): Promise<string> {
   ctx.textAlign = 'left';
   ctx.fillStyle = GOLD;
   ctx.font = FONT(26, 800);
-  ctx.fillText('FOOTBALL LIFE', PAD, 96);
+  ctx.fillText('FUORICLASSE', PAD, 96);
   ctx.textAlign = 'right';
   ctx.fillStyle = MUTED;
   ctx.font = FONT(24, 600);

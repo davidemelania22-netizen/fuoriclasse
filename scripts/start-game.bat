@@ -1,5 +1,5 @@
 @echo off
-REM Football Life - avvio con un clic (Windows).
+REM Fuoriclasse - avvio con un clic (Windows).
 REM Primo avvio: installa le dipendenze e prepara il database, poi parte.
 REM Avvii successivi: parte subito. Apre il browser da solo.
 
@@ -7,7 +7,7 @@ setlocal
 cd /d "%~dp0.."
 
 echo.
-echo   Football Life - %CD%
+echo   Fuoriclasse - %CD%
 echo.
 
 REM --- Node deve essere installato ---

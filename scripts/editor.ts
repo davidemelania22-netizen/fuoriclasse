@@ -1,5 +1,5 @@
 /**
- * Editor esterno live per Football Life.
+ * Editor esterno live per Fuoriclasse.
  *
  * Avvia prima il gioco (`npm run dev` o `npm run dev:server`), poi in un altro
  * terminale esegui `npm run editor`. Comunica con l'API HTTP in esecuzione,
@@ -170,7 +170,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  console.log('Football Life — editor esterno live\n');
+  console.log('Fuoriclasse — editor esterno live\n');
   saves.forEach((save, index) => {
     console.log(
       `  [${index}] ${save.name}  (${save.currentDate.slice(0, 10)})`,
