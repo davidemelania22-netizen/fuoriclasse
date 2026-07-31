@@ -7,13 +7,13 @@ interface ClubPresentationProps {
   onDone: () => void;
 }
 
+/** Mirrors SquadRole in @football-life/shared, in words a player reads. */
 const SQUAD_ROLE_WORDS: Record<string, string> = {
-  STAR: 'stella della squadra',
   KEY: 'giocatore chiave',
-  REGULAR: 'titolare',
-  ROTATION: 'rotazione',
-  PROSPECT: 'giovane di prospettiva',
+  FIRST_TEAM: 'titolare',
+  ROTATION: 'uomo di rotazione',
   BACKUP: 'riserva',
+  PROSPECT: 'giovane di prospettiva',
 };
 
 /** Photographers do not flash in unison; fixed offsets look staged. */
@@ -57,9 +57,11 @@ export function ClubPresentation({
     return () => window.removeEventListener('keydown', onKey);
   });
 
+  // Never show the raw enum: an unknown role reads better as plain words
+  // than as FIRST_TEAM, which is what the first version put on screen.
   const role =
     SQUAD_ROLE_WORDS[presentation.squadRole] ??
-    presentation.squadRole.toLowerCase();
+    presentation.squadRole.toLowerCase().replace(/_/g, ' ');
 
   return (
     <div

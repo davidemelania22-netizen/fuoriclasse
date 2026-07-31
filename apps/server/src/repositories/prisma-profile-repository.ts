@@ -56,6 +56,8 @@ export class PrismaProfileRepository implements ProfileRepository {
         (profile.naturalization as StoredNaturalization | undefined) ?? null,
       lastPresentedClubId:
         (profile.lastPresentedClubId as string | undefined) ?? null,
+      celebratedHonourIds:
+        (profile.celebratedHonourIds as string[] | undefined) ?? [],
     };
   }
 
@@ -145,6 +147,13 @@ export class PrismaProfileRepository implements ProfileRepository {
 
   setLastPresentedClub(saveGameId: string, clubId: string): Promise<boolean> {
     return this.patch(saveGameId, { lastPresentedClubId: clubId });
+  }
+
+  setCelebratedHonours(
+    saveGameId: string,
+    honourIds: string[],
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { celebratedHonourIds: honourIds });
   }
 
   setCappedForCountry(saveGameId: string, countryId: string): Promise<boolean> {

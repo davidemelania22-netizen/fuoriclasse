@@ -82,6 +82,7 @@ export class PrismaCareerTimelineRepository implements CareerTimelineRepository 
         };
       }),
       honours: honours.map((h) => ({
+        id: h.id,
         type: h.type,
         clubId: h.clubId,
         clubName: h.clubName,

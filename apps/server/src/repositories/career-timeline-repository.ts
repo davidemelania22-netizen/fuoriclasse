@@ -15,6 +15,7 @@ export interface CareerAppearanceRecord {
 }
 
 export interface CareerHonourRecord {
+  id: string;
   type: string;
   clubId: string | null;
   clubName: string | null;

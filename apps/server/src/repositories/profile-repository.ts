@@ -51,6 +51,13 @@ export interface PlayerProfile {
    * and tomorrow's, triggers the scene without touching the signing code.
    */
   lastPresentedClubId: string | null;
+  /**
+   * Honours whose ceremony has already played. Kept as a list of ids rather
+   * than a high-water mark because trophies arrive in bunches at the end of
+   * a season and the player watches them one at a time; a career tops out at
+   * a few dozen, so the list stays small.
+   */
+  celebratedHonourIds: string[];
 }
 
 /** A federation's approach: change the shirt you play for, or stay loyal. */
@@ -130,6 +137,11 @@ export interface ProfileRepository {
   ): Promise<boolean>;
   /** Remember that the presentation for this club has been watched. */
   setLastPresentedClub(saveGameId: string, clubId: string): Promise<boolean>;
+  /** Persist the honours whose ceremony has already played. */
+  setCelebratedHonours(
+    saveGameId: string,
+    honourIds: string[],
+  ): Promise<boolean>;
   /** Persist the season's national call-up state. */
   setNationalCallup(
     saveGameId: string,

@@ -18,6 +18,7 @@ import { AttributesPanel } from '../components/AttributesPanel';
 import { SeasonSkipCard } from '../components/SeasonSkipCard';
 import { LeagueSpotlightCard } from '../components/LeagueSpotlightCard';
 import { ClubPresentation } from '../components/ClubPresentation';
+import { AwardCeremony } from '../components/AwardCeremony';
 import { intensityLabels, label, laCountry } from '../i18n';
 import { fileToAvatarDataUrl } from '../utils/image';
 
@@ -113,8 +114,19 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
   });
   const dismissPresentation = useMutation({
     mutationFn: () => api.markPresentationSeen(saveId),
+    onSuccess: () => queryClient.setQueryData(['presentation', saveId], null),
+  });
+
+  // Trophies wait their turn behind the unveiling: one scene at a time, and
+  // a bunch won at the end of a season is watched one trophy per dismissal.
+  const ceremonyQuery = useQuery({
+    queryKey: ['ceremony', saveId],
+    queryFn: () => api.getCeremony(saveId),
+  });
+  const dismissCeremony = useMutation({
+    mutationFn: (honourId: string) => api.markCeremonySeen(saveId, honourId),
     onSuccess: () =>
-      queryClient.setQueryData(['presentation', saveId], null),
+      queryClient.invalidateQueries({ queryKey: ['ceremony', saveId] }),
   });
 
   // Non-neutral tactical instructions become identity chips on the card.
@@ -296,11 +308,18 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
 
   return (
     <div className="page">
-      {presentationQuery.data && (
+      {presentationQuery.data ? (
         <ClubPresentation
           presentation={presentationQuery.data}
           onDone={() => dismissPresentation.mutate()}
         />
+      ) : (
+        ceremonyQuery.data && (
+          <AwardCeremony
+            ceremony={ceremonyQuery.data}
+            onDone={() => dismissCeremony.mutate(ceremonyQuery.data!.honourId)}
+          />
+        )
       )}
       <div className="topbar">
         <button type="button" onClick={clearSave}>

@@ -113,6 +113,10 @@ import {
   getClubPresentation,
   markPresentationSeen,
 } from '../application/club-presentation';
+import {
+  getAwardCeremony,
+  markCeremonySeen,
+} from '../application/award-ceremony';
 import { PrismaNaturalizationRepository } from '../repositories/prisma-naturalization-repository';
 import { getNews, markNewsRead, recordNews } from '../application/news';
 import { getInterviewSession, submitInterview } from '../application/interview';
@@ -156,6 +160,8 @@ const postMatchSchema = z.object({ answerKey: z.string().min(1) });
 const callupSchema = z.object({ accept: z.boolean() });
 
 const signSchema = z.object({ clubId: z.string().min(1) });
+
+const ceremonySeenSchema = z.object({ honourId: z.string().min(1) });
 const respondOfferSchema = z.object({ accept: z.boolean() });
 
 const buySchema = z.object({ itemKey: z.string().min(1) });
@@ -348,6 +354,11 @@ export function registerApiRoutes(
   const careerDeps = { repository: careerRepo, config: DEFAULT_CAREER_CONFIG };
   const presentationDeps = {
     career: careerRepo,
+    profile: profileRepo,
+    editor: editorRepo,
+  };
+  const ceremonyDeps = {
+    timeline: careerTimelineRepo,
     profile: profileRepo,
     editor: editorRepo,
   };
@@ -920,6 +931,22 @@ export function registerApiRoutes(
     const { id } = request.params as { id: string };
     const marked = await markPresentationSeen(presentationDeps, id);
     if (!marked) return reply.code(404).send({ error: 'NoClub' });
+    return reply.send({ ok: true });
+  });
+
+  // The trophy ceremony, derived from the honours the protagonist can claim.
+  app.get('/api/saves/:id/ceremony', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const ceremony = await getAwardCeremony(ceremonyDeps, id);
+    return reply.send({ ceremony });
+  });
+
+  app.post('/api/saves/:id/ceremony/seen', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const body = parseBody(ceremonySeenSchema, request.body, reply);
+    if (!body) return reply;
+    const marked = await markCeremonySeen(ceremonyDeps, id, body.honourId);
+    if (!marked) return reply.code(404).send({ error: 'NotFound' });
     return reply.send({ ok: true });
   });
 

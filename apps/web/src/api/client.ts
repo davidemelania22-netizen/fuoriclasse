@@ -16,6 +16,21 @@ import type {
 
 const BASE = '/api';
 
+/** A trophy being lifted — mirrors the server's AwardCeremony. */
+export interface AwardCeremony {
+  honourId: string;
+  type: string;
+  label: string;
+  isPersonal: boolean;
+  competitionName: string | null;
+  seasonLabel: string;
+  clubName: string | null;
+  colors: { primary: string; secondary: string; onDark: string };
+  playerName: string;
+  avatarDataUrl: string | null;
+  careerTotal: number;
+}
+
 /** The unveiling at a new club — mirrors the server's ClubPresentation. */
 export interface ClubPresentation {
   clubId: string;
@@ -702,6 +717,15 @@ export const api = {
     http<NaturalizationOffer>(`/saves/${id}/naturalization`, {
       method: 'POST',
       body: JSON.stringify({ accept }),
+    }),
+  getCeremony: (id: string) =>
+    http<{ ceremony: AwardCeremony | null }>(`/saves/${id}/ceremony`).then(
+      (r) => r.ceremony,
+    ),
+  markCeremonySeen: (id: string, honourId: string) =>
+    http<{ ok: true }>(`/saves/${id}/ceremony/seen`, {
+      method: 'POST',
+      body: JSON.stringify({ honourId }),
     }),
   getPresentation: (id: string) =>
     http<{ presentation: ClubPresentation | null }>(
