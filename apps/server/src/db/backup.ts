@@ -62,8 +62,12 @@ export async function backupDatabaseOnce(keep = 8): Promise<string | null> {
     .filter((f) => f.startsWith('dev-') && f.endsWith('.db'))
     .sort();
   for (const old of files.slice(0, Math.max(0, files.length - keep))) {
-    await fs.promises.rm(path.join(dir, old), { force: true });
-    await fs.promises.rm(path.join(dir, `${old}-wal`), { force: true });
+    // `-shm` as well as `-wal`: rotating only two of SQLite's three files left
+    // orphaned shared-memory files behind on every boot, for backups whose
+    // database had long since been deleted.
+    for (const suffix of ['', '-wal', '-shm']) {
+      await fs.promises.rm(path.join(dir, `${old}${suffix}`), { force: true });
+    }
   }
   return dest;
 }
