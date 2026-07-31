@@ -1,0 +1,98 @@
+import { clubColors } from '@football-life/game-data';
+import type { CareerRepository } from '../repositories/career-repository';
+import type { EditorRepository } from '../repositories/editor-repository';
+import type { ProfileRepository } from '../repositories/profile-repository';
+
+/**
+ * The moment a player is unveiled at a new club.
+ *
+ * Nothing signals this: it is *derived*. If the club under contract is not
+ * the club whose presentation was last watched, one is owed. That way every
+ * route into a squad — signing as a free agent, accepting a transfer offer,
+ * a quick-start auto-signature, a loan, anything added later — produces the
+ * scene without a single line in the signing code, and a save created before
+ * this feature gets its presentation the next time it is opened.
+ */
+export interface ClubPresentation {
+  clubId: string;
+  clubName: string;
+  /** Crest as a data URL when the club has one, else null. */
+  clubLogo: string | null;
+  competitionName: string | null;
+  colors: {
+    primary: string;
+    secondary: string;
+    onPrimary: string;
+    onDark: string;
+  };
+  playerName: string;
+  /** The protagonist's own photo, when they uploaded one. */
+  avatarDataUrl: string | null;
+  weeklyWage: number;
+  squadRole: string;
+  /** Contract length in whole years, rounded to the nearest one. */
+  contractYears: number;
+  /** In-world year of the unveiling. */
+  year: number;
+}
+
+export interface ClubPresentationDeps {
+  career: CareerRepository;
+  profile: ProfileRepository;
+  editor: EditorRepository;
+}
+
+const YEAR_MS = 365.25 * 24 * 60 * 60 * 1000;
+
+export async function getClubPresentation(
+  deps: ClubPresentationDeps,
+  saveGameId: string,
+): Promise<ClubPresentation | null> {
+  const career = await deps.career.loadProtagonist(saveGameId);
+  if (!career?.clubId || !career.currentContract) return null;
+
+  const profile = await deps.profile.getProfile(saveGameId);
+  if (profile?.lastPresentedClubId === career.clubId) return null;
+
+  const club = (await deps.career.listClubDirectory(saveGameId)).find(
+    (candidate) => candidate.clubId === career.clubId,
+  );
+  if (!club) return null;
+
+  const player = await deps.editor.loadEditablePlayer(saveGameId);
+
+  const years = Math.max(
+    1,
+    Math.round(
+      (career.currentContract.endDate.getTime() -
+        career.currentDate.getTime()) /
+        YEAR_MS,
+    ),
+  );
+
+  return {
+    clubId: club.clubId,
+    clubName: club.name,
+    clubLogo: club.logo ?? null,
+    competitionName: club.competitionName ?? null,
+    colors: clubColors(club.name),
+    playerName: player
+      ? `${player.firstName} ${player.lastName}`
+      : 'Il protagonista',
+    avatarDataUrl: profile?.avatarDataUrl ?? null,
+    weeklyWage: career.currentContract.weeklyWage,
+    squadRole: career.currentContract.squadRole,
+    contractYears: years,
+    year: career.currentDate.getUTCFullYear(),
+  };
+}
+
+/** Called once the scene has played (or been skipped): do not show it again. */
+export async function markPresentationSeen(
+  deps: Pick<ClubPresentationDeps, 'career' | 'profile'>,
+  saveGameId: string,
+): Promise<boolean> {
+  const career = await deps.career.loadProtagonist(saveGameId);
+  if (!career?.clubId) return false;
+  return deps.profile.setLastPresentedClub(saveGameId, career.clubId);
+}

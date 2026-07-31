@@ -54,6 +54,8 @@ export class PrismaProfileRepository implements ProfileRepository {
         (profile.cappedForCountryId as string | undefined) ?? null,
       naturalization:
         (profile.naturalization as StoredNaturalization | undefined) ?? null,
+      lastPresentedClubId:
+        (profile.lastPresentedClubId as string | undefined) ?? null,
     };
   }
 
@@ -139,6 +141,10 @@ export class PrismaProfileRepository implements ProfileRepository {
     offer: StoredLoanOffer | null,
   ): Promise<boolean> {
     return this.patch(saveGameId, { loanOffer: offer });
+  }
+
+  setLastPresentedClub(saveGameId: string, clubId: string): Promise<boolean> {
+    return this.patch(saveGameId, { lastPresentedClubId: clubId });
   }
 
   setCappedForCountry(saveGameId: string, countryId: string): Promise<boolean> {

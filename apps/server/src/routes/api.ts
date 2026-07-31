@@ -109,6 +109,10 @@ import { getTactics, setInstructions } from '../application/tactics';
 import { getCalendarMonth } from '../application/calendar';
 import { decideNationalCallup } from '../application/national-callup';
 import { decideNaturalization } from '../application/naturalization';
+import {
+  getClubPresentation,
+  markPresentationSeen,
+} from '../application/club-presentation';
 import { PrismaNaturalizationRepository } from '../repositories/prisma-naturalization-repository';
 import { getNews, markNewsRead, recordNews } from '../application/news';
 import { getInterviewSession, submitInterview } from '../application/interview';
@@ -342,6 +346,11 @@ export function registerApiRoutes(
     return reply.send(result);
   }
   const careerDeps = { repository: careerRepo, config: DEFAULT_CAREER_CONFIG };
+  const presentationDeps = {
+    career: careerRepo,
+    profile: profileRepo,
+    editor: editorRepo,
+  };
   const eventDeps = { repository: eventRepo, definitions: EVENT_DEFINITIONS };
   const seasonSummaryRepo = new PrismaSeasonSummaryRepository(prisma);
   const loanDeps = {
@@ -897,6 +906,21 @@ export function registerApiRoutes(
       return reply.code(409).send({ error: 'NoPendingCallup' });
     }
     return reply.send(result.callup);
+  });
+
+  // The unveiling at a new club. Derived, not signalled: see
+  // `application/club-presentation.ts` for why nothing calls this on signing.
+  app.get('/api/saves/:id/presentation', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const presentation = await getClubPresentation(presentationDeps, id);
+    return reply.send({ presentation });
+  });
+
+  app.post('/api/saves/:id/presentation/seen', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const marked = await markPresentationSeen(presentationDeps, id);
+    if (!marked) return reply.code(404).send({ error: 'NoClub' });
+    return reply.send({ ok: true });
   });
 
   app.post('/api/saves/:id/naturalization', async (request, reply) => {

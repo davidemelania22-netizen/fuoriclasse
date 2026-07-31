@@ -16,6 +16,26 @@ import type {
 
 const BASE = '/api';
 
+/** The unveiling at a new club — mirrors the server's ClubPresentation. */
+export interface ClubPresentation {
+  clubId: string;
+  clubName: string;
+  clubLogo: string | null;
+  competitionName: string | null;
+  colors: {
+    primary: string;
+    secondary: string;
+    onPrimary: string;
+    onDark: string;
+  };
+  playerName: string;
+  avatarDataUrl: string | null;
+  weeklyWage: number;
+  squadRole: string;
+  contractYears: number;
+  year: number;
+}
+
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
@@ -683,6 +703,12 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ accept }),
     }),
+  getPresentation: (id: string) =>
+    http<{ presentation: ClubPresentation | null }>(
+      `/saves/${id}/presentation`,
+    ).then((r) => r.presentation),
+  markPresentationSeen: (id: string) =>
+    http<{ ok: true }>(`/saves/${id}/presentation/seen`, { method: 'POST' }),
   listQuickStarts: () => http<QuickStartDefinition[]>(`/quick-starts`),
   getCalendar: (id: string, month?: string) =>
     http<CalendarMonthView>(

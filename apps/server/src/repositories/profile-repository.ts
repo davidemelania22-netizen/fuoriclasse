@@ -44,6 +44,13 @@ export interface PlayerProfile {
   cappedForCountryId: string | null;
   /** Naturalisation on the table, or the answer already given. */
   naturalization: StoredNaturalization | null;
+  /**
+   * Club whose presentation the player has already watched. Comparing it
+   * with the club they are actually under contract with is what decides
+   * whether a presentation is owed — so every way of joining a club, today's
+   * and tomorrow's, triggers the scene without touching the signing code.
+   */
+  lastPresentedClubId: string | null;
 }
 
 /** A federation's approach: change the shirt you play for, or stay loyal. */
@@ -121,6 +128,8 @@ export interface ProfileRepository {
     saveGameId: string,
     instructions: { style: string; temperament: string },
   ): Promise<boolean>;
+  /** Remember that the presentation for this club has been watched. */
+  setLastPresentedClub(saveGameId: string, clubId: string): Promise<boolean>;
   /** Persist the season's national call-up state. */
   setNationalCallup(
     saveGameId: string,

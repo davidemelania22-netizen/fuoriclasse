@@ -17,6 +17,7 @@ import { MatchdayCard } from '../components/MatchdayCard';
 import { AttributesPanel } from '../components/AttributesPanel';
 import { SeasonSkipCard } from '../components/SeasonSkipCard';
 import { LeagueSpotlightCard } from '../components/LeagueSpotlightCard';
+import { ClubPresentation } from '../components/ClubPresentation';
 import { intensityLabels, label, laCountry } from '../i18n';
 import { fileToAvatarDataUrl } from '../utils/image';
 
@@ -100,6 +101,20 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
   const newsQuery = useQuery({
     queryKey: ['news', saveId],
     queryFn: () => api.getNews(saveId),
+  });
+
+  // The unveiling at a new club. The server decides whether one is owed by
+  // comparing the club under contract with the last one presented, so this
+  // fires after a signing, a transfer or a loan without knowing about any of
+  // them. Dismissing it tells the server, so it never plays twice.
+  const presentationQuery = useQuery({
+    queryKey: ['presentation', saveId],
+    queryFn: () => api.getPresentation(saveId),
+  });
+  const dismissPresentation = useMutation({
+    mutationFn: () => api.markPresentationSeen(saveId),
+    onSuccess: () =>
+      queryClient.setQueryData(['presentation', saveId], null),
   });
 
   // Non-neutral tactical instructions become identity chips on the card.
@@ -281,6 +296,12 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
 
   return (
     <div className="page">
+      {presentationQuery.data && (
+        <ClubPresentation
+          presentation={presentationQuery.data}
+          onDone={() => dismissPresentation.mutate()}
+        />
+      )}
       <div className="topbar">
         <button type="button" onClick={clearSave}>
           ← Salvataggi
