@@ -1,5 +1,60 @@
-Fuoriclasse — simulatore di carriera calcistica
-Copyright © 2026 Davide Simonetti. Tutti i diritti riservati.
+Fuoriclasse — football career simulator
+Copyright © 2026 Davide Simonetti. All rights reserved.
+
+This notice is provided in English first, for international readers, and in
+Italian below. In case of discrepancy the Italian text prevails, being the
+language of the author and of the applicable jurisdiction.
+
+================================================================================
+ENGLISH
+================================================================================
+
+LICENCE TERMS
+
+This software and all accompanying material — source code, text, images, game
+data and documentation — are the exclusive property of Davide Simonetti.
+
+Anyone who receives a copy of the game is granted permission to install and
+play it free of charge, for personal use.
+
+The following are NOT permitted without the prior written consent of the
+author:
+
+  1. selling, renting, sublicensing or distributing the software, in whole or
+     in part, whether for a fee or free of charge;
+  2. modifying, adapting or creating derivative works;
+  3. removing or altering the authorship and ownership notices contained in
+     the game;
+  4. using the software, its name or its artwork for commercial purposes.
+
+Publishing the source code in a publicly accessible repository does not waive
+any of these rights, nor does it grant any licence beyond the above. Where the
+hosting platform's terms of service grant its users the ability to view or
+fork the repository, that permission is granted to the platform's users by the
+platform's own terms and extends no further: it confers no right to use,
+publish, distribute or exploit this work.
+
+DISCLAIMER OF WARRANTY
+
+The software is provided "as is", without warranty of any kind, express or
+implied, including but not limited to the warranties of merchantability,
+fitness for a particular purpose and non-infringement. In no event shall the
+author be liable for any damages, data loss or other consequences arising from
+the use of, or the inability to use, this software.
+
+THIRD-PARTY SOFTWARE
+
+The game includes third-party components distributed by their respective
+authors under their own licences (MIT, ISC, Apache-2.0, BSD and others). Those
+licences apply to those components, not to this work; their texts and
+copyright notices are collected in THIRD-PARTY-NOTICES.md, distributed
+together with the game.
+
+Contact: davidemelania22@gmail.com
+
+================================================================================
+ITALIANO
+================================================================================
 
 TERMINI DI LICENZA
 
@@ -21,7 +76,11 @@ Non è concesso, senza autorizzazione scritta preventiva dell'autore:
 
 La pubblicazione del codice sorgente su un repository ad accesso pubblico non
 costituisce rinuncia ad alcuno di questi diritti né concessione di licenza
-d'uso oltre a quanto sopra.
+d'uso oltre a quanto sopra. Ove le condizioni d'uso della piattaforma che
+ospita il repository consentano ai propri utenti di visualizzarlo o di
+duplicarlo (fork), tale facoltà è concessa dalle condizioni della piattaforma
+stessa e non si estende oltre: non attribuisce alcun diritto di usare,
+pubblicare, distribuire o sfruttare quest'opera.
 
 ESCLUSIONE DI GARANZIA
 
