@@ -31,11 +31,14 @@ export function resolveDbFile(): string | null {
  * for in blood on 2026-07-14, when every save was purged and no backup or
  * OS snapshot existed to restore from.
  *
- * `keep` must be generous: on 2026-07-15 a schema push wiped the database
+ * `keep` must stay generous: on 2026-07-15 a schema push wiped the database
  * and the only two retained snapshots were both taken by boots AFTER the
- * wipe, rotating the good ones away. Eight boots of headroom prevents that.
+ * wipe, rotating the good ones away. Five boots of headroom is the floor —
+ * enough that a bad session cannot rotate away every good copy before it is
+ * noticed, while a full world weighs ~190 MB per snapshot and eight of them
+ * cost more disk than the insurance is worth.
  */
-export async function backupDatabaseOnce(keep = 8): Promise<string | null> {
+export async function backupDatabaseOnce(keep = 5): Promise<string | null> {
   const db = resolveDbFile();
   if (!db) return null;
   const dir = path.join(path.dirname(db), 'backups');
