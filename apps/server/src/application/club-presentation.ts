@@ -2,6 +2,7 @@ import { clubColors } from '@football-life/game-data';
 import type { CareerRepository } from '../repositories/career-repository';
 import type { EditorRepository } from '../repositories/editor-repository';
 import type { ProfileRepository } from '../repositories/profile-repository';
+import type { SaveGameRepository } from '../repositories/save-game-repository';
 
 /**
  * The moment a player is unveiled at a new club.
@@ -34,12 +35,40 @@ export interface ClubPresentation {
   contractYears: number;
   /** In-world year of the unveiling. */
   year: number;
+  /** Surname alone: what actually goes on the back of a shirt. */
+  shirtName: string;
+  /** Squad number, assigned from the position. */
+  shirtNumber: number;
+}
+
+/**
+ * Squad numbers by position, in the order a club hands them out. The game
+ * has never stored a shirt number — it needs one only now, to print on the
+ * back of the shirt — so it is derived from the player id and stays the
+ * same every time the scene is replayed.
+ */
+const NUMBERS_BY_POSITION: Record<string, readonly number[]> = {
+  GK: [1, 12, 22, 31],
+  DF: [2, 3, 4, 5, 6, 13, 15, 24],
+  MF: [8, 14, 16, 18, 20, 23],
+  WG: [7, 11, 17, 27, 30],
+  FW: [9, 10, 19, 21, 29, 99],
+};
+
+function shirtNumberFor(playerId: string, position: string): number {
+  const pool = NUMBERS_BY_POSITION[position] ?? NUMBERS_BY_POSITION.MF!;
+  let hash = 0;
+  for (let i = 0; i < playerId.length; i += 1) {
+    hash = (hash * 31 + playerId.charCodeAt(i)) % 100_000;
+  }
+  return pool[hash % pool.length]!;
 }
 
 export interface ClubPresentationDeps {
   career: CareerRepository;
   profile: ProfileRepository;
   editor: EditorRepository;
+  saveGame: SaveGameRepository;
 }
 
 const YEAR_MS = 365.25 * 24 * 60 * 60 * 1000;
@@ -60,6 +89,7 @@ export async function getClubPresentation(
   if (!club) return null;
 
   const player = await deps.editor.loadEditablePlayer(saveGameId);
+  const game = await deps.saveGame.loadGame(saveGameId);
 
   const years = Math.max(
     1,
@@ -84,6 +114,11 @@ export async function getClubPresentation(
     squadRole: career.currentContract.squadRole,
     contractYears: years,
     year: career.currentDate.getUTCFullYear(),
+    shirtName: (player?.lastName ?? 'GIOCATORE').toUpperCase(),
+    shirtNumber: shirtNumberFor(
+      career.playerId,
+      game?.player?.primaryPosition ?? 'MF',
+    ),
   };
 }
 

@@ -356,6 +356,7 @@ export function registerApiRoutes(
     career: careerRepo,
     profile: profileRepo,
     editor: editorRepo,
+    saveGame: saveRepo,
   };
   const ceremonyDeps = {
     timeline: careerTimelineRepo,

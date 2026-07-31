@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { ClubPresentation as Presentation } from '../api/client';
 
 interface ClubPresentationProps {
@@ -18,21 +18,23 @@ const SQUAD_ROLE_WORDS: Record<string, string> = {
 
 /** Photographers do not flash in unison; fixed offsets look staged. */
 const FLASHES = [
-  { top: '18%', left: '8%', delay: 1.1 },
-  { top: '62%', left: '4%', delay: 1.9 },
-  { top: '28%', left: '88%', delay: 1.4 },
-  { top: '72%', left: '92%', delay: 2.3 },
-  { top: '9%', left: '52%', delay: 1.7 },
-  { top: '80%', left: '30%', delay: 2.7 },
+  { top: '20%', left: '6%', delay: 1.5 },
+  { top: '66%', left: '3%', delay: 2.3 },
+  { top: '30%', left: '92%', delay: 1.8 },
+  { top: '74%', left: '95%', delay: 2.7 },
+  { top: '11%', left: '48%', delay: 2.1 },
+  { top: '84%', left: '28%', delay: 3.1 },
 ];
 
 /**
- * The unveiling: lights up, crest drops, the player walks into frame while
- * the photographers go off, then the name assembles and the deal appears.
+ * The unveiling, staged as the photograph every signing produces: the club's
+ * media wall behind, the crest over one shoulder, and the new player holding
+ * up the shirt with his name and number on it.
  *
- * Everything is CSS and SVG — no video, no animation library, no megabytes.
- * The club's own colours drive the whole palette, so Milano Rossonera is red
- * and black and Firenze Viola is purple without a single asset per club.
+ * Everything is CSS and SVG — no video, no animation library, no megabytes,
+ * and no artwork per club. The wall, the shirt and the crest all take the
+ * club's own colours, so the same scene is red and black at Milano Rossonera
+ * and yellow and red at Lecce.
  */
 export function ClubPresentation({
   presentation,
@@ -40,15 +42,14 @@ export function ClubPresentation({
 }: ClubPresentationProps) {
   const [leaving, setLeaving] = useState(false);
   const { colors } = presentation;
+  const arcId = useId();
 
   const finish = () => {
     if (leaving) return;
     setLeaving(true);
-    // Let the fade-out play before unmounting.
     window.setTimeout(onDone, 420);
   };
 
-  // Escape skips, like any cutscene should.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' || event.key === 'Enter') finish();
@@ -77,22 +78,12 @@ export function ClubPresentation({
       role="dialog"
       aria-label={`Presentazione al ${presentation.clubName}`}
     >
-      <div className="presentation-stage">
-        <div className="presentation-beam" aria-hidden />
-        {FLASHES.map((flash, i) => (
-          <span
-            key={i}
-            className="presentation-flash"
-            aria-hidden
-            style={{
-              top: flash.top,
-              left: flash.left,
-              animationDelay: `${flash.delay}s`,
-            }}
-          />
-        ))}
-
-        <div className="presentation-crest" aria-hidden>
+      {/* The media wall: colour blocks and a sweep, like the backdrop clubs
+          put up in the press room. */}
+      <div className="wall" aria-hidden>
+        <div className="wall-block" />
+        <div className="wall-sweep" />
+        <div className="wall-crest">
           {presentation.clubLogo ? (
             <img src={presentation.clubLogo} alt="" />
           ) : (
@@ -101,32 +92,87 @@ export function ClubPresentation({
                 d="M32 3 58 12v22c0 14-11 24-26 27C17 58 6 48 6 34V12Z"
                 fill="var(--club-primary)"
                 stroke="var(--club-secondary)"
-                strokeWidth="3"
+                strokeWidth="2.5"
               />
               <path
-                d="M32 14v34"
+                d="M32 15v32M20 24h24"
                 stroke="var(--club-secondary)"
-                strokeWidth="5"
+                strokeWidth="3.5"
+                fill="none"
               />
             </svg>
           )}
         </div>
+        {FLASHES.map((flash, i) => (
+          <span
+            key={i}
+            className="presentation-flash"
+            style={{
+              top: flash.top,
+              left: flash.left,
+              animationDelay: `${flash.delay}s`,
+            }}
+          />
+        ))}
+      </div>
 
-        <div className="presentation-figure">
-          {presentation.avatarDataUrl ? (
-            <img src={presentation.avatarDataUrl} alt="" />
-          ) : (
-            <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden>
-              <circle cx="50" cy="38" r="20" fill="var(--club-on-primary)" />
+      <div className="unveil">
+        {/* Head above, shirt in front: the pose of every signing photo. */}
+        <div className="unveil-player">
+          {/* Only with a real photo: the placeholder silhouette behind the
+              collar read as a hole in the wall, and the shirt alone is the
+              stronger image anyway. */}
+          {presentation.avatarDataUrl && (
+            <div className="unveil-head">
+              <img src={presentation.avatarDataUrl} alt="" />
+            </div>
+          )}
+
+          <div className="unveil-shirt">
+            <svg viewBox="0 0 200 210" width="100%" height="100%">
+              <defs>
+                {/* The arc the surname follows, as it does on a real back. */}
+                <path id={arcId} d="M42 92 Q100 62 158 92" fill="none" />
+              </defs>
               <path
-                d="M14 96 C14 70 32 60 50 60 C68 60 86 70 86 96 Z"
-                fill="var(--club-on-primary)"
+                className="shirt-body"
+                d="M70 24 L96 14 Q100 30 104 14 L130 24 L188 60 L162 96 L148 84 L148 190 Q100 200 52 190 L52 84 L38 96 L12 60 Z"
+                fill="var(--club-primary)"
+                stroke="var(--club-secondary)"
+                strokeWidth="4"
+                strokeLinejoin="round"
               />
+              {/* Collar and sleeve trim in the second colour. */}
+              <path
+                d="M96 14 Q100 32 104 14"
+                fill="none"
+                stroke="var(--club-secondary)"
+                strokeWidth="7"
+              />
+              <path
+                d="M162 96 L148 84M38 96 L52 84"
+                stroke="var(--club-secondary)"
+                strokeWidth="6"
+              />
+              <text className="shirt-name" fill="var(--club-on-primary)">
+                <textPath href={`#${arcId}`} startOffset="50%">
+                  {presentation.shirtName}
+                </textPath>
+              </text>
+              <text
+                className="shirt-number"
+                x="100"
+                y="166"
+                textAnchor="middle"
+                fill="var(--club-on-primary)"
+              >
+                {presentation.shirtNumber}
+              </text>
             </svg>
-          )}
+          </div>
         </div>
 
-        <div className="presentation-copy">
+        <div className="unveil-copy">
           <p className="presentation-kicker">
             {presentation.competitionName ?? 'Nuova avventura'} ·{' '}
             {presentation.year}

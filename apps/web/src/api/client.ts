@@ -49,6 +49,8 @@ export interface ClubPresentation {
   squadRole: string;
   contractYears: number;
   year: number;
+  shirtName: string;
+  shirtNumber: number;
 }
 
 export class ApiError extends Error {
