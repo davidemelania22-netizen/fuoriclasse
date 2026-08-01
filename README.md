@@ -9,6 +9,36 @@ statistiche, cronaca, conseguenze).
 > (generazione mondo, allenamento/crescita, partite, carriera/contratti,
 > infortuni/benessere, eventi, ritiro), API Fastify e interfaccia React.
 
+## Scaricare e giocare — versione 0.1.5
+
+Non serve né Node né il terminale: si scarica un file, doppio clic, installato.
+
+**[github.com/davidemelania22-netizen/fuoriclasse/releases/latest](https://github.com/davidemelania22-netizen/fuoriclasse/releases/latest)**
+
+| File                          | Per chi                          |
+| ----------------------------- | -------------------------------- |
+| `Fuoriclasse-0.1.5-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
+| `Fuoriclasse.Setup.0.1.5.exe` | Windows                          |
+
+L'app **non è firmata** (servirebbe un certificato Apple a pagamento), quindi la
+prima volta il sistema avvisa. È normale, e va fatto una volta sola:
+
+- **macOS** — tasto destro sull'app → **Apri** → **Apri** di nuovo. Con il
+  doppio clic normale macOS risponde "Impossibile verificare lo sviluppatore".
+- **Windows** — allo schermo blu di SmartScreen: **Ulteriori informazioni** →
+  **Esegui comunque**.
+
+Tutto gira in locale: le carriere restano sul computer di chi gioca e non
+passano da nessun server.
+
+### Novità della 0.1.5
+
+- **Ricerca nell'editor del mondo.** Un mondo contiene 22 competizioni e 120
+  club: la barra di ricerca filtra per nome, sigla, campionato e paese, così
+  rinominare una squadra non costa più di scorrere. Invio salva la riga.
+- **Presentazione al nuovo club** e **cerimonia di premiazione**: due scene
+  animate, disegnate in CSS e SVG nei colori del club (0.1.3–0.1.4).
+
 ## Requisiti
 
 - **Node.js >= 20** (consigliato via [nvm](https://github.com/nvm-sh/nvm))
@@ -41,10 +71,11 @@ costruita sulla propria macchina: il gioco include il motore nativo di Prisma,
 che esiste in una versione diversa per ogni sistema operativo. Per questo
 `.github/workflows/release.yml` costruisce le due versioni (Mac Apple Silicon
 e Windows) e le pubblica in una **Release di GitHub**: quella pagina è il link
-da dare a chi vuole giocare. Basta creare un tag:
+da dare a chi vuole giocare. Basta alzare `version` in `package.json` (è quella
+che finisce nel nome dei file) e creare il tag corrispondente:
 
 ```bash
-git tag v0.1.0 && git push origin v0.1.0
+git tag -a v0.1.5 -m "Fuoriclasse 0.1.5" && git push origin main --follow-tags
 ```
 
 Cosa fa `npm run desktop:stage` (il passaggio prima dell'impacchettamento,
@@ -59,9 +90,14 @@ di un'ora a ogni tentativo mentre gli altri due finivano in quattro minuti.
 Rimettere la voce nella matrice del workflow è tutto ciò che serve, se un
 giorno servisse.
 
-L'app **non è firmata** (serve un certificato Apple a pagamento): la prima
-volta, su Mac, occorre **tasto destro sull'app → Apri → Apri**. Su Windows
-SmartScreen mostra "Altre informazioni" → "Esegui comunque".
+Due limiti dichiarati, per onestà: l'installer Windows viene costruito e
+verificato come eseguibile valido, ma **non è mai stato eseguito su una macchina
+Windows reale** (qui non ce n'è una); e lo storico delle migrazioni Prisma è
+incompleto — lo schema si allinea con `prisma db push`, non ricostruendolo dalle
+migrazioni.
+
+L'app non è firmata: per i passaggi del primo avvio, vedi
+[Scaricare e giocare](#scaricare-e-giocare--versione-015).
 
 I salvataggi vivono in `~/Library/Application Support/Fuoriclasse/` su macOS
 e in `%APPDATA%\Fuoriclasse\` su Windows, con backup automatici a ogni avvio.
@@ -74,10 +110,10 @@ normale "avanti-avanti") e la cartella del gioco.
 
 Poi:
 
-| Sistema     | Cosa fare                                                         |
-| ----------- | ----------------------------------------------------------------- |
-| **macOS**   | doppio clic su `scripts/start-game.command`                       |
-| **Windows** | doppio clic su `scripts/start-game.bat`                           |
+| Sistema     | Cosa fare                                   |
+| ----------- | ------------------------------------------- |
+| **macOS**   | doppio clic su `scripts/start-game.command` |
+| **Windows** | doppio clic su `scripts/start-game.bat`     |
 
 Il primo avvio installa le dipendenze e prepara il database: ci vogliono
 qualche minuto e serve la connessione a internet. Dalla volta successiva il
