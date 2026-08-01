@@ -3,7 +3,10 @@ import { clubColors } from './club-colors';
 import { DEFAULT_WORLD_CONFIG } from './world-config';
 
 const allClubNames = Object.values(DEFAULT_WORLD_CONFIG.namePools).flatMap(
-  (pool) => [...(pool.featuredClubs ?? []), ...(pool.secondDivisionClubs ?? [])],
+  (pool) => [
+    ...(pool.featuredClubs ?? []),
+    ...(pool.secondDivisionClubs ?? []),
+  ],
 );
 
 describe('clubColors', () => {
@@ -32,7 +35,13 @@ describe('clubColors', () => {
   });
 
   it('gives every club in the default world a colour', () => {
-    expect(allClubNames).toHaveLength(120);
+    // Derived, not a literal: league size is a balance knob, and a hard 120
+    // here only ever failed the day someone tuned it.
+    const expected =
+      Object.keys(DEFAULT_WORLD_CONFIG.namePools).length *
+      (DEFAULT_WORLD_CONFIG.clubsPerTopDivision +
+        DEFAULT_WORLD_CONFIG.clubsPerSecondDivision);
+    expect(allClubNames).toHaveLength(expected);
     for (const name of allClubNames) {
       const colors = clubColors(name);
       expect(colors.primary).toMatch(/^#[0-9a-f]{6}$/i);

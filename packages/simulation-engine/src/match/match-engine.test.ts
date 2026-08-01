@@ -23,6 +23,13 @@ const config: MatchConfig = {
     condition: 0.13,
     randomness: 0.05,
   },
+  individual: {
+    chanceExponent: 2.4,
+    chanceReference: 60,
+    starWeight: 0.3,
+    starShare: 0.3,
+    ratingPerAbility: 1 / 26,
+  },
   rating: {
     base: 6.1,
     noise: 0.5,

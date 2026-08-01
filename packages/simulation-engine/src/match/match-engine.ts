@@ -57,6 +57,19 @@ function expectedGoals(
   return clamp(config.baseGoals * 2 ** exponent, config.minXg, config.maxXg);
 }
 
+/**
+ * How much of his team's chances a player's quality earns him.
+ *
+ * Linear weighting made a perfect player merely twice as likely to score as an
+ * average one, so a 20-in-everything striker took barely a third of his side's
+ * goals. Raising ability to a power reproduces what the game actually looks
+ * like: the best player in a modest team scores most of what that team scores.
+ */
+function chanceShare(ability: number, config: MatchConfig): number {
+  const { chanceExponent, chanceReference } = config.individual;
+  return Math.max(0.001, ability / chanceReference) ** chanceExponent;
+}
+
 function pickWeighted(
   rng: RandomSource,
   starters: readonly MatchPlayer[],
@@ -121,7 +134,7 @@ export function simulateMatch(input: SimulateMatchInput): MatchResult {
         rng,
         starters,
         (p) =>
-          (p.finishing * 0.6 + p.currentAbility * 0.4) *
+          chanceShare(p.finishing * 0.6 + p.currentAbility * 0.4, config) *
           ATTACK_WEIGHT[p.position] *
           (p.goalBias ?? 1),
       );
@@ -134,7 +147,9 @@ export function simulateMatch(input: SimulateMatchInput): MatchResult {
           rng,
           starters,
           (p) =>
-            p.currentAbility * ASSIST_WEIGHT[p.position] * (p.assistBias ?? 1),
+            chanceShare(p.currentAbility, config) *
+            ASSIST_WEIGHT[p.position] *
+            (p.assistBias ?? 1),
           scorer.id,
         );
         if (assister) {
@@ -189,7 +204,8 @@ export function simulateMatch(input: SimulateMatchInput): MatchResult {
         config.rating.base +
         rng.normal(0, config.rating.noise) +
         outcomeBonus +
-        (effectiveAbility(player) - teamAverage) / 40 +
+        (effectiveAbility(player) - teamAverage) *
+          config.individual.ratingPerAbility +
         goals * config.rating.goalBonus +
         assists * config.rating.assistBonus;
 

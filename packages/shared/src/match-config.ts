@@ -31,6 +31,33 @@ export const matchConfigSchema = z.object({
     condition: z.number(),
     randomness: z.number(),
   }),
+  /** How decisive individual quality is, rather than the squad average. */
+  individual: z.object({
+    /**
+     * Exponent on a player's ability when picking who scores or assists.
+     * 1 is linear (a 100 is twice a 50); above 1 a great player takes a
+     * disproportionate share of his team's chances, as they do in reality.
+     */
+    chanceExponent: z.number().positive(),
+    /** Ability that maps to weight 1 before the exponent is applied. */
+    chanceReference: z.number().positive(),
+    /**
+     * How much of a team's strength comes from its best players rather than
+     * from the flat average of the eleven. 0 = pure mean.
+     */
+    starWeight: z.number().min(0).max(1),
+    /**
+     * What fraction of a group counts as "the best" for starWeight. A share
+     * rather than a count, so a three-man attack and a five-man defence are
+     * lifted alike — a fixed count silently strengthened only the defence.
+     */
+    starShare: z.number().min(0).max(1),
+    /**
+     * Rating points gained per point of ability above the team average.
+     * Larger values make a standout player's mark visibly higher.
+     */
+    ratingPerAbility: z.number().positive(),
+  }),
   rating: z.object({
     base: z.number(),
     noise: z.number().min(0),
