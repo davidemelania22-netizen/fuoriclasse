@@ -9,7 +9,7 @@ statistiche, cronaca, conseguenze).
 > (generazione mondo, allenamento/crescita, partite, carriera/contratti,
 > infortuni/benessere, eventi, ritiro), API Fastify e interfaccia React.
 
-## Scaricare e giocare — versione 0.1.5
+## Scaricare e giocare — versione 0.1.6
 
 Non serve né Node né il terminale: si scarica un file, doppio clic, installato.
 
@@ -17,8 +17,8 @@ Non serve né Node né il terminale: si scarica un file, doppio clic, installato
 
 | File                          | Per chi                          |
 | ----------------------------- | -------------------------------- |
-| `Fuoriclasse-0.1.5-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
-| `Fuoriclasse.Setup.0.1.5.exe` | Windows                          |
+| `Fuoriclasse-0.1.6-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
+| `Fuoriclasse.Setup.0.1.6.exe` | Windows                          |
 
 L'app **non è firmata** (servirebbe un certificato Apple a pagamento), quindi la
 prima volta il sistema avvisa. È normale, e va fatto una volta sola:
@@ -31,13 +31,23 @@ prima volta il sistema avvisa. È normale, e va fatto una volta sola:
 Tutto gira in locale: le carriere restano sul computer di chi gioca e non
 passano da nessun server.
 
-### Novità della 0.1.5
+### Novità della 0.1.6
 
-- **Ricerca nell'editor del mondo.** Un mondo contiene 22 competizioni e 120
-  club: la barra di ricerca filtra per nome, sigla, campionato e paese, così
-  rinominare una squadra non costa più di scorrere. Invio salva la riga.
-- **Presentazione al nuovo club** e **cerimonia di premiazione**: due scene
-  animate, disegnate in CSS e SVG nei colori del club (0.1.3–0.1.4).
+- **Una stagione vera: 20 squadre, 38 giornate**, da metà agosto a inizio
+  maggio, andata e ritorno. Prima le divisioni ne avevano 12 e il campionato
+  finiva a gennaio. (Le carriere già iniziate restano a 12: il numero di club
+  si decide quando nasce il mondo.)
+- **Il valore decide.** Le occasioni vanno a chi sa sfruttarle, la forza di una
+  squadra sente i suoi campioni e il voto premia chi spicca. Con tutti gli
+  attributi al massimo si segnano ~39 gol in 38 giornate, più della metà di
+  quelli della squadra, con 8,6 di media voto.
+
+### Novità precedenti
+
+- **0.1.5** — ricerca nell'editor del mondo: filtra 22 competizioni e 120 club
+  per nome, sigla, campionato e paese; Invio salva la riga.
+- **0.1.3–0.1.4** — **presentazione al nuovo club** e **cerimonia di
+  premiazione**: due scene animate, disegnate in CSS e SVG nei colori del club.
 
 ## Requisiti
 
