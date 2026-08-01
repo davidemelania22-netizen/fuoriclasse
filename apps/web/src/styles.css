@@ -2762,6 +2762,26 @@ textarea:focus {
   vertical-align: -4px;
 }
 
+/* The search stays under the thumb while the long lists scroll past it:
+   with 142 rows the box is useless if you have to scroll back up to reach it. */
+.world-search-card {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 3;
+}
+
+.world-search {
+  width: 100%;
+  font-size: 1rem;
+  padding: 0.55rem 0.7rem;
+}
+
+.world-search-count {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 .world-list {
   list-style: none;
   margin: 0;
