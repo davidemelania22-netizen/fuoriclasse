@@ -48,6 +48,7 @@ export * from './career/retirement';
 export * from './career/career-simulator';
 export * from './career/transfer-window';
 export * from './career/negotiation';
+export * from './career/contract-talks';
 export * from './wellbeing/injury-system';
 export * from './wellbeing/morale-system';
 export * from './wellbeing/relationship-system';

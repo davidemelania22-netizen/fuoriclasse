@@ -11,7 +11,7 @@ statistiche, cronaca, conseguenze).
 
 ## Scaricare e giocare
 
-Versione attuale: **0.1.9**.
+Versione attuale: **0.2.0**.
 
 Non serve né Node né il terminale: si scarica un file, doppio clic, installato.
 
@@ -19,8 +19,8 @@ Non serve né Node né il terminale: si scarica un file, doppio clic, installato
 
 | File                          | Per chi                          |
 | ----------------------------- | -------------------------------- |
-| `Fuoriclasse-0.1.9-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
-| `Fuoriclasse.Setup.0.1.9.exe` | Windows                          |
+| `Fuoriclasse-0.2.0-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
+| `Fuoriclasse.Setup.0.2.0.exe` | Windows                          |
 
 L'app **non è firmata** (servirebbe un certificato Apple a pagamento), quindi la
 prima volta il sistema avvisa. È normale, e va fatto una volta sola:
@@ -32,6 +32,23 @@ prima volta il sistema avvisa. È normale, e va fatto una volta sola:
 
 Tutto gira in locale: le carriere restano sul computer di chi gioca e non
 passano da nessun server.
+
+### Novità della 0.2.0
+
+- **Il tavolo del contratto** 🤝 — trasferimento o rinnovo, si tratta voce per
+  voce: **durata**, **ingaggio**, **bonus alla firma**, **bonus presenza**,
+  **bonus gol** e **ruolo in rosa**. Accanto a ogni cursore c'è sempre scritto
+  dove sta il club ("loro: …").
+- Il club **controproposta**: se chiedi troppo ti incontra a metà strada, e la
+  sua controproposta arriva già caricata sul tavolo, pronta da firmare o da
+  ritoccare ancora.
+- **La pazienza è finita** — tre pallini in alto. Un'assurdità ne costa due, e
+  quando finiscono il club si alza. Quello che aveva già messo sul piatto resta
+  però firmabile.
+- Il club **paga di più** per chi vale di più, se è ricco e se rischia di
+  perderti a scadenza. Un contratto più lungo costa poco in più a stagione:
+  la durata si può chiedere davvero, non è più un moltiplicatore.
+- Il **rinnovo** non ha bisogno del mercato aperto: si tratta quando vuoi.
 
 ### Novità della 0.1.9
 
@@ -125,7 +142,7 @@ da dare a chi vuole giocare. Basta alzare `version` in `package.json` (è quella
 che finisce nel nome dei file) e creare il tag corrispondente:
 
 ```bash
-git tag -a v0.1.9 -m "Fuoriclasse 0.1.9" && git push origin main --follow-tags
+git tag -a v0.2.0 -m "Fuoriclasse 0.2.0" && git push origin main --follow-tags
 ```
 
 Cosa fa `npm run desktop:stage` (il passaggio prima dell'impacchettamento,

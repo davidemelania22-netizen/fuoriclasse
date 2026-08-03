@@ -8,6 +8,7 @@ import type {
   StoredNationalCallup,
   StoredNaturalization,
   StoredPostMatch,
+  StoredContractTalks,
 } from './profile-repository';
 
 const j = (value: unknown): Prisma.InputJsonValue =>
@@ -60,6 +61,8 @@ export class PrismaProfileRepository implements ProfileRepository {
         (profile.celebratedHonourIds as string[] | undefined) ?? [],
       negotiatedOfferIds:
         (profile.negotiatedOfferIds as string[] | undefined) ?? [],
+      contractTalks:
+        (profile.contractTalks as StoredContractTalks | undefined) ?? null,
     };
   }
 
@@ -163,6 +166,13 @@ export class PrismaProfileRepository implements ProfileRepository {
     offerIds: string[],
   ): Promise<boolean> {
     return this.patch(saveGameId, { negotiatedOfferIds: offerIds });
+  }
+
+  setContractTalks(
+    saveGameId: string,
+    talks: StoredContractTalks | null,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { contractTalks: talks });
   }
 
   setCappedForCountry(saveGameId: string, countryId: string): Promise<boolean> {

@@ -157,6 +157,15 @@ export class PrismaCareerRepository implements CareerRepository {
         endDate: input.newEndDate,
         weeklyWage: input.weeklyWage,
         squadRole: input.squadRole,
+        ...(input.signingBonus !== undefined
+          ? { signingBonus: input.signingBonus }
+          : {}),
+        ...(input.appearanceBonus !== undefined
+          ? { appearanceBonus: input.appearanceBonus }
+          : {}),
+        ...(input.goalBonus !== undefined
+          ? { goalBonus: input.goalBonus }
+          : {}),
       },
     });
   }

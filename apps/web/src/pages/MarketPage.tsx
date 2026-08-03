@@ -1,22 +1,13 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  api,
-  type MarketOfferView,
-  type NegotiationAsk,
-  type NegotiationPreview,
-} from '../api/client';
+import { api, type MarketOfferView } from '../api/client';
 import { useGameStore } from '../stores/useGameStore';
 import { formatMoney, usePreferences } from '../stores/usePreferences';
+import { ContractTable } from '../components/ContractTable';
 
 interface MarketPageProps {
   saveId: string;
 }
-
-const ASKS: { key: NegotiationAsk; label: string }[] = [
-  { key: 'WAGE', label: '💰 Chiedi più ingaggio' },
-  { key: 'ROLE', label: '⭐ Chiedi un ruolo più alto' },
-];
 
 /** A signed number reads as an improvement or a step back at a glance. */
 function Delta({
@@ -42,43 +33,18 @@ function OfferCard({
   saveId,
   windowOpen,
   currency,
+  onOpenTalks,
+  busy,
 }: {
   offer: MarketOfferView;
   saveId: string;
   windowOpen: boolean;
   currency: Parameters<typeof formatMoney>[1];
+  onOpenTalks: (subject: string) => void;
+  busy: boolean;
 }) {
   const queryClient = useQueryClient();
-  const [preview, setPreview] = useState<
-    (NegotiationPreview & { ask: NegotiationAsk }) | null
-  >(null);
   const [message, setMessage] = useState<string | null>(null);
-
-  const refreshAll = () =>
-    Promise.all(
-      ['market', 'offers', 'dashboard', 'saves'].map((key) =>
-        queryClient.invalidateQueries({ queryKey: [key] }),
-      ),
-    );
-
-  const askPreview = useMutation({
-    mutationFn: (ask: NegotiationAsk) =>
-      api.previewNegotiation(saveId, offer.id, ask),
-    onSuccess: (data, ask) => setPreview({ ...data, ask }),
-  });
-
-  const negotiate = useMutation({
-    mutationFn: (ask: NegotiationAsk) => api.negotiate(saveId, offer.id, ask),
-    onSuccess: async (outcome) => {
-      setPreview(null);
-      setMessage(
-        outcome.succeeded
-          ? `Hanno ceduto: ${outcome.weeklyWage.toLocaleString('it-IT')} € a settimana, ruolo ${outcome.squadRoleLabel}.`
-          : `Non hanno ceduto: restano ${outcome.weeklyWage.toLocaleString('it-IT')} € e il ruolo di ${outcome.squadRoleLabel}.`,
-      );
-      await refreshAll();
-    },
-  });
 
   const respond = useMutation({
     mutationFn: (accept: boolean) => api.respondOffer(saveId, offer.id, accept),
@@ -86,12 +52,14 @@ function OfferCard({
       setMessage(
         result.accepted ? 'Hai firmato: nuova squadra.' : 'Offerta rifiutata.',
       );
-      await refreshAll();
+      await Promise.all(
+        ['market', 'talks', 'offers', 'dashboard', 'saves'].map((key) =>
+          queryClient.invalidateQueries({ queryKey: [key] }),
+        ),
+      );
     },
     onError: () => setMessage('Il mercato è chiuso: non puoi firmare adesso.'),
   });
-
-  const busy = negotiate.isPending || respond.isPending;
 
   return (
     <li className="mk-offer card">
@@ -144,71 +112,32 @@ function OfferCard({
 
       {message && <p className="mk-message">{message}</p>}
 
-      {/* Odds first, commitment second — the same deal every gamble in this
-          game offers. */}
-      {preview && (
-        <div className="mk-negotiation">
-          <p className="mk-odds">
-            <strong>{Math.round(preview.successChance * 100)}%</strong> che
-            accettino
-          </p>
-          <p className="mk-outcome is-up">✓ {preview.successLabel}</p>
-          <p className="mk-outcome is-down">✗ {preview.failureLabel}</p>
-          <div className="mk-actions">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => negotiate.mutate(preview.ask)}
-            >
-              {negotiate.isPending ? 'Trattativa…' : 'Prova'}
-            </button>
-            <button
-              type="button"
-              className="ghost"
-              onClick={() => setPreview(null)}
-            >
-              Lascia stare
-            </button>
-          </div>
-        </div>
-      )}
-
-      {!preview && (
-        <div className="mk-actions">
-          <button
-            type="button"
-            disabled={busy || !windowOpen}
-            title={windowOpen ? undefined : 'Il mercato è chiuso'}
-            onClick={() => respond.mutate(true)}
-          >
-            ✍️ Firma
-          </button>
-          {offer.canNegotiate &&
-            ASKS.map((ask) => (
-              <button
-                key={ask.key}
-                type="button"
-                className="ghost"
-                disabled={busy || askPreview.isPending}
-                onClick={() => askPreview.mutate(ask.key)}
-              >
-                {ask.label}
-              </button>
-            ))}
-          <button
-            type="button"
-            className="ghost"
-            disabled={busy}
-            onClick={() => respond.mutate(false)}
-          >
-            Rifiuta
-          </button>
-        </div>
-      )}
-
-      {!offer.canNegotiate && !preview && (
-        <p className="mk-note">Hai già trattato con questo club.</p>
-      )}
+      <div className="mk-actions">
+        <button
+          type="button"
+          disabled={busy || respond.isPending}
+          onClick={() => onOpenTalks(offer.id)}
+        >
+          🤝 Tratta il contratto
+        </button>
+        <button
+          type="button"
+          className="ghost"
+          disabled={busy || respond.isPending || !windowOpen}
+          title={windowOpen ? undefined : 'Il mercato è chiuso'}
+          onClick={() => respond.mutate(true)}
+        >
+          ✍️ Firma così
+        </button>
+        <button
+          type="button"
+          className="ghost"
+          disabled={busy || respond.isPending}
+          onClick={() => respond.mutate(false)}
+        >
+          Rifiuta
+        </button>
+      </div>
     </li>
   );
 }
@@ -216,11 +145,24 @@ function OfferCard({
 export function MarketPage({ saveId }: MarketPageProps) {
   const close = useGameStore((s) => s.closeOverlay);
   const currency = usePreferences((s) => s.currency);
+  const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ['market', saveId],
     queryFn: () => api.getMarket(saveId),
   });
+  const talksQuery = useQuery({
+    queryKey: ['talks', saveId],
+    queryFn: () => api.getTalks(saveId),
+  });
   const m = query.data;
+  const talks = talksQuery.data?.talks ?? null;
+
+  // Only one table at a time: opening a new subject replaces whatever was open.
+  const openTalks = useMutation({
+    mutationFn: (subject: string) => api.openTalks(saveId, subject),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['talks', saveId] }),
+  });
 
   return (
     <div className="page">
@@ -283,6 +225,36 @@ export function MarketPage({ saveId }: MarketPageProps) {
             </dl>
           </section>
 
+          {talks && (
+            <ContractTable
+              saveId={saveId}
+              talks={talks}
+              windowShut={!m.window.isOpen}
+              onClosed={() =>
+                queryClient.invalidateQueries({ queryKey: ['talks', saveId] })
+              }
+            />
+          )}
+
+          {m.current.clubName && !talks && (
+            <section className="card mk-renewal">
+              <div>
+                <h2>Rinnovo</h2>
+                <p className="mk-renewal-hint">
+                  Siediti col {m.current.clubName} e ridiscuti durata, ingaggio
+                  e bonus. Il rinnovo non ha bisogno del mercato aperto.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={openTalks.isPending}
+                onClick={() => openTalks.mutate('RENEWAL')}
+              >
+                🤝 Tratta il rinnovo
+              </button>
+            </section>
+          )}
+
           <section className="card">
             <h2>Offerte sul tavolo</h2>
             {m.offers.length === 0 ? (
@@ -300,6 +272,8 @@ export function MarketPage({ saveId }: MarketPageProps) {
                     saveId={saveId}
                     windowOpen={m.window.isOpen}
                     currency={currency}
+                    busy={openTalks.isPending}
+                    onOpenTalks={(subject) => openTalks.mutate(subject)}
                   />
                 ))}
               </ul>

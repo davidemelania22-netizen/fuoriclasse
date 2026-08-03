@@ -1,3 +1,26 @@
+/** The negotiation session, as stored. Structural on purpose: the shape is
+ * owned by `application/contract-talks`, and the repository only carries it. */
+export interface StoredContractPackage {
+  years: number;
+  weeklyWage: number;
+  signingBonus: number;
+  appearanceBonus: number;
+  goalBonus: number;
+  squadRole: string;
+}
+
+export interface StoredContractTalks {
+  /** An offer id, or the reserved renewal subject. */
+  subject: string;
+  baseline: StoredContractPackage;
+  clubPosition: StoredContractPackage;
+  patience: number;
+  round: number;
+  status: 'OPEN' | 'AGREED' | 'BROKEN';
+  lastVerdict: string | null;
+  lastMessage: string | null;
+}
+
 /** Per-save protagonist profile stored in Person.personalityProfile JSON. */
 /** A pre-match plan the player prepared for a specific upcoming fixture. */
 export interface StoredMatchPlan {
@@ -60,6 +83,8 @@ export interface PlayerProfile {
   celebratedHonourIds: string[];
   /** Offers the player has already pushed on: one negotiation each. */
   negotiatedOfferIds: string[];
+  /** The contract table currently open, if any. Shape owned by contract-talks. */
+  contractTalks: StoredContractTalks | null;
 }
 
 /** A federation's approach: change the shirt you play for, or stay loyal. */
@@ -146,6 +171,11 @@ export interface ProfileRepository {
   ): Promise<boolean>;
   /** Persist which offers have been negotiated, so nobody asks twice. */
   setNegotiatedOffers(saveGameId: string, offerIds: string[]): Promise<boolean>;
+  /** Store (or clear, when null) the contract table in progress. */
+  setContractTalks(
+    saveGameId: string,
+    talks: StoredContractTalks | null,
+  ): Promise<boolean>;
   /** Persist the season's national call-up state. */
   setNationalCallup(
     saveGameId: string,

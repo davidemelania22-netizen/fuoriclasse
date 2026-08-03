@@ -59,6 +59,7 @@ function deps(options: {
       updated = { weeklyWage: input.weeklyWage, squadRole: input.squadRole };
       return true;
     },
+    setContractBonuses: async () => true,
   };
 
   const career = {

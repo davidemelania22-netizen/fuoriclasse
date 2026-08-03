@@ -58,6 +58,10 @@ export interface RenewContractInput {
   newEndDate: Date;
   weeklyWage: number;
   squadRole: string;
+  /** Optional: a renewal agreed at the table carries its bonuses too. */
+  signingBonus?: number;
+  appearanceBonus?: number;
+  goalBonus?: number;
 }
 
 export interface OfferInput {

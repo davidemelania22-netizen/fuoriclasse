@@ -29,11 +29,22 @@ export interface MarketRepository {
     saveGameId: string,
     limit: number,
   ): Promise<WorldTransferRecord[]>;
-  /** Rewrite an offer's terms after a successful negotiation. */
+  /** Rewrite an offer's terms once the table has agreed them. */
   updateOfferTerms(input: {
     offerId: string;
     playerId: string;
     weeklyWage: number;
     squadRole: string;
+    contractYears?: number;
+  }): Promise<boolean>;
+  /**
+   * Bonuses live on the contract, not on the offer, so they are written once
+   * the contract exists — right after signing.
+   */
+  setContractBonuses(input: {
+    playerId: string;
+    signingBonus: number;
+    appearanceBonus: number;
+    goalBonus: number;
   }): Promise<boolean>;
 }

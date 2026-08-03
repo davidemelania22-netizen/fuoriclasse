@@ -77,6 +77,7 @@ export class PrismaMarketRepository implements MarketRepository {
     playerId: string;
     weeklyWage: number;
     squadRole: string;
+    contractYears?: number;
   }): Promise<boolean> {
     // Guard on the player too: an offer id from elsewhere must not be editable.
     const result = await this.prisma.transferOffer.updateMany({
@@ -88,8 +89,33 @@ export class PrismaMarketRepository implements MarketRepository {
       data: {
         offeredWage: input.weeklyWage,
         squadRole: input.squadRole,
+        ...(input.contractYears !== undefined
+          ? { contractYears: input.contractYears }
+          : {}),
       },
     });
     return result.count > 0;
+  }
+
+  async setContractBonuses(input: {
+    playerId: string;
+    signingBonus: number;
+    appearanceBonus: number;
+    goalBonus: number;
+  }): Promise<boolean> {
+    const contract = await this.prisma.contract.findFirst({
+      where: { playerId: input.playerId, status: 'ACTIVE' },
+      orderBy: { startDate: 'desc' },
+    });
+    if (!contract) return false;
+    await this.prisma.contract.update({
+      where: { id: contract.id },
+      data: {
+        signingBonus: input.signingBonus,
+        appearanceBonus: input.appearanceBonus,
+        goalBonus: input.goalBonus,
+      },
+    });
+    return true;
   }
 }

@@ -58,6 +58,13 @@ import {
   runNegotiation,
 } from '../application/market';
 import {
+  cancelTalks,
+  getTalks,
+  openTalks,
+  proposeTerms,
+  signAgreedTerms,
+} from '../application/contract-talks';
+import {
   AUTOSAVE_INTERVALS,
   autoSaveAfterWeeks,
   readSettings,
@@ -185,6 +192,15 @@ const signSchema = z.object({ clubId: z.string().min(1) });
 const ceremonySeenSchema = z.object({ honourId: z.string().min(1) });
 const respondOfferSchema = z.object({ accept: z.boolean() });
 const negotiateSchema = z.object({ ask: z.enum(['WAGE', 'ROLE']) });
+const openTalksSchema = z.object({ subject: z.string().trim().min(1).max(64) });
+const proposalSchema = z.object({
+  years: z.number().int().min(1).max(10),
+  weeklyWage: z.number().min(0).max(10_000_000),
+  signingBonus: z.number().min(0).max(500_000_000),
+  appearanceBonus: z.number().min(0).max(10_000_000),
+  goalBonus: z.number().min(0).max(10_000_000),
+  squadRole: z.enum(['PROSPECT', 'BACKUP', 'ROTATION', 'FIRST_TEAM', 'KEY']),
+});
 
 const buySchema = z.object({ itemKey: z.string().min(1) });
 
@@ -335,6 +351,11 @@ export function registerApiRoutes(
   };
   const marketRepo = new PrismaMarketRepository(prisma);
   const marketDeps = {
+    market: marketRepo,
+    career: careerRepo,
+    profile: profileRepo,
+  };
+  const talksDeps = {
     market: marketRepo,
     career: careerRepo,
     profile: profileRepo,
@@ -1066,6 +1087,59 @@ export function registerApiRoutes(
       return reply.send(outcome);
     },
   );
+
+  // The contract table: a transfer offer or a renewal, same conversation.
+  app.get('/api/saves/:id/talks', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    return reply.send({ talks: await getTalks(talksDeps, id) });
+  });
+
+  app.post('/api/saves/:id/talks/open', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const body = parseBody(openTalksSchema, request.body ?? {}, reply);
+    if (!body) return reply;
+    const talks = await openTalks(talksDeps, {
+      saveGameId: id,
+      subject: body.subject,
+    });
+    if (!talks) return reply.code(404).send({ error: 'NotFound' });
+    return reply.send({ talks });
+  });
+
+  app.post('/api/saves/:id/talks/propose', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const body = parseBody(proposalSchema, request.body ?? {}, reply);
+    if (!body) return reply;
+    const result = await proposeTerms(talksDeps, {
+      saveGameId: id,
+      proposal: body,
+    });
+    // Null means there is no open table left to talk at.
+    if (!result) return reply.code(409).send({ error: 'TalksClosed' });
+    return reply.send(result);
+  });
+
+  app.post('/api/saves/:id/talks/sign', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    // A transfer is still a transfer: it needs the window open. A renewal
+    // with your own club does not.
+    const talks = await getTalks(talksDeps, id);
+    if (talks && talks.subject !== 'RENEWAL') {
+      const market = await getMarket(marketDeps, id);
+      if (market && !market.window.isOpen) {
+        return reply.code(409).send({ error: 'WindowClosed' });
+      }
+    }
+    const result = await signAgreedTerms(talksDeps, id);
+    if (!result) return reply.code(409).send({ error: 'CannotSign' });
+    return reply.send(result);
+  });
+
+  app.post('/api/saves/:id/talks/cancel', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    await cancelTalks(talksDeps, id);
+    return reply.send({ ok: true });
+  });
 
   // The scouting report on yourself: identity, the three attribute columns,
   // the season and the career, assembled in one round trip.

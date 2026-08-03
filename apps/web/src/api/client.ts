@@ -360,6 +360,39 @@ export interface NegotiationOutcome {
   squadRoleLabel: string;
 }
 
+/** Every term of a contract, the thing that gets argued over. */
+export interface ContractPackage {
+  years: number;
+  weeklyWage: number;
+  signingBonus: number;
+  appearanceBonus: number;
+  goalBonus: number;
+  squadRole: string;
+}
+
+export interface TalksView {
+  subject: string;
+  baseline: ContractPackage;
+  clubPosition: ContractPackage;
+  patience: number;
+  round: number;
+  status: 'OPEN' | 'AGREED' | 'BROKEN';
+  lastVerdict: string | null;
+  lastMessage: string | null;
+  clubName: string;
+  squadRoleLabel: string;
+  limits: Record<
+    'years' | 'weeklyWage' | 'signingBonus' | 'appearanceBonus' | 'goalBonus',
+    { min: number; max: number }
+  >;
+  isOpen: boolean;
+}
+
+export interface ProposalResult extends TalksView {
+  verdict: 'ACCEPT' | 'COUNTER' | 'REJECT' | 'WALKED_OUT';
+  message: string;
+}
+
 export interface DashboardResponse {
   save: SaveGameSummary;
   player: PlayerSummary;
@@ -1060,6 +1093,25 @@ export const api = {
       { method: 'POST' },
     ),
   getMarket: (id: string) => http<MarketView>(`/saves/${id}/market`),
+  getTalks: (id: string) =>
+    http<{ talks: TalksView | null }>(`/saves/${id}/talks`),
+  openTalks: (id: string, subject: string) =>
+    http<{ talks: TalksView }>(`/saves/${id}/talks/open`, {
+      method: 'POST',
+      body: JSON.stringify({ subject }),
+    }),
+  proposeTerms: (id: string, proposal: ContractPackage) =>
+    http<ProposalResult>(`/saves/${id}/talks/propose`, {
+      method: 'POST',
+      body: JSON.stringify(proposal),
+    }),
+  signTalks: (id: string) =>
+    http<{ signed: boolean; terms: ContractPackage; clubName: string }>(
+      `/saves/${id}/talks/sign`,
+      { method: 'POST' },
+    ),
+  cancelTalks: (id: string) =>
+    http<{ ok: boolean }>(`/saves/${id}/talks/cancel`, { method: 'POST' }),
   previewNegotiation: (id: string, offerId: string, ask: NegotiationAsk) =>
     http<NegotiationPreview>(
       `/saves/${id}/market/offers/${offerId}/negotiation?ask=${ask}`,
