@@ -23,6 +23,9 @@ const COLUMNS = [
   { category: 'PHYSICAL', title: 'Fisico' },
 ] as const;
 
+/** Enough roles to see the shape of a player without burying the column. */
+const ROLES_SHOWN = 6;
+
 /** Where the pin sits on the pitch, per position. */
 const PITCH_SPOT: Record<string, { x: number; y: number }> = {
   Portiere: { x: 8, y: 50 },
@@ -81,7 +84,12 @@ function AttributeRow({
   showWords: boolean;
 }) {
   return (
-    <li className={`pp-attr ${attribute.isKey ? 'is-key' : ''}`}>
+    <li
+      className={`pp-attr ${attribute.isKey ? 'is-key' : ''}`}
+      // The longest few labels still ellipsize on a narrow window; hovering
+      // gives the full name and the value.
+      title={`${label(attributeLabels, attribute.key)}: ${attribute.value}/20`}
+    >
       <span className="pp-attr-name">
         {label(attributeLabels, attribute.key)}
       </span>
@@ -243,6 +251,21 @@ export function PlayerProfilePage({ saveId }: PlayerProfilePageProps) {
                   ))}
                 </ul>
               )}
+
+              {/* How well he plays each role, best first. Roles outside his
+                  position are still listed, dimmed — that is how you spot the
+                  winger who could become a full-back. */}
+              <ul className="pp-role-list">
+                {p.roles.slice(0, ROLES_SHOWN).map((role) => (
+                  <li
+                    key={role.key}
+                    className={`pp-role ${role.natural ? '' : 'is-foreign'}`}
+                  >
+                    <Stars value={role.stars} />
+                    <span className="pp-role-name">{role.label}</span>
+                  </li>
+                ))}
+              </ul>
             </section>
 
             {/* The three attribute columns */}
@@ -348,6 +371,24 @@ export function PlayerProfilePage({ saveId }: PlayerProfilePageProps) {
                   </div>
                 ))}
               </div>
+
+              {/* Earned, not assigned: each one appears the season the
+                  attributes behind it get there. */}
+              <h4 className="pp-sub">
+                {p.traits.length}{' '}
+                {p.traits.length === 1 ? 'caratteristica' : 'caratteristiche'}
+              </h4>
+              {p.traits.length === 0 ? (
+                <p className="pp-traits-empty">
+                  Nessuna ancora: si guadagnano crescendo.
+                </p>
+              ) : (
+                <ul className="pp-traits">
+                  {p.traits.map((trait) => (
+                    <li key={trait.key}>{trait.label}</li>
+                  ))}
+                </ul>
+              )}
             </section>
           </div>
 

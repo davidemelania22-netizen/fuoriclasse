@@ -1,4 +1,4 @@
-import { clubColors } from '@football-life/game-data';
+import { clubColors, rateRoles, traitsOf } from '@football-life/game-data';
 import type {
   PlayerProfileData,
   PlayerProfileRepository,
@@ -185,6 +185,10 @@ export interface PlayerProfileView {
 
   attributes: ProfileAttributeView[];
   setPieceKeys: string[];
+  /** Every role rated 0-5, best first. */
+  roles: { key: string; label: string; stars: number; natural: boolean }[];
+  /** The habits this player has earned, from his attributes. */
+  traits: { key: string; label: string }[];
 
   morale: number;
   condition: number;
@@ -274,6 +278,12 @@ export async function getPlayerProfile(
       ? Math.round(keeperMean / 10)
       : Math.round(keeperMean / 10 / 2);
 
+  // Roles and traits both read the 0-20 scale, so build that map once.
+  const values20: Record<string, number> = {};
+  for (const attribute of data.attributes) {
+    values20[attribute.key] = to20(attribute.value);
+  }
+
   return {
     playerName: `${data.firstName} ${data.lastName}`,
     shirtNumber: shirtNumberFor(data.playerId, data.primaryPosition),
@@ -316,6 +326,8 @@ export async function getPlayerProfile(
         isKey: keyKeys.has(a.key),
       })),
     setPieceKeys: SET_PIECE_KEYS.filter((key) => byKey.has(key)),
+    roles: rateRoles(values20, data.primaryPosition),
+    traits: traitsOf(values20),
 
     morale: data.morale,
     condition: data.condition,

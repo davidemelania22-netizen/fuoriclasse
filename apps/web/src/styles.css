@@ -4073,10 +4073,12 @@ textarea:focus {
 
 .pp-body {
   display: grid;
-  grid-template-columns: minmax(190px, 0.85fr) minmax(0, 3fr) minmax(
-      180px,
-      0.9fr
-    );
+  /* The attribute columns are the point of the screen and get the room;
+     the roles wrap onto a second line rather than steal it. */
+  grid-template-columns:
+    minmax(205px, 0.85fr)
+    minmax(0, 3.2fr)
+    minmax(190px, 0.9fr);
   gap: 0.75rem;
   align-items: start;
 }
@@ -4659,4 +4661,80 @@ textarea:focus {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* Ruoli con le stelle e caratteristiche ---------------------------------- */
+
+.pp-role-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pp-role-list .pp-role {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.22rem 0.35rem;
+  border-radius: 5px;
+  /* The header's squad-role line shares the class name; reset its margin. */
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.pp-role-list .pp-role:nth-child(odd) {
+  background: var(--surface-2);
+}
+
+/* A role outside his position is still worth seeing — that is how you spot
+   the winger who could become a full-back — but it must not read as his. */
+.pp-role-list .pp-role.is-foreign {
+  opacity: 0.55;
+  font-style: italic;
+}
+
+.pp-role-name {
+  line-height: 1.25;
+}
+
+.pp-role-list .pp-star {
+  font-size: 0.72rem;
+}
+
+.pp-role-list .pp-stars {
+  flex: 0 0 auto;
+}
+
+.pp-traits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pp-traits li {
+  font-size: 0.8rem;
+  padding-left: 0.75rem;
+  position: relative;
+  line-height: 1.35;
+}
+
+.pp-traits li::before {
+  content: '+';
+  position: absolute;
+  left: 0;
+  color: #5ee08a;
+  font-weight: 700;
+}
+
+.pp-traits-empty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
 }

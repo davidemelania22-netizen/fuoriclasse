@@ -18,6 +18,7 @@ export * from './lifestyles';
 export * from './interviews';
 export * from './news-interviews';
 export * from './quick-starts';
+export * from './player-roles';
 export * from './club-colors';
 
 export const GAME_DATA_PACKAGE_NAME = '@football-life/game-data';

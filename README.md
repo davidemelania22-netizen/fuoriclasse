@@ -11,7 +11,7 @@ statistiche, cronaca, conseguenze).
 
 ## Scaricare e giocare
 
-Versione attuale: **0.1.7**.
+Versione attuale: **0.1.8**.
 
 Non serve né Node né il terminale: si scarica un file, doppio clic, installato.
 
@@ -19,8 +19,8 @@ Non serve né Node né il terminale: si scarica un file, doppio clic, installato
 
 | File                          | Per chi                          |
 | ----------------------------- | -------------------------------- |
-| `Fuoriclasse-0.1.7-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
-| `Fuoriclasse.Setup.0.1.7.exe` | Windows                          |
+| `Fuoriclasse-0.1.8-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
+| `Fuoriclasse.Setup.0.1.8.exe` | Windows                          |
 
 L'app **non è firmata** (servirebbe un certificato Apple a pagamento), quindi la
 prima volta il sistema avvisa. È normale, e va fatto una volta sola:
@@ -32,6 +32,20 @@ prima volta il sistema avvisa. È normale, e va fatto una volta sola:
 
 Tutto gira in locale: le carriere restano sul computer di chi gioca e non
 passano da nessun server.
+
+### Novità della 0.1.8
+
+- **Ruoli con le stelle** — 18 ruoli (dal _Portiere libero_ al _Falso nove_),
+  ognuno valutato 0-5 sulla media pesata degli attributi che quel ruolo
+  chiede davvero. I ruoli fuori dalla tua posizione restano in lista, in
+  corsivo e con un malus.
+- **Caratteristiche** — 24 abitudini ("Si muove negli spazi", "Tira con
+  potenza", "Non molla mai"…) che compaiono solo quando **tutti** gli
+  attributi che le reggono arrivano a soglia, e si perdono se cali.
+
+Nessuna delle due è memorizzata: entrambe si calcolano dagli attributi, quindi
+valgono anche sulle carriere già iniziate e si muovono mentre il giocatore
+cresce.
 
 ### Novità della 0.1.7
 
@@ -99,7 +113,7 @@ da dare a chi vuole giocare. Basta alzare `version` in `package.json` (è quella
 che finisce nel nome dei file) e creare il tag corrispondente:
 
 ```bash
-git tag -a v0.1.7 -m "Fuoriclasse 0.1.7" && git push origin main --follow-tags
+git tag -a v0.1.8 -m "Fuoriclasse 0.1.8" && git push origin main --follow-tags
 ```
 
 Cosa fa `npm run desktop:stage` (il passaggio prima dell'impacchettamento,

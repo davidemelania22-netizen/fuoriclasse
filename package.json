@@ -1,6 +1,6 @@
 {
   "name": "football-life",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "description": "Fuoriclasse: simulatore di carriera calcistica — monorepo",
   "type": "module",

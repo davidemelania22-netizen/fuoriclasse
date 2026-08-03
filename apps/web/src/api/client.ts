@@ -265,6 +265,8 @@ export interface PlayerProfileView {
   keeperRating: number;
   attributes: ProfileAttributeView[];
   setPieceKeys: string[];
+  roles: { key: string; label: string; stars: number; natural: boolean }[];
+  traits: { key: string; label: string }[];
   morale: number;
   condition: number;
   form: number;
