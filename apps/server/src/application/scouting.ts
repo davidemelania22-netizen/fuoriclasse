@@ -51,6 +51,12 @@ export async function runScoutingWeek(
     matches: readonly MatchdayReport[];
     /** How closely the world watches this league (1 = a top division). */
     attention?: number | undefined;
+    /**
+     * Clubs can only table a bid while the market is open. Interest keeps
+     * building when it is shut, so the window reopening brings a rush —
+     * which is exactly how a transfer window feels.
+     */
+    marketOpen?: boolean | undefined;
   },
 ): Promise<ScoutingWeek | null> {
   const state = await deps.scouting.loadScoutingState(input.saveGameId);
@@ -107,8 +113,12 @@ export async function runScoutingWeek(
   // Interest past the threshold turns into a concrete offer.
   const offersFrom: string[] = [];
   const offerInputs: OfferInput[] = [];
+  const marketOpen = input.marketOpen ?? true;
   for (const [clubId, interest] of dossiers) {
     if (interest < SCOUT_OFFER_THRESHOLD) continue;
+    // Dossier is ready but the market is shut: the club waits rather than
+    // losing the interest it built up.
+    if (!marketOpen) continue;
     const club = clubById.get(clubId);
     if (!club) {
       dossiers.delete(clubId); // e.g. no longer above us after promotion

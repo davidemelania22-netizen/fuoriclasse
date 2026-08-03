@@ -17,6 +17,7 @@ import { CalendarPage } from './pages/CalendarPage';
 import { WorldEditorPage } from './pages/WorldEditorPage';
 import { PlayerProfilePage } from './pages/PlayerProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
+import { MarketPage } from './pages/MarketPage';
 import { applyPreferences, usePreferences } from './stores/usePreferences';
 
 export function App() {
@@ -69,6 +70,9 @@ export function App() {
       )}
       {currentSaveId && view === 'profile' && (
         <PlayerProfilePage saveId={currentSaveId} />
+      )}
+      {currentSaveId && view === 'market' && (
+        <MarketPage saveId={currentSaveId} />
       )}
       {view === 'settings' && <SettingsPage />}
       {currentSaveId && view === 'dashboard' && (

@@ -51,6 +51,12 @@ import { PrismaAwardsRepository } from '../repositories/prisma-awards-repository
 import { PrismaCareerTimelineRepository } from '../repositories/prisma-career-timeline-repository';
 import { PrismaPlayerProfileRepository } from '../repositories/prisma-player-profile-repository';
 import { getPlayerProfile } from '../application/player-profile';
+import { PrismaMarketRepository } from '../repositories/prisma-market-repository';
+import {
+  getMarket,
+  previewNegotiation,
+  runNegotiation,
+} from '../application/market';
 import {
   AUTOSAVE_INTERVALS,
   autoSaveAfterWeeks,
@@ -178,6 +184,7 @@ const signSchema = z.object({ clubId: z.string().min(1) });
 
 const ceremonySeenSchema = z.object({ honourId: z.string().min(1) });
 const respondOfferSchema = z.object({ accept: z.boolean() });
+const negotiateSchema = z.object({ ask: z.enum(['WAGE', 'ROLE']) });
 
 const buySchema = z.object({ itemKey: z.string().min(1) });
 
@@ -326,6 +333,12 @@ export function registerApiRoutes(
     profile: profileRepo,
     matchConfig: DEFAULT_MATCH_CONFIG,
   };
+  const marketRepo = new PrismaMarketRepository(prisma);
+  const marketDeps = {
+    market: marketRepo,
+    career: careerRepo,
+    profile: profileRepo,
+  };
   const playerProfileDeps = {
     profileData: new PrismaPlayerProfileRepository(prisma),
     profile: profileRepo,
@@ -420,6 +433,7 @@ export function registerApiRoutes(
     profile: profileRepo,
     newsRepo,
     leagueContext: leagueContextRepo,
+    market: marketRepo,
   };
 
   app.post('/api/saves', async (request, reply) => {
@@ -565,6 +579,14 @@ export function registerApiRoutes(
     };
     const body = parseBody(respondOfferSchema, request.body, reply);
     if (!body) return reply;
+    // Signing elsewhere is a transfer: it can only happen while the window is
+    // open. Turning an offer down is always allowed.
+    if (body.accept) {
+      const market = await getMarket(marketDeps, id);
+      if (market && !market.window.isOpen) {
+        return reply.code(409).send({ error: 'WindowClosed' });
+      }
+    }
     const result = await respondToOffer(careerDeps, {
       saveGameId: id,
       offerId,
@@ -994,6 +1016,56 @@ export function registerApiRoutes(
     if (!restored) return reply.code(404).send({ error: 'NotFound' });
     return reply.send({ restored: true });
   });
+
+  // The transfer market on one screen: the window, the offers, how each one
+  // compares to the deal in hand, and what the rest of the world is doing.
+  app.get('/api/saves/:id/market', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const market = await getMarket(marketDeps, id);
+    if (!market) return reply.code(404).send({ error: 'NotFound' });
+    return reply.send(market);
+  });
+
+  app.get(
+    '/api/saves/:id/market/offers/:offerId/negotiation',
+    async (request, reply) => {
+      const { id, offerId } = request.params as {
+        id: string;
+        offerId: string;
+      };
+      const { ask } = request.query as { ask?: string };
+      if (ask !== 'WAGE' && ask !== 'ROLE') {
+        return reply.code(400).send({ error: 'BadAsk' });
+      }
+      const preview = await previewNegotiation(marketDeps, {
+        saveGameId: id,
+        offerId,
+        ask,
+      });
+      if (!preview) return reply.code(404).send({ error: 'NotFound' });
+      return reply.send(preview);
+    },
+  );
+
+  app.post(
+    '/api/saves/:id/market/offers/:offerId/negotiate',
+    async (request, reply) => {
+      const { id, offerId } = request.params as {
+        id: string;
+        offerId: string;
+      };
+      const body = parseBody(negotiateSchema, request.body ?? {}, reply);
+      if (!body) return reply;
+      const outcome = await runNegotiation(marketDeps, {
+        saveGameId: id,
+        offerId,
+        ask: body.ask,
+      });
+      // Null means the offer is gone or already been pushed once.
+      if (!outcome) return reply.code(409).send({ error: 'CannotNegotiate' });
+      return reply.send(outcome);
+    },
+  );
 
   // The scouting report on yourself: identity, the three attribute columns,
   // the season and the career, assembled in one round trip.

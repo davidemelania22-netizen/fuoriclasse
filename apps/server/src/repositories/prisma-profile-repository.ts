@@ -58,6 +58,8 @@ export class PrismaProfileRepository implements ProfileRepository {
         (profile.lastPresentedClubId as string | undefined) ?? null,
       celebratedHonourIds:
         (profile.celebratedHonourIds as string[] | undefined) ?? [],
+      negotiatedOfferIds:
+        (profile.negotiatedOfferIds as string[] | undefined) ?? [],
     };
   }
 
@@ -154,6 +156,13 @@ export class PrismaProfileRepository implements ProfileRepository {
     honourIds: string[],
   ): Promise<boolean> {
     return this.patch(saveGameId, { celebratedHonourIds: honourIds });
+  }
+
+  setNegotiatedOffers(
+    saveGameId: string,
+    offerIds: string[],
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { negotiatedOfferIds: offerIds });
   }
 
   setCappedForCountry(saveGameId: string, countryId: string): Promise<boolean> {

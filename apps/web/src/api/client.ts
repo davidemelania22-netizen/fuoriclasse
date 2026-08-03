@@ -301,6 +301,65 @@ export interface SnapshotView {
   automatic: boolean;
 }
 
+/** One offer, with how it compares to the deal already in hand. */
+export interface MarketOfferView {
+  id: string;
+  clubName: string;
+  clubLogo: string | null;
+  clubReputation: number;
+  competitionName: string | null;
+  fee: number;
+  weeklyWage: number;
+  contractYears: number;
+  squadRole: string;
+  squadRoleLabel: string;
+  wageDelta: number | null;
+  roleDelta: number | null;
+  reputationDelta: number | null;
+  canNegotiate: boolean;
+}
+
+export interface WorldTransferRecord {
+  date: string;
+  headline: string;
+  body: string;
+}
+
+export interface MarketView {
+  window: {
+    isOpen: boolean;
+    kind: string;
+    label: string;
+    daysAway: number;
+    opensAt: string;
+    closesAt: string;
+  };
+  current: {
+    clubName: string | null;
+    weeklyWage: number | null;
+    squadRoleLabel: string | null;
+    contractEnd: string | null;
+    marketValue: number;
+  };
+  offers: MarketOfferView[];
+  worldTransfers: WorldTransferRecord[];
+}
+
+export type NegotiationAsk = 'WAGE' | 'ROLE';
+
+export interface NegotiationPreview {
+  successChance: number;
+  successLabel: string;
+  failureLabel: string;
+}
+
+export interface NegotiationOutcome {
+  succeeded: boolean;
+  weeklyWage: number;
+  squadRole: string;
+  squadRoleLabel: string;
+}
+
 export interface DashboardResponse {
   save: SaveGameSummary;
   player: PlayerSummary;
@@ -999,6 +1058,19 @@ export const api = {
     http<{ restored: boolean }>(
       `/snapshots/${encodeURIComponent(name)}/restore`,
       { method: 'POST' },
+    ),
+  getMarket: (id: string) => http<MarketView>(`/saves/${id}/market`),
+  previewNegotiation: (id: string, offerId: string, ask: NegotiationAsk) =>
+    http<NegotiationPreview>(
+      `/saves/${id}/market/offers/${offerId}/negotiation?ask=${ask}`,
+    ),
+  negotiate: (id: string, offerId: string, ask: NegotiationAsk) =>
+    http<NegotiationOutcome>(
+      `/saves/${id}/market/offers/${offerId}/negotiate`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ ask }),
+      },
     ),
   getPlayerProfile: (id: string) =>
     http<PlayerProfileView>(`/saves/${id}/player-profile`),

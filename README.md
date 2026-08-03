@@ -11,7 +11,7 @@ statistiche, cronaca, conseguenze).
 
 ## Scaricare e giocare
 
-Versione attuale: **0.1.8**.
+Versione attuale: **0.1.9**.
 
 Non serve né Node né il terminale: si scarica un file, doppio clic, installato.
 
@@ -19,8 +19,8 @@ Non serve né Node né il terminale: si scarica un file, doppio clic, installato
 
 | File                          | Per chi                          |
 | ----------------------------- | -------------------------------- |
-| `Fuoriclasse-0.1.8-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
-| `Fuoriclasse.Setup.0.1.8.exe` | Windows                          |
+| `Fuoriclasse-0.1.9-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
+| `Fuoriclasse.Setup.0.1.9.exe` | Windows                          |
 
 L'app **non è firmata** (servirebbe un certificato Apple a pagamento), quindi la
 prima volta il sistema avvisa. È normale, e va fatto una volta sola:
@@ -32,6 +32,18 @@ prima volta il sistema avvisa. È normale, e va fatto una volta sola:
 
 Tutto gira in locale: le carriere restano sul computer di chi gioca e non
 passano da nessun server.
+
+### Novità della 0.1.9
+
+- **Mercato** 🔁 — una pagina sua. Le **finestre** (estiva e invernale) dicono
+  se è aperto e quanto manca: a mercato chiuso non si firma, e i club
+  interessati aspettano invece di perdere interesse.
+- Ogni offerta è **confrontata con il contratto che hai**: ingaggio, ruolo e
+  reputazione del club, in verde o in rosso.
+- **Trattativa**: puoi chiedere più ingaggio o un ruolo più alto. Le
+  probabilità sono dichiarate prima di provarci, una trattativa per club, e
+  anche un rifiuto limita qualcosa.
+- In fondo, i trasferimenti realmente avvenuti nel mondo di gioco.
 
 ### Novità della 0.1.8
 
@@ -113,7 +125,7 @@ da dare a chi vuole giocare. Basta alzare `version` in `package.json` (è quella
 che finisce nel nome dei file) e creare il tag corrispondente:
 
 ```bash
-git tag -a v0.1.8 -m "Fuoriclasse 0.1.8" && git push origin main --follow-tags
+git tag -a v0.1.9 -m "Fuoriclasse 0.1.9" && git push origin main --follow-tags
 ```
 
 Cosa fa `npm run desktop:stage` (il passaggio prima dell'impacchettamento,

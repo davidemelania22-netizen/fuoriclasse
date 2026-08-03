@@ -67,6 +67,7 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
   const openWorldEditor = useGameStore((s) => s.openWorldEditor);
   const openPlayerProfile = useGameStore((s) => s.openPlayerProfile);
   const openSettings = useGameStore((s) => s.openSettings);
+  const openMarket = useGameStore((s) => s.openMarket);
   const playPresentation = usePreferences((s) => s.playPresentation);
   const playCeremony = usePreferences((s) => s.playCeremony);
   const [intensity, setIntensity] = useState<string>(TrainingIntensity.Normal);
@@ -374,6 +375,9 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
         </button>
         <button type="button" className="ghost" onClick={openPlayerProfile}>
           👤 Scheda
+        </button>
+        <button type="button" className="ghost" onClick={openMarket}>
+          🔁 Mercato
         </button>
         <button type="button" className="ghost" onClick={openWorldEditor}>
           🏟️ Mondo

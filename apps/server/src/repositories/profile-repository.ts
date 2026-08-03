@@ -58,6 +58,8 @@ export interface PlayerProfile {
    * a few dozen, so the list stays small.
    */
   celebratedHonourIds: string[];
+  /** Offers the player has already pushed on: one negotiation each. */
+  negotiatedOfferIds: string[];
 }
 
 /** A federation's approach: change the shirt you play for, or stay loyal. */
@@ -142,6 +144,8 @@ export interface ProfileRepository {
     saveGameId: string,
     honourIds: string[],
   ): Promise<boolean>;
+  /** Persist which offers have been negotiated, so nobody asks twice. */
+  setNegotiatedOffers(saveGameId: string, offerIds: string[]): Promise<boolean>;
   /** Persist the season's national call-up state. */
   setNationalCallup(
     saveGameId: string,

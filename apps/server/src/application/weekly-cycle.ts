@@ -1,4 +1,6 @@
 import type { TrainingIntensity } from '@football-life/shared';
+import { transferWindowAt } from '@football-life/simulation-engine';
+import type { MarketRepository } from '../repositories/market-repository';
 import { advanceWeeks } from './advance-week';
 import { simulateDueMatchdays } from './simulate-matchday';
 import { announceNationalCallup } from './national-callup';
@@ -49,6 +51,7 @@ export interface WeeklyCycleDeps {
   profile: ProfileRepository;
   newsRepo: NewsRepository;
   leagueContext: LeagueContextRepository;
+  market: MarketRepository;
 }
 
 export interface WeeklyCycleInput {
@@ -175,10 +178,15 @@ export async function runWeeklyCycle(
   if (naturalizationOffer) newsItems.push(...naturalizationOffer.news);
 
   // Scouts in the stands: dossiers move, and big interest becomes offers.
+  const marketState = await deps.market.loadMarketState(saveGameId);
+  const marketOpen = marketState?.seasonStart
+    ? transferWindowAt(toDate, marketState.seasonStart).isOpen
+    : true;
   const scouting = await runScoutingWeek(deps.scouting, {
     saveGameId,
     matches,
     attention: spotlight.scoutAttention,
+    marketOpen,
   });
   if (scouting) newsItems.push(...scouting.news);
 

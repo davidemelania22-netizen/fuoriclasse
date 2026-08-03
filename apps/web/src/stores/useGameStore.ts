@@ -17,7 +17,8 @@ type View =
   | 'calendar'
   | 'world'
   | 'profile'
-  | 'settings';
+  | 'settings'
+  | 'market';
 
 interface GameStore {
   currentSaveId: string | null;
@@ -39,6 +40,7 @@ interface GameStore {
   openWorldEditor: () => void;
   openPlayerProfile: () => void;
   openSettings: () => void;
+  openMarket: () => void;
   openCareer: () => void;
   closeOverlay: () => void;
 }
@@ -63,6 +65,7 @@ export const useGameStore = create<GameStore>((set) => ({
   openWorldEditor: () => set({ view: 'world' }),
   openPlayerProfile: () => set({ view: 'profile' }),
   openSettings: () => set({ view: 'settings' }),
+  openMarket: () => set({ view: 'market' }),
   openCareer: () => set({ view: 'career' }),
   closeOverlay: () => set({ view: 'dashboard' }),
 }));

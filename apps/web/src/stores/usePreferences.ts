@@ -107,13 +107,16 @@ export const usePreferences = create<PreferencesState>(
   }),
 );
 
-/** Format money in the chosen currency, compactly. */
+/**
+ * Money in the chosen currency. Only millions are abbreviated: a weekly wage
+ * of 1.665 € read as "2K €", which is both wrong and useless — the figures
+ * people compare offer to offer are exact ones.
+ */
 export function formatMoney(value: number, currency: Currency): string {
   const symbol = CURRENCIES.find((c) => c.key === currency)?.symbol ?? '€';
   if (Math.abs(value) >= 1_000_000) {
     const m = value / 1_000_000;
-    return `${m >= 10 ? Math.round(m) : m.toFixed(2).replace('.', ',')}M ${symbol}`;
+    return `${Math.abs(m) >= 10 ? Math.round(m) : m.toFixed(2).replace('.', ',')}M ${symbol}`;
   }
-  if (Math.abs(value) >= 1000) return `${Math.round(value / 1000)}K ${symbol}`;
-  return `${value.toLocaleString('it-IT')} ${symbol}`;
+  return `${Math.round(value).toLocaleString('it-IT')} ${symbol}`;
 }
