@@ -3919,3 +3919,744 @@ textarea:focus {
     transform: translate(var(--drift), 100vh) rotate(var(--spin));
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Scheda giocatore (pp-*): the scouting report on yourself, laid out the way
+   a football-management profile lays it out — identity across the top, the
+   three attribute columns in the middle, the season underneath.
+   --------------------------------------------------------------------------- */
+
+.pp {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Identity band -------------------------------------------------------- */
+
+.pp-header {
+  display: grid;
+  grid-template-columns:
+    auto minmax(200px, 1.4fr) minmax(150px, 1fr) minmax(220px, 1.3fr)
+    auto;
+  align-items: center;
+  gap: 1.25rem;
+  border-left: 4px solid var(--club-primary, var(--accent));
+}
+
+.pp-face {
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.pp-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pp-name {
+  margin: 0;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pp-shirt {
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.05rem 0.45rem;
+  border-radius: 6px;
+  background: var(--club-primary, var(--accent));
+  color: var(--club-on-dark, #fff);
+}
+
+.pp-position {
+  margin: 0.15rem 0 0;
+  font-weight: 600;
+}
+
+.pp-origin,
+.pp-role {
+  margin: 0.1rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.pp-club {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pp-club img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.pp-club-name {
+  margin: 0;
+  font-weight: 700;
+}
+
+.pp-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin: 0;
+}
+
+.pp-facts dt {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pp-facts dd {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.pp-ability {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: right;
+}
+
+.pp-ability-label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Half-star rating: a filled star clipped over a dim one. */
+.pp-stars {
+  display: inline-flex;
+  gap: 1px;
+}
+
+.pp-star {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  font-size: 1.05rem;
+}
+
+.pp-star-off {
+  color: var(--line-strong);
+}
+
+.pp-star-on {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #f0cf67;
+  white-space: nowrap;
+}
+
+/* Body: roles | attributes | info -------------------------------------- */
+
+.pp-body {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.85fr) minmax(0, 3fr) minmax(
+      180px,
+      0.9fr
+    );
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.pp-roles h3,
+.pp-info h3,
+.pp-column h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+}
+
+.pp-pitch {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(46, 125, 74, 0.28),
+    rgba(46, 125, 74, 0.16)
+  );
+  overflow: hidden;
+}
+
+.pp-pitch-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.pp-pitch-circle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+}
+
+.pp-pitch-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: #5ee08a;
+  box-shadow: 0 0 0 4px rgba(94, 224, 138, 0.25);
+}
+
+.pp-pitch-caption {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+.pp-secondary {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.pp-secondary li {
+  font-size: 0.75rem;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--muted);
+}
+
+/* The three columns ---------------------------------------------------- */
+
+.pp-attributes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 1.5rem;
+}
+
+.pp-sub {
+  margin: 0.9rem 0 0.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pp-attr-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pp-attr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.22rem 0.45rem;
+  border-left: 3px solid transparent;
+  border-radius: 4px;
+}
+
+.pp-attr:nth-child(odd) {
+  background: var(--surface-2);
+}
+
+/* The attributes that decide the position get the accent bar, the way a
+   profile highlights what actually matters for the role. */
+.pp-attr.is-key {
+  border-left-color: #5ee08a;
+  background: rgba(94, 224, 138, 0.09);
+}
+
+.pp-attr-name {
+  font-size: 0.86rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pp-attr-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex: 0 0 auto;
+}
+
+.pp-attr-word {
+  font-size: 0.78rem;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+.pp-keeper {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Info ----------------------------------------------------------------- */
+
+.pp-info dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.pp-info dt {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pp-info dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.pp-feet {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.9rem;
+}
+
+.pp-foot-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.pp-foot-bars {
+  display: flex;
+  gap: 2px;
+}
+
+.pp-foot-bars i {
+  width: 12px;
+  height: 5px;
+  border-radius: 2px;
+  background: var(--line-strong);
+}
+
+.pp-foot-bars i.is-on {
+  background: #5ee08a;
+}
+
+/* Condition strip ------------------------------------------------------ */
+
+.pp-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.pp-tile h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pp-tile-word {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.pp-form-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 46px;
+}
+
+.pp-form-bars i {
+  width: 12px;
+  border-radius: 3px 3px 0 0;
+  background: currentColor;
+}
+
+.pp-form-avg {
+  margin: 0.35rem 0 0;
+  font-weight: 700;
+}
+
+.pp-form-avg span {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.pp-career-line {
+  margin: 0.3rem 0 0;
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Season table --------------------------------------------------------- */
+
+.pp-season {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.pp-table-wrap {
+  overflow-x: auto;
+}
+
+.pp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.pp-table th {
+  text-align: left;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.3rem 0.5rem;
+}
+
+.pp-table td {
+  padding: 0.35rem 0.5rem;
+  border-top: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.pp-table th:not(:first-child),
+.pp-table td:not(:first-child) {
+  text-align: right;
+}
+
+.pp-rating {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pp-toggle {
+  margin-left: auto;
+}
+
+@media (max-width: 1100px) {
+  .pp-header {
+    grid-template-columns: auto 1fr;
+    row-gap: 0.75rem;
+  }
+
+  .pp-ability {
+    text-align: left;
+  }
+
+  .pp-body {
+    grid-template-columns: 1fr;
+  }
+
+  .pp-attributes {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Impostazioni (set-*, seg, switch, snap-*)
+   --------------------------------------------------------------------------- */
+
+.set-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.set-title {
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.set-title-spaced {
+  margin-top: 1.4rem;
+}
+
+.set-sub {
+  margin: 1.1rem 0 0.5rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.set-intro {
+  margin: 0 0 0.9rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.set-row:last-child {
+  border-bottom: none;
+}
+
+/* Segmented controls need the full width, so they stack under their label. */
+.set-stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+
+.set-label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.set-hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.set-static {
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.set-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.set-notice {
+  margin: 0;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.set-confirm {
+  margin-top: 0.9rem;
+  padding: 0.75rem;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.set-confirm p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+/* Segmented control ---------------------------------------------------- */
+
+.seg {
+  display: flex;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.seg button {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+  /* The base button is a gold gradient with dark ink; an unselected segment
+     has to drop both or it reads as dark text on a dark card. */
+  background: transparent;
+  color: var(--text);
+  font-weight: 500;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.seg button:hover:not(.is-on) {
+  background: var(--surface-2);
+}
+
+.seg button + button {
+  border-left: 1px solid var(--line-strong);
+}
+
+.seg button.is-on {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+/* Switch --------------------------------------------------------------- */
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.switch-word {
+  font-size: 0.82rem;
+  color: var(--muted);
+  min-width: 1.4rem;
+  text-align: right;
+}
+
+.switch-track {
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  position: relative;
+  transition: background 0.15s ease;
+}
+
+.switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+
+.switch.is-on .switch-track {
+  background: #35c46a;
+}
+
+.switch.is-on .switch-knob {
+  transform: translateX(20px);
+}
+
+.switch.is-on .switch-word {
+  color: #35c46a;
+  font-weight: 700;
+}
+
+/* Snapshots ------------------------------------------------------------ */
+
+.snap-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.snap-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.snap-row:last-child {
+  border-bottom: none;
+}
+
+.snap-kind {
+  flex: 0 0 auto;
+}
+
+.snap-when {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.84rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.snap-size {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.hero-settings {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.4rem 0.55rem;
+}
+
+.hero {
+  position: relative;
+}
+
+/* Accessibility: one switch that actually stops everything moving, and the
+   same courtesy for anyone whose system already asks for it. */
+:root[data-reduce-motion='true'] *,
+:root[data-reduce-motion='true'] *::before,
+:root[data-reduce-motion='true'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

@@ -18,6 +18,7 @@ const randomSeed = () => Math.random().toString(36).slice(2, 12);
 export function HomePage() {
   const queryClient = useQueryClient();
   const selectSave = useGameStore((s) => s.selectSave);
+  const openSettings = useGameStore((s) => s.openSettings);
 
   const savesQuery = useQuery({ queryKey: ['saves'], queryFn: api.listSaves });
   const quickStartsQuery = useQuery({
@@ -78,6 +79,17 @@ export function HomePage() {
             <p>Vivi la tua carriera. Scegli il tuo destino.</p>
           </div>
         </div>
+        {/* Reachable before any career exists: text size and autosave are
+            worth setting before the first season, not after. */}
+        <button
+          type="button"
+          className="hero-settings"
+          onClick={openSettings}
+          aria-label="Impostazioni"
+          title="Impostazioni"
+        >
+          ⚙️
+        </button>
       </header>
 
       <div className="home">

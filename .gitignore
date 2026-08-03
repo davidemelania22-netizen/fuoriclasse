@@ -22,6 +22,10 @@ dev.db*
 # backup del database e build dell'app desktop: pesanti e personali,
 # non vanno condivisi
 prisma/backups/
+# copie della partita e preferenze del giocatore: dati suoi, mai nel repo
+prisma/snapshots/
+prisma/impostazioni.json
+prisma/.autosave-weeks
 apps/desktop/release/
 
 # staging della build desktop (rigenerata da npm run desktop:stage)

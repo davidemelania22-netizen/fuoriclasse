@@ -9,7 +9,9 @@ statistiche, cronaca, conseguenze).
 > (generazione mondo, allenamento/crescita, partite, carriera/contratti,
 > infortuni/benessere, eventi, ritiro), API Fastify e interfaccia React.
 
-## Scaricare e giocare — versione 0.1.6
+## Scaricare e giocare
+
+Versione attuale: **0.1.7**.
 
 Non serve né Node né il terminale: si scarica un file, doppio clic, installato.
 
@@ -17,8 +19,8 @@ Non serve né Node né il terminale: si scarica un file, doppio clic, installato
 
 | File                          | Per chi                          |
 | ----------------------------- | -------------------------------- |
-| `Fuoriclasse-0.1.6-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
-| `Fuoriclasse.Setup.0.1.6.exe` | Windows                          |
+| `Fuoriclasse-0.1.7-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
+| `Fuoriclasse.Setup.0.1.7.exe` | Windows                          |
 
 L'app **non è firmata** (servirebbe un certificato Apple a pagamento), quindi la
 prima volta il sistema avvisa. È normale, e va fatto una volta sola:
@@ -30,6 +32,18 @@ prima volta il sistema avvisa. È normale, e va fatto una volta sola:
 
 Tutto gira in locale: le carriere restano sul computer di chi gioca e non
 passano da nessun server.
+
+### Novità della 0.1.7
+
+- **Scheda giocatore** 👤 — il profilo completo: identità e stelle in alto, le
+  tre colonne di attributi (Tecnica, Psicologia, Fisico) sulla scala 1-20 con
+  evidenziati quelli che contano per il tuo ruolo, info fisiche e piede,
+  striscia di forma e statistiche di stagione e carriera. Un interruttore
+  passa da numeri a parole.
+- **Impostazioni** ⚙️ — valuta, dimensione del testo, schermo intero, scene
+  accendibili, riduzione delle animazioni, e soprattutto i **salvataggi**:
+  copie della partita da cui tornare indietro, con l'automatico **spento
+  finché non lo accendi tu**.
 
 ### Novità della 0.1.6
 
@@ -85,7 +99,7 @@ da dare a chi vuole giocare. Basta alzare `version` in `package.json` (è quella
 che finisce nel nome dei file) e creare il tag corrispondente:
 
 ```bash
-git tag -a v0.1.5 -m "Fuoriclasse 0.1.5" && git push origin main --follow-tags
+git tag -a v0.1.7 -m "Fuoriclasse 0.1.7" && git push origin main --follow-tags
 ```
 
 Cosa fa `npm run desktop:stage` (il passaggio prima dell'impacchettamento,
@@ -107,10 +121,12 @@ incompleto — lo schema si allinea con `prisma db push`, non ricostruendolo dal
 migrazioni.
 
 L'app non è firmata: per i passaggi del primo avvio, vedi
-[Scaricare e giocare](#scaricare-e-giocare--versione-015).
+[Scaricare e giocare](#scaricare-e-giocare).
 
 I salvataggi vivono in `~/Library/Application Support/Fuoriclasse/` su macOS
 e in `%APPDATA%\Fuoriclasse\` su Windows, con backup automatici a ogni avvio.
+Le copie fatte dal giocatore (⚙️ Impostazioni → Salvataggi) stanno lì accanto,
+in `snapshots/`, insieme al file `impostazioni.json`.
 
 ## Giocare dalla cartella del progetto (senza installer)
 

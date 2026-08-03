@@ -49,6 +49,21 @@ import { PrismaContinentalRepository } from '../repositories/prisma-continental-
 import { PrismaNationalTeamRepository } from '../repositories/prisma-national-team-repository';
 import { PrismaAwardsRepository } from '../repositories/prisma-awards-repository';
 import { PrismaCareerTimelineRepository } from '../repositories/prisma-career-timeline-repository';
+import { PrismaPlayerProfileRepository } from '../repositories/prisma-player-profile-repository';
+import { getPlayerProfile } from '../application/player-profile';
+import {
+  AUTOSAVE_INTERVALS,
+  autoSaveAfterWeeks,
+  readSettings,
+  settingsSchema,
+  writeSettings,
+} from '../application/settings';
+import {
+  deleteSnapshot,
+  listSnapshots,
+  restoreSnapshot,
+  takeSnapshot,
+} from '../db/snapshots';
 import { PrismaStandingsRepository } from '../repositories/prisma-standings-repository';
 import { PrismaSeasonRolloverRepository } from '../repositories/prisma-season-rollover-repository';
 import { PrismaNpcAgingRepository } from '../repositories/prisma-npc-aging-repository';
@@ -310,6 +325,10 @@ export function registerApiRoutes(
     tactics: tacticsRepo,
     profile: profileRepo,
     matchConfig: DEFAULT_MATCH_CONFIG,
+  };
+  const playerProfileDeps = {
+    profileData: new PrismaPlayerProfileRepository(prisma),
+    profile: profileRepo,
   };
   const calendarDeps = { calendar: new PrismaCalendarRepository(prisma) };
   const worldEditorDeps = { world: new PrismaWorldEditorRepository(prisma) };
@@ -935,6 +954,56 @@ export function registerApiRoutes(
     return reply.send({ ok: true });
   });
 
+  // Settings the server has to act on. Everything cosmetic lives in the
+  // browser; what is here is autosave, because only the server can take a copy
+  // of the database.
+  app.get('/api/settings', async () => ({
+    settings: readSettings(),
+    intervals: AUTOSAVE_INTERVALS,
+  }));
+
+  app.put('/api/settings', async (request, reply) => {
+    const body = parseBody(settingsSchema, request.body ?? {}, reply);
+    if (!body) return reply;
+    return reply.send({ settings: writeSettings(body) });
+  });
+
+  app.get('/api/snapshots', async () => ({ snapshots: await listSnapshots() }));
+
+  app.post('/api/snapshots', async (_request, reply) => {
+    const settings = readSettings();
+    const snapshot = await takeSnapshot(false, settings.autoSaveKeep);
+    if (!snapshot) return reply.code(500).send({ error: 'NoDatabase' });
+    return reply.send({ snapshot });
+  });
+
+  app.delete('/api/snapshots/:name', async (request, reply) => {
+    const { name } = request.params as { name: string };
+    const deleted = await deleteSnapshot(name);
+    if (!deleted) return reply.code(404).send({ error: 'NotFound' });
+    return reply.send({ deleted: true });
+  });
+
+  // Restoring swaps the file under Prisma, so the pool has to be dropped and
+  // rebuilt or every later query reads the pages that were just replaced.
+  app.post('/api/snapshots/:name/restore', async (request, reply) => {
+    const { name } = request.params as { name: string };
+    await prisma.$disconnect();
+    const restored = await restoreSnapshot(name);
+    await prisma.$connect();
+    if (!restored) return reply.code(404).send({ error: 'NotFound' });
+    return reply.send({ restored: true });
+  });
+
+  // The scouting report on yourself: identity, the three attribute columns,
+  // the season and the career, assembled in one round trip.
+  app.get('/api/saves/:id/player-profile', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const profile = await getPlayerProfile(playerProfileDeps, id);
+    if (!profile) return reply.code(404).send({ error: 'NotFound' });
+    return reply.send(profile);
+  });
+
   // The trophy ceremony, derived from the honours the protagonist can claim.
   app.get('/api/saves/:id/ceremony', async (request, reply) => {
     const { id } = request.params as { id: string };
@@ -1047,7 +1116,10 @@ export function registerApiRoutes(
       ...body,
     });
     if (!result) return reply.code(404).send({ error: 'NotFound' });
-    return reply.send(result);
+    // Only after the week is safely written: a snapshot of a half-played week
+    // would restore to a state the player never saw.
+    const autoSave = await autoSaveAfterWeeks(result.report.weeksAdvanced);
+    return reply.send({ ...result, autoSave });
   });
 
   app.post('/api/saves/:id/simulate-season', async (request, reply) => {

@@ -15,14 +15,22 @@ import { CareerPage } from './pages/CareerPage';
 import { TacticsPage } from './pages/TacticsPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { WorldEditorPage } from './pages/WorldEditorPage';
+import { PlayerProfilePage } from './pages/PlayerProfilePage';
+import { SettingsPage } from './pages/SettingsPage';
+import { applyPreferences, usePreferences } from './stores/usePreferences';
 
 export function App() {
   const currentSaveId = useGameStore((s) => s.currentSaveId);
   const view = useGameStore((s) => s.view);
+  const preferences = usePreferences();
+
+  // Text size and reduced motion are document-level: push them on every
+  // render so a preference set on another screen lands immediately.
+  applyPreferences(preferences);
 
   return (
     <div className="app">
-      {!currentSaveId && <HomePage />}
+      {!currentSaveId && view !== 'settings' && <HomePage />}
       {currentSaveId && view === 'editor' && (
         <EditorPage saveId={currentSaveId} />
       )}
@@ -59,6 +67,10 @@ export function App() {
       {currentSaveId && view === 'world' && (
         <WorldEditorPage saveId={currentSaveId} />
       )}
+      {currentSaveId && view === 'profile' && (
+        <PlayerProfilePage saveId={currentSaveId} />
+      )}
+      {view === 'settings' && <SettingsPage />}
       {currentSaveId && view === 'dashboard' && (
         <DashboardPage saveId={currentSaveId} />
       )}

@@ -205,6 +205,100 @@ export interface LeagueSpotlight {
   scoutAttention: number;
 }
 
+/** One attribute on the 0-20 scale the profile screen speaks. */
+export interface ProfileAttributeView {
+  key: string;
+  category: string;
+  value: number;
+  isKey: boolean;
+}
+
+export interface ProfileSeasonLine {
+  competitionName: string;
+  appearances: number;
+  goals: number;
+  assists: number;
+  yellowCards: number;
+  redCards: number;
+  averageRating: number;
+}
+
+export interface ProfileRecentMatch {
+  date: string;
+  opponentName: string;
+  competitionName: string | null;
+  rating: number;
+  goals: number;
+  assists: number;
+}
+
+/** The scouting report on yourself. */
+export interface PlayerProfileView {
+  playerName: string;
+  shirtNumber: number;
+  positionLabel: string;
+  secondaryPositionLabels: string[];
+  footLabel: string;
+  footStrength: { left: number; right: number };
+  nationalityId: string;
+  ageYears: number;
+  birthDate: string;
+  heightCm: number;
+  weightKg: number;
+  avatarDataUrl: string | null;
+  clubName: string | null;
+  clubLogo: string | null;
+  colors: {
+    primary: string;
+    secondary: string;
+    onPrimary: string;
+    onDark: string;
+  };
+  squadRoleLabel: string | null;
+  weeklyWage: number | null;
+  contractEndDate: string | null;
+  marketValue: number;
+  abilityStars: number;
+  potentialStars: number;
+  reputationLabel: string;
+  personalityLabel: string;
+  keeperRating: number;
+  attributes: ProfileAttributeView[];
+  setPieceKeys: string[];
+  morale: number;
+  condition: number;
+  form: number;
+  stress: number;
+  seasonLabel: string | null;
+  seasonLines: ProfileSeasonLine[];
+  recentMatches: ProfileRecentMatch[];
+  careerTotals: {
+    appearances: number;
+    goals: number;
+    assists: number;
+    clubs: number;
+  };
+}
+
+/** Settings the server acts on: only autosave, for now. */
+export interface ServerSettings {
+  autoSaveEnabled: boolean;
+  autoSaveEveryWeeks: number;
+  autoSaveKeep: number;
+}
+
+export interface AutoSaveInterval {
+  weeks: number;
+  label: string;
+}
+
+export interface SnapshotView {
+  name: string;
+  createdAt: string;
+  sizeBytes: number;
+  automatic: boolean;
+}
+
 export interface DashboardResponse {
   save: SaveGameSummary;
   player: PlayerSummary;
@@ -883,6 +977,29 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+  getSettings: () =>
+    http<{ settings: ServerSettings; intervals: AutoSaveInterval[] }>(
+      '/settings',
+    ),
+  saveSettings: (settings: ServerSettings) =>
+    http<{ settings: ServerSettings }>('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    }),
+  listSnapshots: () => http<{ snapshots: SnapshotView[] }>('/snapshots'),
+  takeSnapshot: () =>
+    http<{ snapshot: SnapshotView }>('/snapshots', { method: 'POST' }),
+  deleteSnapshot: (name: string) =>
+    http<{ deleted: boolean }>(`/snapshots/${encodeURIComponent(name)}`, {
+      method: 'DELETE',
+    }),
+  restoreSnapshot: (name: string) =>
+    http<{ restored: boolean }>(
+      `/snapshots/${encodeURIComponent(name)}/restore`,
+      { method: 'POST' },
+    ),
+  getPlayerProfile: (id: string) =>
+    http<PlayerProfileView>(`/saves/${id}/player-profile`),
   getWorld: (id: string) => http<EditableWorldView>(`/saves/${id}/world`),
   editWorldClub: (
     id: string,

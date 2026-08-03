@@ -9,6 +9,7 @@ import {
   type SeasonSkipSummary,
 } from '../api/client';
 import { useGameStore } from '../stores/useGameStore';
+import { usePreferences } from '../stores/usePreferences';
 import { PlayerCard } from '../components/PlayerCard';
 import { EventCard } from '../components/EventCard';
 import { WalletBar } from '../components/WalletBar';
@@ -64,6 +65,10 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
   const openTactics = useGameStore((s) => s.openTactics);
   const openCalendar = useGameStore((s) => s.openCalendar);
   const openWorldEditor = useGameStore((s) => s.openWorldEditor);
+  const openPlayerProfile = useGameStore((s) => s.openPlayerProfile);
+  const openSettings = useGameStore((s) => s.openSettings);
+  const playPresentation = usePreferences((s) => s.playPresentation);
+  const playCeremony = usePreferences((s) => s.playCeremony);
   const [intensity, setIntensity] = useState<string>(TrainingIntensity.Normal);
   const [lastReport, setLastReport] = useState<
     AdvanceResponse['report'] | null
@@ -108,9 +113,12 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
   // comparing the club under contract with the last one presented, so this
   // fires after a signing, a transfer or a loan without knowing about any of
   // them. Dismissing it tells the server, so it never plays twice.
+  // Both scenes can be switched off in the settings; the server still knows
+  // one is owed, so turning them back on shows the one you skipped.
   const presentationQuery = useQuery({
     queryKey: ['presentation', saveId],
     queryFn: () => api.getPresentation(saveId),
+    enabled: playPresentation,
   });
   const dismissPresentation = useMutation({
     mutationFn: () => api.markPresentationSeen(saveId),
@@ -122,6 +130,7 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
   const ceremonyQuery = useQuery({
     queryKey: ['ceremony', saveId],
     queryFn: () => api.getCeremony(saveId),
+    enabled: playCeremony,
   });
   const dismissCeremony = useMutation({
     mutationFn: (honourId: string) => api.markCeremonySeen(saveId, honourId),
@@ -363,11 +372,23 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
         <button type="button" className="ghost" onClick={openShop}>
           🛒 Negozio
         </button>
+        <button type="button" className="ghost" onClick={openPlayerProfile}>
+          👤 Scheda
+        </button>
         <button type="button" className="ghost" onClick={openWorldEditor}>
           🏟️ Mondo
         </button>
         <button type="button" className="ghost" onClick={openEditor}>
           Modifica
+        </button>
+        <button
+          type="button"
+          className="ghost"
+          onClick={openSettings}
+          aria-label="Impostazioni"
+          title="Impostazioni"
+        >
+          ⚙️
         </button>
       </div>
 

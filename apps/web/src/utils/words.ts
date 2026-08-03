@@ -23,3 +23,38 @@ export const ratingWord = (value20: number): string => bandOf(value20).word;
 
 /** CSS tone class matching the word's band. */
 export const ratingTone = (value20: number): string => bandOf(value20).tone;
+
+/**
+ * Morale and fitness need their own words: a body at 100% is "Perfetta", not
+ * "Fuoriclasse", and a happy player is "Entusiasta", not "Ottimo". Both take
+ * the raw 0-100 the engine stores.
+ */
+const MORALE_BANDS: { max: number; word: string; tone: string }[] = [
+  { max: 20, word: 'A terra', tone: 'word-poor' },
+  { max: 40, word: 'Scontento', tone: 'word-weak' },
+  { max: 60, word: 'Neutrale', tone: 'word-fair' },
+  { max: 80, word: 'Contento', tone: 'word-good' },
+  { max: 100, word: 'Entusiasta', tone: 'word-great' },
+];
+
+const CONDITION_BANDS: { max: number; word: string; tone: string }[] = [
+  { max: 30, word: 'Esausto', tone: 'word-poor' },
+  { max: 55, word: 'Affaticato', tone: 'word-weak' },
+  { max: 75, word: 'Sufficiente', tone: 'word-fair' },
+  { max: 92, word: 'Buona', tone: 'word-good' },
+  { max: 100, word: 'Perfetta', tone: 'word-great' },
+];
+
+const pick = (
+  bands: { max: number; word: string; tone: string }[],
+  v: number,
+) => bands.find((band) => Math.max(0, Math.min(100, v)) <= band.max)!;
+
+export const moraleWord = (value: number): string =>
+  pick(MORALE_BANDS, value).word;
+export const moraleTone = (value: number): string =>
+  pick(MORALE_BANDS, value).tone;
+export const conditionWord = (value: number): string =>
+  pick(CONDITION_BANDS, value).word;
+export const conditionTone = (value: number): string =>
+  pick(CONDITION_BANDS, value).tone;
