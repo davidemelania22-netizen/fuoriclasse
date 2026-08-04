@@ -3,10 +3,12 @@ import { InjuryStatus, type AttributeCategory } from '@football-life/shared';
 import type { AttributeValue } from '@football-life/simulation-engine';
 import type {
   InjuryTreatmentUpdate,
+  MatchAftermathUpdate,
   ProgressionRepository,
   ProtagonistSnapshot,
   WeeklyUpdate,
 } from './progression-repository';
+import { conditionFromFatigue } from '@football-life/simulation-engine';
 
 const ACTIVE_INJURY_STATUSES = [InjuryStatus.Active, InjuryStatus.Recovering];
 const WEEK_MS = 7 * 86_400_000;
@@ -212,5 +214,36 @@ export class PrismaProgressionRepository implements ProgressionRepository {
         recurrenceRisk: update.recurrenceRisk,
       },
     });
+  }
+
+  async applyMatchAftermath(
+    update: MatchAftermathUpdate,
+  ): Promise<{ fatigue: number; condition: number; morale: number } | null> {
+    const save = await this.prisma.saveGame.findUnique({
+      where: { id: update.saveGameId },
+    });
+    if (!save?.playerPersonId) return null;
+    const person = await this.prisma.person.findUnique({
+      where: { id: save.playerPersonId },
+      include: { player: true },
+    });
+    const player = person?.player;
+    if (!player) return null;
+
+    const fatigue = Math.max(
+      0,
+      Math.min(100, player.fatigue + update.fatigueDelta),
+    );
+    const morale = Math.max(
+      0,
+      Math.min(100, player.morale + update.moraleDelta),
+    );
+    const next = {
+      fatigue: Math.round(fatigue),
+      morale: Math.round(morale),
+      condition: Math.round(conditionFromFatigue(fatigue)),
+    };
+    await this.prisma.player.update({ where: { id: player.id }, data: next });
+    return next;
   }
 }

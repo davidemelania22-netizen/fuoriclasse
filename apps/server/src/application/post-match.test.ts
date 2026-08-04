@@ -75,6 +75,7 @@ describe('post-match flash interview', () => {
       saveGameId: game.save.id,
       matches: [
         reportWith({
+          minutes: 90,
           rating: 8.2,
           goals: 2,
           assists: 0,
@@ -129,6 +130,7 @@ describe('post-match flash interview', () => {
       interview: new PrismaInterviewRepository(db.prisma),
     };
     const dull = {
+      minutes: 90,
       rating: 6.2,
       goals: 0,
       assists: 0,

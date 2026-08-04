@@ -9,6 +9,8 @@ import type {
   StoredNaturalization,
   StoredPostMatch,
   StoredContractTalks,
+  StoredPendingRenewal,
+  StoredTalksMemory,
 } from './profile-repository';
 
 const j = (value: unknown): Prisma.InputJsonValue =>
@@ -63,6 +65,10 @@ export class PrismaProfileRepository implements ProfileRepository {
         (profile.negotiatedOfferIds as string[] | undefined) ?? [],
       contractTalks:
         (profile.contractTalks as StoredContractTalks | undefined) ?? null,
+      talksMemory:
+        (profile.talksMemory as StoredTalksMemory | undefined) ?? null,
+      pendingRenewal:
+        (profile.pendingRenewal as StoredPendingRenewal | undefined) ?? null,
     };
   }
 
@@ -173,6 +179,20 @@ export class PrismaProfileRepository implements ProfileRepository {
     talks: StoredContractTalks | null,
   ): Promise<boolean> {
     return this.patch(saveGameId, { contractTalks: talks });
+  }
+
+  setTalksMemory(
+    saveGameId: string,
+    memory: StoredTalksMemory,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { talksMemory: memory });
+  }
+
+  setPendingRenewal(
+    saveGameId: string,
+    renewal: StoredPendingRenewal | null,
+  ): Promise<boolean> {
+    return this.patch(saveGameId, { pendingRenewal: renewal });
   }
 
   setCappedForCountry(saveGameId: string, countryId: string): Promise<boolean> {

@@ -83,6 +83,8 @@ export class PrismaCareerRepository implements CareerRepository {
             endDate: contract.endDate,
             squadRole: contract.squadRole,
             weeklyWage: contract.weeklyWage,
+            appearanceBonus: contract.appearanceBonus,
+            goalBonus: contract.goalBonus,
           }
         : null,
     };

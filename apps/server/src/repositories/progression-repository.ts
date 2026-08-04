@@ -81,9 +81,23 @@ export interface InjuryTreatmentUpdate {
   recurrenceRisk: number;
 }
 
+/** What a matchday adds to the protagonist once the results are known. */
+export interface MatchAftermathUpdate {
+  saveGameId: string;
+  fatigueDelta: number;
+  moraleDelta: number;
+}
+
 /** Persistence boundary for advancing the protagonist's weekly progression. */
 export interface ProgressionRepository {
   loadProtagonist(saveGameId: string): Promise<ProtagonistSnapshot | null>;
   applyWeeklyUpdate(update: WeeklyUpdate): Promise<void>;
   applyInjuryTreatment(update: InjuryTreatmentUpdate): Promise<void>;
+  /**
+   * Applied after the matches are played, because training runs before them:
+   * the ninety minutes and the result cannot be known when the week starts.
+   */
+  applyMatchAftermath(
+    update: MatchAftermathUpdate,
+  ): Promise<{ fatigue: number; condition: number; morale: number } | null>;
 }

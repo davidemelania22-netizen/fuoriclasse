@@ -1,16 +1,23 @@
 import {
   clampProposal,
+  COOLING_OFF_WEEKS,
   createRandomSource,
   packageCost,
   respondToProposal,
   TERM_LIMITS,
+  willClubTalk,
   type ContractPackage,
+  type TalksRefusal,
   type TalksVerdict,
 } from '@football-life/simulation-engine';
 import { DEFAULT_CAREER_CONFIG } from '@football-life/game-data';
 import type { CareerRepository } from '../repositories/career-repository';
+import type { CareerStatsRepository } from '../repositories/career-stats-repository';
 import type { MarketRepository } from '../repositories/market-repository';
-import type { ProfileRepository } from '../repositories/profile-repository';
+import type {
+  ProfileRepository,
+  StoredTalksMemory,
+} from '../repositories/profile-repository';
 
 /**
  * Sitting down over a contract — a transfer offer or a renewal with the club
@@ -49,6 +56,10 @@ export interface StoredTalks {
   status: 'OPEN' | 'AGREED' | 'BROKEN';
   lastVerdict: string | null;
   lastMessage: string | null;
+  /** True once the player has left the table without closing the deal. */
+  dismissed?: boolean;
+  /** True once an agent has improved the opening package. Only ever once. */
+  agentBoosted?: boolean;
 }
 
 export interface TalksView extends StoredTalks {
@@ -71,6 +82,27 @@ export interface TalksDeps {
   market: MarketRepository;
   career: CareerRepository;
   profile: ProfileRepository;
+  /** Read only to know what the player has actually done this season. */
+  careerStats: CareerStatsRepository;
+}
+
+const WEEK_MS = 7 * 86_400_000;
+const MONTH_MS = 30 * 86_400_000;
+
+const weeksBetween = (from: Date, to: Date) =>
+  (to.getTime() - from.getTime()) / WEEK_MS;
+
+/** What the player has done in the season currently being played. */
+async function seasonSoFar(deps: TalksDeps, saveGameId: string) {
+  const stats = await deps.careerStats.loadCareerStats(saveGameId);
+  const appearances = stats?.appearances ?? [];
+  if (appearances.length === 0) return { appearances: 0, goals: 0 };
+  const latest = Math.max(...appearances.map((a) => a.seasonStartMs));
+  const thisSeason = appearances.filter((a) => a.seasonStartMs === latest);
+  return {
+    appearances: thisSeason.length,
+    goals: thisSeason.reduce((sum, a) => sum + a.goals, 0),
+  };
 }
 
 const bound = (base: number, span: { min: number; max: number }) => ({
@@ -102,10 +134,23 @@ async function context(deps: TalksDeps, saveGameId: string, subject: string) {
   if (!career) return null;
 
   const directory = await deps.career.listClubDirectory(saveGameId);
-  const expiringSoon =
-    state.currentContractEnd !== null &&
-    state.currentContractEnd.getTime() - state.currentDate.getTime() <
-      365 * 86_400_000;
+  const monthsLeft =
+    state.currentContractEnd === null
+      ? 0
+      : (state.currentContractEnd.getTime() - state.currentDate.getTime()) /
+        MONTH_MS;
+  const expiringSoon = state.currentContractEnd !== null && monthsLeft < 12;
+  // What he has done lately is what a club actually pays for.
+  const season = await seasonSoFar(deps, saveGameId);
+  const leverage = {
+    currentAbility: career.currentAbility,
+    marketValue: state.marketValue,
+    expiringSoon,
+    form: career.form,
+    seasonAppearances: season.appearances,
+    seasonGoals: season.goals,
+    age: career.age,
+  };
 
   if (subject === RENEWAL_SUBJECT) {
     if (!state.clubId || !career.currentContract) return null;
@@ -118,6 +163,9 @@ async function context(deps: TalksDeps, saveGameId: string, subject: string) {
       clubName: state.clubName ?? 'il tuo club',
       clubReputation: club?.reputation ?? 0,
       expiringSoon,
+      monthsLeft,
+      season,
+      leverage: { ...leverage, clubReputation: club?.reputation ?? 0 },
       // A renewal opens from what the player earns today: the club's first
       // word is "the same again", and everything is argued from there.
       baseline: {
@@ -146,6 +194,9 @@ async function context(deps: TalksDeps, saveGameId: string, subject: string) {
     clubName: club?.name ?? 'Sconosciuto',
     clubReputation: club?.reputation ?? 0,
     expiringSoon,
+    monthsLeft,
+    season,
+    leverage: { ...leverage, clubReputation: club?.reputation ?? 0 },
     baseline: {
       years: offer.contractYears,
       weeklyWage: offer.offeredWage,
@@ -171,20 +222,51 @@ function view(talks: StoredTalks, clubName: string): TalksView {
   };
 }
 
-/** Open (or reopen) the table on a subject. */
+/** Either a table to sit at, or the reason there is not one. */
+export type OpenTalksResult =
+  | { status: 'OPEN'; talks: TalksView }
+  | { status: 'REFUSED'; reason: TalksRefusal; message: string };
+
+/**
+ * Open (or reopen) the table on a subject.
+ *
+ * A renewal is not a button. Before anything else the club is asked whether it
+ * is even willing to talk: it will not reopen a contract it signed last month,
+ * it will not improve a long deal for someone who never plays, and it will not
+ * hear you at all in the weeks after you walked out on it.
+ */
 export async function openTalks(
   deps: TalksDeps,
   input: { saveGameId: string; subject: string },
-): Promise<TalksView | null> {
+): Promise<OpenTalksResult | null> {
   const ctx = await context(deps, input.saveGameId, input.subject);
   if (!ctx) return null;
 
   const profile = await deps.profile.getProfile(input.saveGameId);
   const existing = profile?.contractTalks ?? null;
-  // Resuming the same conversation keeps its history; a different subject
-  // replaces it, because you can only be at one table at a time.
-  if (existing && existing.subject === input.subject) {
-    return view(existing, ctx.clubName);
+  const memory = profile?.talksMemory ?? null;
+
+  // Resuming the same conversation keeps its history — including the patience
+  // already spent, which is the whole point of not deleting it on the way out.
+  // A table the club walked away from is NOT resumable, or reopening it would
+  // be a way round the very cooling-off that walking away earned.
+  if (
+    existing &&
+    existing.subject === input.subject &&
+    existing.status !== 'BROKEN'
+  ) {
+    const resumed: StoredTalks = { ...existing, dismissed: false };
+    await deps.profile.setContractTalks(input.saveGameId, resumed);
+    return { status: 'OPEN', talks: view(resumed, ctx.clubName) };
+  }
+
+  const willing = willingness(ctx, memory, input.subject);
+  if (!willing.willing) {
+    return {
+      status: 'REFUSED',
+      reason: willing.reason,
+      message: willing.message,
+    };
   }
 
   const talks: StoredTalks = {
@@ -196,9 +278,49 @@ export async function openTalks(
     status: 'OPEN',
     lastVerdict: null,
     lastMessage: null,
+    dismissed: false,
   };
   await deps.profile.setContractTalks(input.saveGameId, talks);
-  return view(talks, ctx.clubName);
+  return { status: 'OPEN', talks: view(talks, ctx.clubName) };
+}
+
+/**
+ * Whether this club will sit down now.
+ *
+ * A transfer is a different conversation from a renewal: another club has
+ * already made an offer, so the only thing that can stop it is you having
+ * stormed out of a table recently.
+ */
+function willingness(
+  ctx: NonNullable<Awaited<ReturnType<typeof context>>>,
+  memory: StoredTalksMemory | null,
+  subject: string,
+) {
+  const now = ctx.state.currentDate;
+  const coolingOffWeeksLeft = memory?.coolingOffUntil
+    ? Math.max(0, weeksBetween(now, new Date(memory.coolingOffUntil)))
+    : 0;
+  if (subject !== RENEWAL_SUBJECT) {
+    return willClubTalk({
+      coolingOffWeeksLeft,
+      weeksSinceSigned: null,
+      // A club bidding for you has its own reasons; none of yours apply.
+      monthsLeft: 0,
+      seasonAppearances: ctx.season.appearances,
+      seasonGoals: ctx.season.goals,
+      form: ctx.career.form,
+    });
+  }
+  return willClubTalk({
+    coolingOffWeeksLeft,
+    weeksSinceSigned: memory?.lastSignedAt
+      ? weeksBetween(new Date(memory.lastSignedAt), now)
+      : null,
+    monthsLeft: ctx.monthsLeft,
+    seasonAppearances: ctx.season.appearances,
+    seasonGoals: ctx.season.goals,
+    form: ctx.career.form,
+  });
 }
 
 export async function getTalks(
@@ -207,7 +329,8 @@ export async function getTalks(
 ): Promise<TalksView | null> {
   const profile = await deps.profile.getProfile(saveGameId);
   const talks = profile?.contractTalks;
-  if (!talks) return null;
+  // A dismissed table is remembered, not shown.
+  if (!talks || talks.dismissed) return null;
   const ctx = await context(deps, saveGameId, talks.subject);
   return view(talks, ctx?.clubName ?? 'Il club');
 }
@@ -238,12 +361,7 @@ export async function proposeTerms(
       baseline: talks.baseline,
       clubPosition: talks.clubPosition,
       proposal: input.proposal,
-      leverage: {
-        currentAbility: ctx.career.currentAbility,
-        clubReputation: ctx.clubReputation,
-        marketValue: ctx.state.marketValue,
-        expiringSoon: ctx.expiringSoon,
-      },
+      leverage: ctx.leverage,
       patience: talks.patience,
     },
     rng,
@@ -264,6 +382,17 @@ export async function proposeTerms(
     lastMessage: response.message,
   };
   await deps.profile.setContractTalks(input.saveGameId, next);
+
+  // Pushing a club until it stands up is not free: it will not hear you again
+  // for a while, whatever door you try. Without this, walking out and walking
+  // straight back in refilled the patience for nothing.
+  if (response.verdict === 'WALKED_OUT') {
+    await rememberTalks(deps, input.saveGameId, profile?.talksMemory ?? null, {
+      coolingOffUntil: new Date(
+        ctx.state.currentDate.getTime() + COOLING_OFF_WEEKS * WEEK_MS,
+      ).toISOString(),
+    });
+  }
 
   return {
     ...view(next, ctx.clubName),
@@ -337,15 +466,54 @@ export async function signAgreedTerms(
   }
 
   await deps.profile.setContractTalks(saveGameId, null);
+  if (talks.subject === RENEWAL_SUBJECT && ctx.state.clubId) {
+    // Staying is a moment too. Nothing about the state can be read to infer
+    // it — the club does not change — so signing leaves the note itself.
+    await deps.profile.setPendingRenewal(saveGameId, {
+      clubId: ctx.state.clubId,
+      years: terms.years,
+      weeklyWage: terms.weeklyWage,
+      squadRole: terms.squadRole,
+      signedAt: ctx.state.currentDate.toISOString(),
+    });
+  }
+  // A contract just signed is a contract nobody reopens next week.
+  await rememberTalks(deps, saveGameId, profile?.talksMemory ?? null, {
+    lastSignedAt: ctx.state.currentDate.toISOString(),
+    coolingOffUntil: null,
+  });
   return { signed: true, terms, clubName: ctx.clubName };
 }
 
-/** Walk away from the table without signing. */
+/**
+ * Leave the table. The session is kept rather than deleted: the patience spent
+ * arguing stays spent, so leaving and coming back is not a way to start over.
+ */
 export async function cancelTalks(
   deps: TalksDeps,
   saveGameId: string,
 ): Promise<boolean> {
-  return deps.profile.setContractTalks(saveGameId, null);
+  const profile = await deps.profile.getProfile(saveGameId);
+  const talks = profile?.contractTalks;
+  if (!talks) return true;
+  return deps.profile.setContractTalks(saveGameId, {
+    ...talks,
+    dismissed: true,
+  });
+}
+
+/** Merge a change into what the club remembers. */
+async function rememberTalks(
+  deps: TalksDeps,
+  saveGameId: string,
+  current: StoredTalksMemory | null,
+  patch: Partial<StoredTalksMemory>,
+): Promise<void> {
+  await deps.profile.setTalksMemory(saveGameId, {
+    coolingOffUntil: current?.coolingOffUntil ?? null,
+    lastSignedAt: current?.lastSignedAt ?? null,
+    ...patch,
+  });
 }
 
 /** What a package would cost the club per season — shown while you draft it. */

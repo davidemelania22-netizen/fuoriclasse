@@ -52,6 +52,8 @@ export interface LineupEntry {
 }
 
 export interface Pagella {
+  /** Minutes actually on the pitch — what the legs pay for. */
+  minutes: number;
   rating: number;
   goals: number;
   assists: number;
@@ -479,6 +481,7 @@ export async function simulateDueMatchdays(
             awayLineup: toLineup(fixture.awayClubId),
             pagella: protagonistAppearance
               ? {
+                  minutes: protagonistAppearance.minutesPlayed,
                   rating: protagonistAppearance.rating,
                   goals: protagonistAppearance.goals,
                   assists: protagonistAppearance.assists,

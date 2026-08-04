@@ -41,6 +41,7 @@ const config: ProgressionConfig = {
     medicalFactor: 0.1,
     agePenaltyStart: 30,
     agePenaltyPerYear: 0.6,
+    sheddingRate: 0.25,
   },
   decay: {
     startAge: 30,

@@ -33,6 +33,8 @@ export interface AwardCeremony {
 
 /** The unveiling at a new club — mirrors the server's ClubPresentation. */
 export interface ClubPresentation {
+  /** SIGNING = unveiled at a new club. RENEWAL = signing to stay. */
+  kind: 'SIGNING' | 'RENEWAL';
   clubId: string;
   clubName: string;
   clubLogo: string | null;
@@ -393,6 +395,20 @@ export interface ProposalResult extends TalksView {
   message: string;
 }
 
+/** The club declining to sit down at all, with its reason in words. */
+export interface TalksRefusal {
+  reason: 'COOLING_OFF' | 'JUST_SIGNED' | 'NOT_EARNED';
+  message: string;
+}
+
+/** One line of the ledger: where a movement came from. */
+export interface LedgerEntry {
+  occurredAt: string;
+  type: string;
+  description: string;
+  amount: number;
+}
+
 export interface DashboardResponse {
   save: SaveGameSummary;
   player: PlayerSummary;
@@ -558,6 +574,15 @@ export interface AdvanceResponse {
   unreadNews: number;
   postMatch: PostMatchSession | null;
   scouting: ScoutingWeek | null;
+  /** What the week paid, or null when there is no contract to pay it. */
+  payslip: PayslipView | null;
+}
+
+/** The week's earnings, itemised the way a payslip is. */
+export interface PayslipView {
+  lines: { kind: string; label: string; units: number; amount: number }[];
+  total: number;
+  balance: number;
 }
 
 export interface NewsItemRecord {
@@ -969,7 +994,10 @@ export const api = {
     }),
   deleteSave: (id: string) =>
     http<{ deleted: boolean }>(`/saves/${id}`, { method: 'DELETE' }),
-  getBalance: (id: string) => http<{ balance: number }>(`/saves/${id}/finance`),
+  getBalance: (id: string) =>
+    http<{ balance: number; movements: LedgerEntry[] }>(
+      `/saves/${id}/finance`,
+    ),
   listClubs: (id: string) => http<ClubDirectoryEntry[]>(`/saves/${id}/clubs`),
   listOffers: (id: string) =>
     http<ProtagonistOfferView[]>(`/saves/${id}/offers`),
@@ -1096,17 +1124,22 @@ export const api = {
   getTalks: (id: string) =>
     http<{ talks: TalksView | null }>(`/saves/${id}/talks`),
   openTalks: (id: string, subject: string) =>
-    http<{ talks: TalksView }>(`/saves/${id}/talks/open`, {
-      method: 'POST',
-      body: JSON.stringify({ subject }),
-    }),
+    http<{ talks: TalksView | null; refusal: TalksRefusal | null }>(
+      `/saves/${id}/talks/open`,
+      { method: 'POST', body: JSON.stringify({ subject }) },
+    ),
   proposeTerms: (id: string, proposal: ContractPackage) =>
     http<ProposalResult>(`/saves/${id}/talks/propose`, {
       method: 'POST',
       body: JSON.stringify(proposal),
     }),
   signTalks: (id: string) =>
-    http<{ signed: boolean; terms: ContractPackage; clubName: string }>(
+    http<{
+      signed: boolean;
+      terms: ContractPackage;
+      clubName: string;
+      signingBonusPaid: number;
+    }>(
       `/saves/${id}/talks/sign`,
       { method: 'POST' },
     ),

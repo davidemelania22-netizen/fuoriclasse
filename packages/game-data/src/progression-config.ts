@@ -22,16 +22,20 @@ export const DEFAULT_PROGRESSION_CONFIG: ProgressionConfig = {
   ],
   intensity: {
     REST: { growthMultiplier: 0.2, fatigue: 0 },
-    LIGHT: { growthMultiplier: 0.7, fatigue: 6 },
-    NORMAL: { growthMultiplier: 1.0, fatigue: 12 },
-    INTENSE: { growthMultiplier: 1.25, fatigue: 22 },
+    LIGHT: { growthMultiplier: 0.7, fatigue: 5 },
+    NORMAL: { growthMultiplier: 1.0, fatigue: 10 },
+    INTENSE: { growthMultiplier: 1.25, fatigue: 18 },
   },
   recovery: {
-    base: 12,
+    // Deliberately below a matchday's cost: a week must not be able to wipe
+    // out ninety minutes, or fatigue never carries into the next game and
+    // condition is 100 every Sunday — which is exactly what used to happen.
+    base: 8,
     physicalRecoveryFactor: 0.12,
     medicalFactor: 0.1,
     agePenaltyStart: 30,
     agePenaltyPerYear: 0.6,
+    sheddingRate: 0.25,
   },
   decay: {
     startAge: 30,

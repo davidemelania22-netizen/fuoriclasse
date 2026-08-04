@@ -74,6 +74,7 @@ function greatGame(): MatchdayReport {
     homeLineup: [],
     awayLineup: [],
     pagella: {
+      minutes: 90,
       rating: 8.5,
       goals: 2,
       assists: 1,

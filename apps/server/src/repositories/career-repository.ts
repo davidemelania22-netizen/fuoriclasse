@@ -4,6 +4,9 @@ export interface ProtagonistContract {
   endDate: Date;
   squadRole: string;
   weeklyWage: number;
+  /** The bonuses agreed at the table — they are what the week actually pays. */
+  appearanceBonus: number;
+  goalBonus: number;
 }
 
 export interface ProtagonistCareer {

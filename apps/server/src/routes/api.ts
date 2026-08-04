@@ -97,6 +97,7 @@ import { listSaves, loadGame, removeSave } from '../application/load-game';
 import { generateAndPersistWorld } from '../application/generate-world';
 import { editPlayer, loadEditablePlayer } from '../application/edit-player';
 import { getBalance, grantFunds } from '../application/finance';
+import { paySigningBonus } from '../application/wages';
 import {
   listClubs,
   listProtagonistOffers,
@@ -359,6 +360,7 @@ export function registerApiRoutes(
     market: marketRepo,
     career: careerRepo,
     profile: profileRepo,
+    careerStats: careerStatsRepo,
   };
   const playerProfileDeps = {
     profileData: new PrismaPlayerProfileRepository(prisma),
@@ -390,6 +392,7 @@ export function registerApiRoutes(
     config: DEFAULT_CAREER_CONFIG,
     profileRepo,
     financeRepo,
+    talks: talksDeps,
   };
 
   function sendAgentResult(reply: FastifyReply, result: AgentActionResult) {
@@ -455,6 +458,7 @@ export function registerApiRoutes(
     newsRepo,
     leagueContext: leagueContextRepo,
     market: marketRepo,
+    wages: { career: careerRepo, finance: financeRepo },
   };
 
   app.post('/api/saves', async (request, reply) => {
@@ -1098,12 +1102,19 @@ export function registerApiRoutes(
     const { id } = request.params as { id: string };
     const body = parseBody(openTalksSchema, request.body ?? {}, reply);
     if (!body) return reply;
-    const talks = await openTalks(talksDeps, {
+    const result = await openTalks(talksDeps, {
       saveGameId: id,
       subject: body.subject,
     });
-    if (!talks) return reply.code(404).send({ error: 'NotFound' });
-    return reply.send({ talks });
+    if (!result) return reply.code(404).send({ error: 'NotFound' });
+    // A refusal is an answer, not an error: the screen has words to show.
+    if (result.status === 'REFUSED') {
+      return reply.send({
+        talks: null,
+        refusal: { reason: result.reason, message: result.message },
+      });
+    }
+    return reply.send({ talks: result.talks, refusal: null });
   });
 
   app.post('/api/saves/:id/talks/propose', async (request, reply) => {
@@ -1132,7 +1143,16 @@ export function registerApiRoutes(
     }
     const result = await signAgreedTerms(talksDeps, id);
     if (!result) return reply.code(409).send({ error: 'CannotSign' });
-    return reply.send(result);
+    // The signing fee is money, not a number on a sheet: pay it.
+    const paid = await paySigningBonus(
+      { finance: financeRepo },
+      {
+        saveGameId: id,
+        amount: result.terms.signingBonus,
+        clubName: result.clubName,
+      },
+    );
+    return reply.send({ ...result, signingBonusPaid: paid?.total ?? 0 });
   });
 
   app.post('/api/saves/:id/talks/cancel', async (request, reply) => {
@@ -1357,7 +1377,9 @@ export function registerApiRoutes(
     const { id } = request.params as { id: string };
     const balance = await getBalance({ repository: financeRepo }, id);
     if (balance === null) return reply.code(404).send({ error: 'NotFound' });
-    return reply.send({ balance });
+    // The ledger: where the money came from, most recent first.
+    const movements = (await financeRepo.listTransactions(id, 60)) ?? [];
+    return reply.send({ balance, movements });
   });
 
   app.post('/api/saves/:id/finance', async (request, reply) => {

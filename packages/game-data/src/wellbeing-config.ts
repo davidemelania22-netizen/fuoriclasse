@@ -61,7 +61,9 @@ export const DEFAULT_WELLBEING_CONFIG: WellbeingConfig = {
   },
   morale: {
     baseline: 60,
-    regression: 0.06,
+    // Strong enough that a spell out of the side is a slump, not a one-way
+    // trip to zero: an unhappy reserve settles around 30, and recovers.
+    regression: 0.12,
     injuryPenalty: 5,
     stressThreshold: 70,
     highStressPenalty: 3,

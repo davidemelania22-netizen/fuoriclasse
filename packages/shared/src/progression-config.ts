@@ -40,6 +40,12 @@ export const progressionConfigSchema = z.object({
     medicalFactor: z.number(),
     agePenaltyStart: z.number().int(),
     agePenaltyPerYear: z.number(),
+    /**
+     * Share of accumulated fatigue shed each week on top of the flat recovery.
+     * Without it recovery is a constant that either always beats the training
+     * load or never does — which is why condition used to sit at 100 forever.
+     */
+    sheddingRate: z.number().min(0).max(1),
   }),
   decay: z.object({
     startAge: z.number().int(),

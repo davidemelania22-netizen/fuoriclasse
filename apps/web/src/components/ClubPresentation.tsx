@@ -42,6 +42,8 @@ export function ClubPresentation({
 }: ClubPresentationProps) {
   const [leaving, setLeaving] = useState(false);
   const { colors } = presentation;
+  // Staying is not arriving: same stage, same shirt, different sentence.
+  const isRenewal = presentation.kind === 'RENEWAL';
   const arcId = useId();
 
   const finish = () => {
@@ -174,12 +176,23 @@ export function ClubPresentation({
 
         <div className="unveil-copy">
           <p className="presentation-kicker">
-            {presentation.competitionName ?? 'Nuova avventura'} ·{' '}
-            {presentation.year}
+            {isRenewal
+              ? 'Rinnovo'
+              : (presentation.competitionName ?? 'Nuova avventura')}{' '}
+            · {presentation.year}
           </p>
           <h2 className="presentation-name">{presentation.playerName}</h2>
-          <p className="presentation-club">è un nuovo giocatore del</p>
+          <p className="presentation-club">
+            {isRenewal
+              ? 'ha firmato il rinnovo con il'
+              : 'è un nuovo giocatore del'}
+          </p>
           <p className="presentation-club-name">{presentation.clubName}</p>
+          {isRenewal && (
+            <p className="presentation-until">
+              Resta fino al {presentation.year + presentation.contractYears}
+            </p>
+          )}
           <dl className="presentation-terms">
             <div>
               <dt>Contratto</dt>

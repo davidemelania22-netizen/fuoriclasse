@@ -48,6 +48,12 @@ const TONE_LABELS: Record<string, string> = {
   DIPLOMATIC: 'Diplomatico',
 };
 
+const euro = new Intl.NumberFormat('it-IT', {
+  style: 'currency',
+  currency: 'EUR',
+  maximumFractionDigits: 0,
+});
+
 export function DashboardPage({ saveId }: DashboardPageProps) {
   const queryClient = useQueryClient();
   const clearSave = useGameStore((s) => s.clearSave);
@@ -77,6 +83,9 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
   const [lastMatches, setLastMatches] = useState<AdvanceResponse['matches']>(
     [],
   );
+  const [lastPayslip, setLastPayslip] = useState<
+    AdvanceResponse['payslip'] | null
+  >(null);
   const [newSeason, setNewSeason] = useState<
     AdvanceResponse['seasonRollover'] | null
   >(null);
@@ -169,6 +178,7 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
     onSuccess: async (response) => {
       setLastReport(response.report);
       setLastMatches(response.matches);
+      setLastPayslip(response.payslip);
       setNewSeason(
         response.seasonRollover.rolledOver ? response.seasonRollover : null,
       );
@@ -197,6 +207,7 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
     onSuccess: async (summary) => {
       // The weekly report belongs to a single week; the season card replaces it.
       setLastReport(null);
+      setLastPayslip(null);
       setLastMatches([]);
       setNewSeason(null);
       setCupResults([]);
@@ -472,14 +483,30 @@ export function DashboardPage({ saveId }: DashboardPageProps) {
             {lastReport && (
               <p className="report">
                 Abilità {lastReport.abilityBefore.toFixed(1)} →{' '}
-                {lastReport.abilityAfter.toFixed(1)} · stanchezza{' '}
-                {Math.round(lastReport.fatigue)} ·{' '}
+                {lastReport.abilityAfter.toFixed(1)} · condizione{' '}
+                {Math.round(lastReport.condition)}% · morale{' '}
+                {Math.round(lastReport.morale)} ·{' '}
                 {lastReport.injured ? 'infortunato' : 'in forma'}
                 {lastReport.injuriesSustained > 0 &&
                   (lastReport.injuryRelapse
                     ? ' · ricaduta sul vecchio infortunio!'
                     : ` · ${lastReport.injuriesSustained} nuovo infortunio`)}
               </p>
+            )}
+            {lastPayslip && (
+              <div className="payslip">
+                <p className="payslip-title">
+                  💶 Hai incassato {euro.format(lastPayslip.total)}
+                </p>
+                <ul>
+                  {lastPayslip.lines.map((line) => (
+                    <li key={line.kind}>
+                      <span>{line.label}</span>
+                      <strong>{euro.format(line.amount)}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </section>
 

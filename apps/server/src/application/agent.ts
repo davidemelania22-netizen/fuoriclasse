@@ -2,11 +2,12 @@ import type { Agent, AgentRequestType } from '@football-life/shared';
 import { AGENTS } from '@football-life/game-data';
 import type { FinanceRepository } from '../repositories/finance-repository';
 import type { ProfileRepository } from '../repositories/profile-repository';
+import { generateProtagonistOffers, type CareerDeps } from './career';
 import {
-  generateProtagonistOffers,
-  renewProtagonistContract,
-  type CareerDeps,
-} from './career';
+  openTalks,
+  RENEWAL_SUBJECT,
+  type TalksDeps,
+} from './contract-talks';
 
 const euro = (n: number): string =>
   new Intl.NumberFormat('it-IT', {
@@ -42,6 +43,8 @@ export async function chooseAgent(
 export interface AgentActionDeps extends CareerDeps {
   profileRepo: ProfileRepository;
   financeRepo: FinanceRepository;
+  /** Contract matters go through the table, agent or no agent. */
+  talks: TalksDeps;
 }
 
 export type AgentActionResult =
@@ -50,6 +53,24 @@ export type AgentActionResult =
   | { status: 'no-contract' }
   | { status: 'save-not-found' };
 
+/**
+ * How much better an opening package an agent can extract before the player
+ * even sits down. A well-connected agent is worth roughly a tenth; nobody is
+ * worth a new contract on their own.
+ */
+function agentEdge(contacts: number): number {
+  return 1 + Math.min(0.12, 0.02 * contacts);
+}
+
+/**
+ * Ask the agent to go and get you a better deal.
+ *
+ * This used to be a button that raised the wage every time it was pressed —
+ * eight clicks turned 2.302 € a week into 8.900 €, and no club ever said no.
+ * Now it opens the same table everything else goes through: the club can
+ * refuse to sit down at all, and what the agent is actually worth is a better
+ * opening package, not a free rise.
+ */
 export async function negotiateWage(
   deps: AgentActionDeps,
   input: { saveGameId: string },
@@ -63,25 +84,46 @@ export async function negotiateWage(
   if (!career) return { status: 'save-not-found' };
   if (!career.currentContract) return { status: 'no-contract' };
 
-  const old = career.currentContract.weeklyWage;
-  const factor = 1 + 0.03 * agent.contacts + career.currentAbility / 1000;
-  const newWage = Math.max(
-    old,
-    Math.min(Math.round(old * factor), Math.round(old * 1.6)),
-  );
+  const opened = await openTalks(deps.talks, {
+    saveGameId: input.saveGameId,
+    subject: RENEWAL_SUBJECT,
+  });
+  if (!opened) return { status: 'save-not-found' };
+  if (opened.status === 'REFUSED') {
+    return {
+      status: 'ok',
+      message: `${agent.name} ha provato a muoversi, ma è tornato con un no. ${opened.message}`,
+    };
+  }
 
-  await deps.repository.renewContract({
-    contractId: career.currentContract.id,
-    newEndDate: career.currentContract.endDate,
-    weeklyWage: newWage,
-    squadRole: career.currentContract.squadRole,
+  // The agent's weight is felt in what the club puts on the table first, and
+  // exactly once: pressing the button again only walks you back to the table
+  // that is already open.
+  const talks = opened.talks;
+  if (talks.agentBoosted || talks.round > 0) {
+    return {
+      status: 'ok',
+      message: `${agent.name} ha già fatto la sua parte: il tavolo è aperto e il club è fermo a ${euro(talks.clubPosition.weeklyWage)} a settimana. Il resto lo tratti tu.`,
+    };
+  }
+
+  const edge = agentEdge(agent.contacts);
+  const improved = {
+    ...talks.baseline,
+    weeklyWage: Math.round(talks.baseline.weeklyWage * edge),
+    signingBonus: Math.round(talks.baseline.signingBonus * edge),
+  };
+  await deps.talks.profile.setContractTalks(input.saveGameId, {
+    ...talks,
+    baseline: improved,
+    clubPosition: improved,
+    agentBoosted: true,
   });
 
-  const message =
-    newWage > old
-      ? `${agent.name} ha strappato un aumento: stipendio da ${euro(old)} a ${euro(newWage)} a settimana.`
-      : `${agent.name} non è riuscito a ottenere di più: lo stipendio resta ${euro(old)} a settimana.`;
-  return { status: 'ok', message };
+  return {
+    status: 'ok',
+    message: `${agent.name} ha aperto il tavolo e ha già strappato qualcosa: si parte da ${euro(improved.weeklyWage)} a settimana invece di ${euro(talks.baseline.weeklyWage)}. Ora tocca a te, al tavolo del contratto.`,
+  };
 }
 
 export async function requestFromAgent(
@@ -122,13 +164,6 @@ export async function requestFromAgent(
     return { status: 'ok', message };
   }
 
-  // renewal
-  const result = await renewProtagonistContract(deps, {
-    saveGameId: input.saveGameId,
-  });
-  if (!result) return { status: 'no-contract' };
-  return {
-    status: 'ok',
-    message: `${agent.name} ha rinnovato il tuo contratto: ${euro(result.weeklyWage)} a settimana fino al ${result.newEndDate.slice(0, 10)}.`,
-  };
+  // A renewal is the same conversation as asking for more money: one door.
+  return negotiateWage(deps, { saveGameId: input.saveGameId });
 }

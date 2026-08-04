@@ -202,6 +202,7 @@ describe('news builders', () => {
     const dull: MatchdayReport = {
       ...base,
       pagella: {
+        minutes: 90,
         rating: 6.1,
         goals: 0,
         assists: 0,
@@ -213,6 +214,7 @@ describe('news builders', () => {
     const great: MatchdayReport = {
       ...base,
       pagella: {
+        minutes: 90,
         rating: 8.4,
         goals: 2,
         assists: 0,

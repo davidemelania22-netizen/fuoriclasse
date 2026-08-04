@@ -15,6 +15,11 @@ import type { SaveGameRepository } from '../repositories/save-game-repository';
  * this feature gets its presentation the next time it is opened.
  */
 export interface ClubPresentation {
+  /**
+   * Which moment this is. A SIGNING is the unveiling at a club you have just
+   * joined; a RENEWAL is the far quieter one where you sign to stay.
+   */
+  kind: 'SIGNING' | 'RENEWAL';
   clubId: string;
   clubName: string;
   /** Crest as a data URL when the club has one, else null. */
@@ -81,7 +86,12 @@ export async function getClubPresentation(
   if (!career?.clubId || !career.currentContract) return null;
 
   const profile = await deps.profile.getProfile(saveGameId);
-  if (profile?.lastPresentedClubId === career.clubId) return null;
+  // Arriving somewhere new comes first: if a transfer and a renewal are both
+  // outstanding, the unveiling is the bigger moment and the renewal is moot.
+  const arriving = profile?.lastPresentedClubId !== career.clubId;
+  const staying =
+    !arriving && profile?.pendingRenewal?.clubId === career.clubId;
+  if (!arriving && !staying) return null;
 
   const club = (await deps.career.listClubDirectory(saveGameId)).find(
     (candidate) => candidate.clubId === career.clubId,
@@ -101,6 +111,7 @@ export async function getClubPresentation(
   );
 
   return {
+    kind: arriving ? 'SIGNING' : 'RENEWAL',
     clubId: club.clubId,
     clubName: club.name,
     clubLogo: club.logo ?? null,
@@ -129,5 +140,8 @@ export async function markPresentationSeen(
 ): Promise<boolean> {
   const career = await deps.career.loadProtagonist(saveGameId);
   if (!career?.clubId) return false;
+  // Clearing both is right whichever scene just played: an unveiling at a new
+  // club makes any older pending renewal irrelevant.
+  await deps.profile.setPendingRenewal(saveGameId, null);
   return deps.profile.setLastPresentedClub(saveGameId, career.clubId);
 }

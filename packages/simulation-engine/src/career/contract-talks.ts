@@ -88,19 +88,145 @@ export interface TalksLeverage {
    * him for nothing pays more, which is the oldest lever in football.
    */
   expiringSoon: boolean;
+  /** Recent form, 0-100. */
+  form: number;
+  /** What he has actually done this season. */
+  seasonAppearances: number;
+  seasonGoals: number;
+  /** Years old. A career winding down does not get a rise for being famous. */
+  age: number;
+}
+
+const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
+
+/**
+ * What the player has done lately, worth between a tenth off and a fifth on.
+ *
+ * Raw ability is what a player *could* do; a club pays for what he *has* done.
+ * A reserve who never gets on the pitch has no case however good he is, and a
+ * modest player in the middle of a great run has one.
+ */
+export function meritFactor(leverage: TalksLeverage): number {
+  // Under ten games he is not yet part of the season; over twenty-five he is
+  // the team. Form pulls either way around an ordinary 50.
+  const played = clamp01((leverage.seasonAppearances - 8) / 18);
+  const form = clamp01((leverage.form - 50) / 40);
+  const scoring = clamp01(
+    leverage.seasonGoals / Math.max(10, leverage.seasonAppearances),
+  );
+  const earned = played * (0.1 + form * 0.09 + scoring * 0.07);
+  // Nothing on the pitch is worse than neutral: it is an argument against him,
+  // and a big enough one to wipe out what raw ability would otherwise buy.
+  const idle = leverage.seasonAppearances < 5 ? 0.18 : 0;
+  return earned - idle;
+}
+
+/** Past thirty a club stops paying for the future and starts paying for now. */
+function agePenalty(age: number): number {
+  return clamp01((age - 30) / 6) * 0.12;
 }
 
 /**
  * How far above its own opening package the club will go, as a multiple.
- * A modest player prises out a few percent; a star with a year left prises
- * out half as much again.
+ *
+ * A benched player prises out nothing at all — the ceiling can sit below 1,
+ * which is the club saying "these are the terms, take them or leave them".
+ * A star in form with a year left prises out a third as much again.
  */
 export function clubCeiling(leverage: TalksLeverage): number {
-  const ability = Math.max(0, Math.min(1, (leverage.currentAbility - 40) / 60));
+  const ability = clamp01((leverage.currentAbility - 40) / 60);
   // A rich club has room to move; a poor one does not, whoever is asking.
-  const wealth = Math.min(0.12, leverage.clubReputation / 60_000);
-  const expiry = leverage.expiringSoon ? 0.12 : 0;
-  return 1.04 + ability * 0.28 + wealth + expiry;
+  const wealth = Math.min(0.1, leverage.clubReputation / 70_000);
+  const expiry = leverage.expiringSoon ? 0.1 : 0;
+  return (
+    1.0 +
+    ability * 0.18 +
+    wealth +
+    expiry +
+    meritFactor(leverage) -
+    agePenalty(leverage.age)
+  );
+}
+
+/** Why a club will not sit down right now. */
+export type TalksRefusal = 'COOLING_OFF' | 'JUST_SIGNED' | 'NOT_EARNED';
+
+export interface WillingnessInput {
+  /** Weeks before the club will talk again after a walk-out. 0 when free. */
+  coolingOffWeeksLeft: number;
+  /** Weeks since the last contract was signed here; null when never. */
+  weeksSinceSigned: number | null;
+  /** Months before the current contract runs out. */
+  monthsLeft: number;
+  seasonAppearances: number;
+  seasonGoals: number;
+  /** Recent form, 0-100, centred on an ordinary 50. */
+  form: number;
+}
+
+export type Willingness =
+  | { willing: true }
+  | { willing: false; reason: TalksRefusal; message: string };
+
+/** Weeks a club needs after a walk-out before it will hear you again. */
+export const COOLING_OFF_WEEKS = 8;
+/** Weeks before a freshly signed contract can be reopened. */
+export const SETTLE_IN_WEEKS = 16;
+/** A contract inside this many months of expiry is worth talking about. */
+const EXPIRY_TALKING_MONTHS = 18;
+
+/**
+ * Whether the club will even sit down.
+ *
+ * Without this a renewal was a button: press it, sign it, press it again. A
+ * club renews a contract for a reason — the deal is running out, or the player
+ * has made himself impossible to ignore. Otherwise the answer is "not now".
+ */
+export function willClubTalk(input: WillingnessInput): Willingness {
+  if (input.coolingOffWeeksLeft > 0) {
+    const weeks = Math.ceil(input.coolingOffWeeksLeft);
+    return {
+      willing: false,
+      reason: 'COOLING_OFF',
+      message: `Ti sei alzato dal tavolo: al club serve tempo. Se ne riparla fra ${weeks} ${
+        weeks === 1 ? 'settimana' : 'settimane'
+      }.`,
+    };
+  }
+
+  if (
+    input.weeksSinceSigned !== null &&
+    input.weeksSinceSigned < SETTLE_IN_WEEKS
+  ) {
+    const weeks = SETTLE_IN_WEEKS - Math.floor(input.weeksSinceSigned);
+    return {
+      willing: false,
+      reason: 'JUST_SIGNED',
+      message: `Hai firmato da poco: il club non riapre un contratto appena chiuso. Riprova fra ${weeks} ${
+        weeks === 1 ? 'settimana' : 'settimane'
+      }.`,
+    };
+  }
+
+  // Either the deal is running down — then the club has its own reason to
+  // talk — or the player has made himself impossible to ignore.
+  const runningOut = input.monthsLeft <= EXPIRY_TALKING_MONTHS;
+  // Being in the side is the price of entry; after that either the form or
+  // the goals make the case. Form alone missed the obvious one — a striker
+  // with a dozen goals and an ordinary average rating was being told no.
+  const earnedIt =
+    input.seasonAppearances >= 12 &&
+    (input.form >= 55 || input.seasonGoals >= 8);
+  if (!runningOut && !earnedIt) {
+    return {
+      willing: false,
+      reason: 'NOT_EARNED',
+      message:
+        'Il club non ha motivo di ritoccare il tuo contratto adesso: hai ancora anni davanti. Gioca e falli ricredere.',
+    };
+  }
+
+  return { willing: true };
 }
 
 export type TalksVerdict = 'ACCEPT' | 'COUNTER' | 'REJECT' | 'WALKED_OUT';

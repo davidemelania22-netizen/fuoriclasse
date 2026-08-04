@@ -653,8 +653,12 @@ textarea:focus {
   font-size: 1rem;
 }
 
-.topbar .wallet {
+.topbar .wallet-wrap {
   margin-left: auto;
+}
+
+.wallet-wrap {
+  position: relative;
 }
 
 .wallet {
@@ -694,6 +698,122 @@ textarea:focus {
 
 .wallet-negative .wallet-value {
   color: var(--danger);
+}
+
+.wallet {
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+/* The ledger: where the money actually came from. */
+.wallet-ledger {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  z-index: 30;
+  width: min(22rem, 80vw);
+  max-height: 20rem;
+  overflow-y: auto;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.7rem;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.35);
+}
+
+.wallet-ledger-title {
+  margin: 0 0 0.45rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+}
+
+.wallet-ledger ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.wallet-ledger li {
+  display: grid;
+  grid-template-columns: 3.4rem 1fr auto;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-size: 0.8rem;
+}
+
+.wl-when {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.wl-what {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wl-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.wl-amount.is-in {
+  color: var(--good, #4ade80);
+}
+
+.wl-amount.is-out {
+  color: var(--danger);
+}
+
+/* The week's payslip, under the weekly report. */
+.payslip {
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.6rem;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+}
+
+.payslip-title {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.payslip ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.payslip li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--muted, var(--faint));
+}
+
+.payslip li strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The club declining to sit down at the contract table. */
+.mk-refusal {
+  border-left: 3px solid var(--danger);
+}
+
+.mk-refusal-title {
+  margin: 0 0 0.3rem;
+  font-weight: 700;
 }
 
 /* ---------- editor grid ---------- */
@@ -3616,6 +3736,7 @@ textarea:focus {
 .presentation-name,
 .presentation-club,
 .presentation-club-name,
+.presentation-until,
 .presentation-terms {
   opacity: 0;
   animation: copy-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -3656,6 +3777,14 @@ textarea:focus {
   font-size: clamp(1.2rem, 2.6vw, 1.7rem);
   font-weight: 700;
   color: #fff;
+}
+
+.presentation-until {
+  animation-delay: 2.25s;
+  margin: 0.5rem 0 0;
+  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .presentation-terms {

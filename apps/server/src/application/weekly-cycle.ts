@@ -1,5 +1,8 @@
 import type { TrainingIntensity } from '@football-life/shared';
-import { transferWindowAt } from '@football-life/simulation-engine';
+import {
+  matchAftermath,
+  transferWindowAt,
+} from '@football-life/simulation-engine';
 import type { MarketRepository } from '../repositories/market-repository';
 import { advanceWeeks } from './advance-week';
 import { simulateDueMatchdays } from './simulate-matchday';
@@ -21,6 +24,7 @@ import {
   type NaturalizationDeps,
 } from './naturalization';
 import { applyMatchReputation, resolveSpotlight } from './league-context';
+import { payForWeeks, type WagesDeps } from './wages';
 import type { ProfileRepository } from '../repositories/profile-repository';
 import type { NewsRepository } from '../repositories/news-repository';
 import type { LeagueContextRepository } from '../repositories/league-context-repository';
@@ -52,6 +56,7 @@ export interface WeeklyCycleDeps {
   newsRepo: NewsRepository;
   leagueContext: LeagueContextRepository;
   market: MarketRepository;
+  wages: WagesDeps;
 }
 
 export interface WeeklyCycleInput {
@@ -213,6 +218,49 @@ export async function runWeeklyCycle(
     matches,
   });
 
+  // Ninety minutes leave a mark that training never did: legs and mood both.
+  // Applied here rather than inside the advance, because the week's training
+  // runs before anyone knows how Sunday went.
+  const aftermath = matchAftermath(
+    matches.map((match) => {
+      const ours = match.isHome
+        ? match.homeGoals > match.awayGoals
+        : match.awayGoals > match.homeGoals;
+      return {
+        played: match.pagella !== null,
+        minutes: match.pagella?.minutes ?? 0,
+        rating: match.pagella?.rating ?? 0,
+        goals: match.pagella?.goals ?? 0,
+        won: ours,
+        drew: match.homeGoals === match.awayGoals,
+      };
+    }),
+  );
+  if (aftermath.fatigue !== 0 || aftermath.morale !== 0) {
+    const after = await deps.advance.repository.applyMatchAftermath({
+      saveGameId,
+      fatigueDelta: aftermath.fatigue,
+      moraleDelta: aftermath.morale,
+    });
+    // The report is what the player reads: it must show the legs and the mood
+    // as they are once Sunday is over, not as they were on the Monday before.
+    if (after) {
+      report.fatigue = after.fatigue;
+      report.condition = after.condition;
+      report.morale = after.morale;
+    }
+  }
+
+  // Pay day. The wage is owed for every week that passed; the bonuses only for
+  // what actually happened on the pitch.
+  const played = matches.filter((match) => match.pagella !== null);
+  const payslip = await payForWeeks(deps.wages, {
+    saveGameId,
+    weeks: report.weeksAdvanced,
+    appearances: played.length,
+    goals: played.reduce((sum, match) => sum + (match.pagella?.goals ?? 0), 0),
+  });
+
   const event = input.skipEvents
     ? null
     : await generateWeeklyEvent(deps.events, { saveGameId });
@@ -232,5 +280,6 @@ export async function runWeeklyCycle(
     naturalizationOffer: naturalizationOffer?.offer ?? null,
     spotlight,
     reputation,
+    payslip,
   };
 }

@@ -17,7 +17,12 @@ import type {
   PendingOffer,
   ProtagonistCareer,
 } from '../repositories/career-repository';
-import type { ProfileRepository } from '../repositories/profile-repository';
+import type {
+  ProfileRepository,
+  StoredPendingRenewal,
+  StoredTalksMemory,
+} from '../repositories/profile-repository';
+import type { CareerStatsRepository } from '../repositories/career-stats-repository';
 
 const NOW = new Date('2024-07-01T00:00:00.000Z');
 
@@ -31,8 +36,17 @@ const offer: PendingOffer = {
   squadRole: 'FIRST_TEAM',
 };
 
-function harness(options: { talks?: StoredTalks | null } = {}) {
+function harness(
+  options: {
+    talks?: StoredTalks | null;
+    memory?: StoredTalksMemory | null;
+    seasonAppearances?: number;
+    seasonGoals?: number;
+  } = {},
+) {
   let stored: StoredTalks | null = options.talks ?? null;
+  let memory: StoredTalksMemory | null = options.memory ?? null;
+  let pendingRenewal: StoredPendingRenewal | null = null;
   const renewed: unknown[] = [];
   const accepted: string[] = [];
   const bonusesWritten: unknown[] = [];
@@ -71,6 +85,8 @@ function harness(options: { talks?: StoredTalks | null } = {}) {
       endDate: new Date('2027-07-01T00:00:00.000Z'),
       squadRole: 'KEY',
       weeklyWage: 6_000,
+      appearanceBonus: 600,
+      goalBonus: 3_000,
     },
   };
 
@@ -104,15 +120,45 @@ function harness(options: { talks?: StoredTalks | null } = {}) {
   } as unknown as CareerRepository;
 
   const profile = {
-    getProfile: async () => ({ contractTalks: stored }),
+    getProfile: async () => ({ contractTalks: stored, talksMemory: memory }),
     setContractTalks: async (_id: string, talks: StoredTalks | null) => {
       stored = talks;
       return true;
     },
+    setTalksMemory: async (_id: string, next: StoredTalksMemory) => {
+      memory = next;
+      return true;
+    },
+    setPendingRenewal: async (
+      _id: string,
+      next: StoredPendingRenewal | null,
+    ) => {
+      pendingRenewal = next;
+      return true;
+    },
   } as unknown as ProfileRepository;
 
+  // A regular starter by default: enough on the pitch for a club to listen.
+  const careerStats = {
+    loadCareerStats: async () => ({
+      appearances: Array.from(
+        { length: options.seasonAppearances ?? 20 },
+        (_, i) => ({
+          seasonStartMs: 0,
+          goals: i < (options.seasonGoals ?? 6) ? 1 : 0,
+        }),
+      ),
+    }),
+  } as unknown as CareerStatsRepository;
+
   return {
-    deps: { market, career: careerRepo, profile },
+    deps: { market, career: careerRepo, profile, careerStats },
+    get memory() {
+      return memory;
+    },
+    get pendingRenewal() {
+      return pendingRenewal;
+    },
     get stored() {
       return stored;
     },
@@ -123,13 +169,22 @@ function harness(options: { talks?: StoredTalks | null } = {}) {
   };
 }
 
+/** Open the table and insist it actually opened. */
+async function sitDown(
+  deps: Parameters<typeof openTalks>[0],
+  subject: string,
+) {
+  const result = await openTalks(deps, { saveGameId: 'save-1', subject });
+  if (!result || result.status !== 'OPEN') {
+    throw new Error(`il club non si è seduto: ${JSON.stringify(result)}`);
+  }
+  return result.talks;
+}
+
 describe('contract talks', () => {
   it('opens a renewal from what the player earns today', async () => {
     const h = harness();
-    const talks = (await openTalks(h.deps, {
-      saveGameId: 'save-1',
-      subject: RENEWAL_SUBJECT,
-    }))!;
+    const talks = await sitDown(h.deps, RENEWAL_SUBJECT);
     expect(talks.clubName).toBe('Bologna Felsinea');
     expect(talks.baseline.weeklyWage).toBe(6_000);
     expect(talks.baseline.squadRole).toBe('KEY');
@@ -142,10 +197,7 @@ describe('contract talks', () => {
 
   it('opens a transfer from what the club bid', async () => {
     const h = harness();
-    const talks = (await openTalks(h.deps, {
-      saveGameId: 'save-1',
-      subject: 'offer-1',
-    }))!;
+    const talks = await sitDown(h.deps, 'offer-1');
     expect(talks.clubName).toBe('Milano Nerazzurra');
     expect(talks.baseline.weeklyWage).toBe(12_000);
     expect(talks.baseline.years).toBe(3);
@@ -160,33 +212,27 @@ describe('contract talks', () => {
 
   it('resumes the same table instead of restarting it', async () => {
     const h = harness();
-    await openTalks(h.deps, { saveGameId: 'save-1', subject: 'offer-1' });
+    await sitDown(h.deps, 'offer-1');
     await proposeTerms(h.deps, {
       saveGameId: 'save-1',
       proposal: { ...h.stored!.baseline, weeklyWage: 20_000 },
     });
     const spent = h.stored!.patience;
-    const again = (await openTalks(h.deps, {
-      saveGameId: 'save-1',
-      subject: 'offer-1',
-    }))!;
+    const again = await sitDown(h.deps, 'offer-1');
     expect(again.patience).toBe(spent);
     expect(again.round).toBe(1);
   });
 
   it('bounds what may be asked for', async () => {
     const h = harness();
-    const talks = (await openTalks(h.deps, {
-      saveGameId: 'save-1',
-      subject: 'offer-1',
-    }))!;
+    const talks = await sitDown(h.deps, 'offer-1');
     expect(talks.limits.weeklyWage.max).toBe(12_000 * 4);
     expect(talks.limits.years.max).toBe(6);
   });
 
   it('moves the club when the ask is reasonable', async () => {
     const h = harness();
-    await openTalks(h.deps, { saveGameId: 'save-1', subject: 'offer-1' });
+    await sitDown(h.deps, 'offer-1');
     const result = (await proposeTerms(h.deps, {
       saveGameId: 'save-1',
       proposal: { ...h.stored!.baseline, weeklyWage: 17_000 },
@@ -197,7 +243,7 @@ describe('contract talks', () => {
 
   it('closes the table once the club has agreed', async () => {
     const h = harness();
-    await openTalks(h.deps, { saveGameId: 'save-1', subject: 'offer-1' });
+    await sitDown(h.deps, 'offer-1');
     const result = (await proposeTerms(h.deps, {
       saveGameId: 'save-1',
       proposal: h.stored!.baseline,
@@ -208,7 +254,7 @@ describe('contract talks', () => {
 
   it('stops listening after too much pushing', async () => {
     const h = harness();
-    await openTalks(h.deps, { saveGameId: 'save-1', subject: 'offer-1' });
+    await sitDown(h.deps, 'offer-1');
     const greedy = { ...h.stored!.baseline, weeklyWage: 48_000 };
     await proposeTerms(h.deps, { saveGameId: 'save-1', proposal: greedy });
     const second = await proposeTerms(h.deps, {
@@ -224,7 +270,7 @@ describe('contract talks', () => {
 
   it('still lets the club’s last position be signed after it walked out', async () => {
     const h = harness();
-    await openTalks(h.deps, { saveGameId: 'save-1', subject: 'offer-1' });
+    await sitDown(h.deps, 'offer-1');
     const greedy = { ...h.stored!.baseline, weeklyWage: 48_000 };
     await proposeTerms(h.deps, { saveGameId: 'save-1', proposal: greedy });
     await proposeTerms(h.deps, { saveGameId: 'save-1', proposal: greedy });
@@ -237,10 +283,7 @@ describe('contract talks', () => {
 
   it('writes every agreed term when a renewal is signed', async () => {
     const h = harness();
-    await openTalks(h.deps, {
-      saveGameId: 'save-1',
-      subject: RENEWAL_SUBJECT,
-    });
+    await sitDown(h.deps, RENEWAL_SUBJECT);
     await proposeTerms(h.deps, {
       saveGameId: 'save-1',
       proposal: { ...h.stored!.baseline, years: 5 },
@@ -257,7 +300,7 @@ describe('contract talks', () => {
 
   it('puts the bonuses on the contract a transfer creates', async () => {
     const h = harness();
-    await openTalks(h.deps, { saveGameId: 'save-1', subject: 'offer-1' });
+    await sitDown(h.deps, 'offer-1');
     const signed = (await signAgreedTerms(h.deps, 'save-1'))!;
 
     // Wage, length and role travel on the offer; bonuses land afterwards.
@@ -273,9 +316,28 @@ describe('contract talks', () => {
     });
   });
 
+  it('leaves a renewal waiting for its moment on screen', async () => {
+    const h = harness();
+    await sitDown(h.deps, RENEWAL_SUBJECT);
+    const signed = (await signAgreedTerms(h.deps, 'save-1'))!;
+    expect(h.pendingRenewal).toMatchObject({
+      clubId: 'club-now',
+      years: signed.terms.years,
+      weeklyWage: signed.terms.weeklyWage,
+    });
+  });
+
+  it('does not stage a renewal scene after a transfer', async () => {
+    // Joining somewhere new has its own unveiling; this must stay untouched.
+    const h = harness();
+    await sitDown(h.deps, 'offer-1');
+    await signAgreedTerms(h.deps, 'save-1');
+    expect(h.pendingRenewal).toBeNull();
+  });
+
   it('clears the table once signed', async () => {
     const h = harness();
-    await openTalks(h.deps, { saveGameId: 'save-1', subject: 'offer-1' });
+    await sitDown(h.deps, 'offer-1');
     await signAgreedTerms(h.deps, 'save-1');
     expect(h.stored).toBeNull();
     expect(await getTalks(h.deps, 'save-1')).toBeNull();
@@ -283,10 +345,104 @@ describe('contract talks', () => {
 
   it('lets the player walk away without signing', async () => {
     const h = harness();
-    await openTalks(h.deps, { saveGameId: 'save-1', subject: 'offer-1' });
+    await sitDown(h.deps, 'offer-1');
     await cancelTalks(h.deps, 'save-1');
-    expect(h.stored).toBeNull();
+    expect(await getTalks(h.deps, 'save-1')).toBeNull();
     expect(h.accepted).toEqual([]);
     expect(h.renewed).toEqual([]);
+  });
+});
+
+describe('what the club remembers', () => {
+  it('does not refund the patience spent when you leave and come back', async () => {
+    const h = harness();
+    await sitDown(h.deps, 'offer-1');
+    await proposeTerms(h.deps, {
+      saveGameId: 'save-1',
+      proposal: { ...h.stored!.baseline, weeklyWage: 20_000 },
+    });
+    const spent = h.stored!.patience;
+    expect(spent).toBeLessThan(3);
+
+    await cancelTalks(h.deps, 'save-1');
+    const again = await sitDown(h.deps, 'offer-1');
+    expect(again.patience).toBe(spent);
+  });
+
+  it('shuts the door for weeks after the club walks out', async () => {
+    const h = harness();
+    await sitDown(h.deps, RENEWAL_SUBJECT);
+    const greedy = { ...h.stored!.baseline, weeklyWage: 24_000 };
+    await proposeTerms(h.deps, { saveGameId: 'save-1', proposal: greedy });
+    await proposeTerms(h.deps, { saveGameId: 'save-1', proposal: greedy });
+    expect(h.stored!.status).toBe('BROKEN');
+    expect(h.memory?.coolingOffUntil).toBeTruthy();
+
+    // A different subject is refused too: the club is not listening at all.
+    await cancelTalks(h.deps, 'save-1');
+    const answer = await openTalks(h.deps, {
+      saveGameId: 'save-1',
+      subject: 'offer-1',
+    });
+    expect(answer).toMatchObject({
+      status: 'REFUSED',
+      reason: 'COOLING_OFF',
+    });
+  });
+
+  it('does not let the same table be reopened to dodge the cooling off', async () => {
+    const h = harness();
+    await sitDown(h.deps, RENEWAL_SUBJECT);
+    const greedy = { ...h.stored!.baseline, weeklyWage: 24_000 };
+    await proposeTerms(h.deps, { saveGameId: 'save-1', proposal: greedy });
+    await proposeTerms(h.deps, { saveGameId: 'save-1', proposal: greedy });
+    await cancelTalks(h.deps, 'save-1');
+
+    const answer = await openTalks(h.deps, {
+      saveGameId: 'save-1',
+      subject: RENEWAL_SUBJECT,
+    });
+    expect(answer).toMatchObject({
+      status: 'REFUSED',
+      reason: 'COOLING_OFF',
+    });
+  });
+
+  it('will not reopen a contract it has just signed', async () => {
+    const h = harness();
+    await sitDown(h.deps, RENEWAL_SUBJECT);
+    await signAgreedTerms(h.deps, 'save-1');
+    expect(h.memory?.lastSignedAt).toBe(NOW.toISOString());
+
+    const answer = await openTalks(h.deps, {
+      saveGameId: 'save-1',
+      subject: RENEWAL_SUBJECT,
+    });
+    expect(answer).toMatchObject({
+      status: 'REFUSED',
+      reason: 'JUST_SIGNED',
+    });
+  });
+
+  it('will not improve a long contract for someone who never plays', async () => {
+    const h = harness({ seasonAppearances: 2, seasonGoals: 0 });
+    const answer = await openTalks(h.deps, {
+      saveGameId: 'save-1',
+      subject: RENEWAL_SUBJECT,
+    });
+    expect(answer).toMatchObject({
+      status: 'REFUSED',
+      reason: 'NOT_EARNED',
+    });
+  });
+
+  it('still hears an offer from another club when you are benched', async () => {
+    // Somebody else wanting you is not a favour your own club grants.
+    const h = harness({ seasonAppearances: 2, seasonGoals: 0 });
+    const answer = await openTalks(h.deps, {
+      saveGameId: 'save-1',
+      subject: 'offer-1',
+    });
+    expect(answer?.status).toBe('OPEN');
   });
 });

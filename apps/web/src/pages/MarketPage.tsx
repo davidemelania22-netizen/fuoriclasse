@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type MarketOfferView } from '../api/client';
+import {
+  api,
+  type MarketOfferView,
+  type TalksRefusal,
+} from '../api/client';
 import { useGameStore } from '../stores/useGameStore';
 import { formatMoney, usePreferences } from '../stores/usePreferences';
 import { ContractTable } from '../components/ContractTable';
@@ -157,11 +161,16 @@ export function MarketPage({ saveId }: MarketPageProps) {
   const m = query.data;
   const talks = talksQuery.data?.talks ?? null;
 
+  // The club can simply decline to sit down; its reason is worth reading.
+  const [refusal, setRefusal] = useState<TalksRefusal | null>(null);
+
   // Only one table at a time: opening a new subject replaces whatever was open.
   const openTalks = useMutation({
     mutationFn: (subject: string) => api.openTalks(saveId, subject),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['talks', saveId] }),
+    onSuccess: (data) => {
+      setRefusal(data.refusal);
+      return queryClient.invalidateQueries({ queryKey: ['talks', saveId] });
+    },
   });
 
   return (
@@ -236,13 +245,22 @@ export function MarketPage({ saveId }: MarketPageProps) {
             />
           )}
 
+          {refusal && !talks && (
+            <section className="card mk-refusal">
+              <p className="mk-refusal-title">Il club non si siede</p>
+              <p>{refusal.message}</p>
+            </section>
+          )}
+
           {m.current.clubName && !talks && (
             <section className="card mk-renewal">
               <div>
                 <h2>Rinnovo</h2>
                 <p className="mk-renewal-hint">
                   Siediti col {m.current.clubName} e ridiscuti durata, ingaggio
-                  e bonus. Il rinnovo non ha bisogno del mercato aperto.
+                  e bonus. Il rinnovo non ha bisogno del mercato aperto — ma il
+                  club accetta di parlarne solo se ha un motivo: il contratto
+                  che scade, o quello che stai facendo in campo.
                 </p>
               </div>
               <button

@@ -19,6 +19,41 @@ export interface StoredContractTalks {
   status: 'OPEN' | 'AGREED' | 'BROKEN';
   lastVerdict: string | null;
   lastMessage: string | null;
+  /**
+   * True once the player has left the table. The session is kept rather than
+   * deleted so the patience already spent is not refunded by walking out and
+   * walking back in. Absent on sessions stored before this existed.
+   */
+  dismissed?: boolean;
+  /** True once an agent has improved the opening package. Only ever once. */
+  agentBoosted?: boolean;
+}
+
+/**
+ * A renewal just agreed, waiting for its moment on screen.
+ *
+ * A signing is derived — the club under contract differs from the last one
+ * presented — but a renewal changes no club, so nothing about the state can
+ * tell you it happened. This is the one thing that has to be remembered.
+ */
+export interface StoredPendingRenewal {
+  clubId: string;
+  years: number;
+  weeklyWage: number;
+  squadRole: string;
+  signedAt: string;
+}
+
+/**
+ * What the club remembers between negotiations: how long it is still annoyed
+ * for, and when it last put pen to paper. Absent on saves from before it
+ * existed, which simply means a club with nothing to hold against you.
+ */
+export interface StoredTalksMemory {
+  /** ISO date before which no club will sit down again. */
+  coolingOffUntil: string | null;
+  /** ISO date the current contract was agreed. */
+  lastSignedAt: string | null;
 }
 
 /** Per-save protagonist profile stored in Person.personalityProfile JSON. */
@@ -85,6 +120,10 @@ export interface PlayerProfile {
   negotiatedOfferIds: string[];
   /** The contract table currently open, if any. Shape owned by contract-talks. */
   contractTalks: StoredContractTalks | null;
+  /** What the club remembers about past negotiations. */
+  talksMemory: StoredTalksMemory | null;
+  /** A renewal signed but not yet celebrated on screen. */
+  pendingRenewal: StoredPendingRenewal | null;
 }
 
 /** A federation's approach: change the shirt you play for, or stay loyal. */
@@ -175,6 +214,16 @@ export interface ProfileRepository {
   setContractTalks(
     saveGameId: string,
     talks: StoredContractTalks | null,
+  ): Promise<boolean>;
+  /** Persist what the club remembers about past negotiations. */
+  setTalksMemory(
+    saveGameId: string,
+    memory: StoredTalksMemory,
+  ): Promise<boolean>;
+  /** Store (or clear, when null) the renewal awaiting its scene. */
+  setPendingRenewal(
+    saveGameId: string,
+    renewal: StoredPendingRenewal | null,
   ): Promise<boolean>;
   /** Persist the season's national call-up state. */
   setNationalCallup(

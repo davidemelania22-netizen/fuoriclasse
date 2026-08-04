@@ -144,7 +144,11 @@ export function applyWeeklyTraining(
       club.medicalQuality * recovery.medicalFactor -
       agePenalty,
   );
-  const fatigueDelta = fatigueLoad - weeklyRecovery;
+  // Shedding a share of what has already accumulated is what gives fatigue an
+  // equilibrium instead of a verdict: with a flat recovery alone the load
+  // either always won or — as it did — always lost, and condition never moved.
+  const shed = player.fatigue * recovery.sheddingRate;
+  const fatigueDelta = fatigueLoad - weeklyRecovery - shed;
   const nextFatigue = clamp(player.fatigue + fatigueDelta, 0, 100);
   const nextCondition = clamp(100 - 0.9 * nextFatigue, 10, 100);
 

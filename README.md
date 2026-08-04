@@ -11,7 +11,7 @@ statistiche, cronaca, conseguenze).
 
 ## Scaricare e giocare
 
-Versione attuale: **0.2.0**.
+Versione attuale: **0.3.0**.
 
 Non serve né Node né il terminale: si scarica un file, doppio clic, installato.
 
@@ -19,8 +19,8 @@ Non serve né Node né il terminale: si scarica un file, doppio clic, installato
 
 | File                          | Per chi                          |
 | ----------------------------- | -------------------------------- |
-| `Fuoriclasse-0.2.0-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
-| `Fuoriclasse.Setup.0.2.0.exe` | Windows                          |
+| `Fuoriclasse-0.3.0-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
+| `Fuoriclasse.Setup.0.3.0.exe` | Windows                          |
 
 L'app **non è firmata** (servirebbe un certificato Apple a pagamento), quindi la
 prima volta il sistema avvisa. È normale, e va fatto una volta sola:
@@ -32,6 +32,38 @@ prima volta il sistema avvisa. È normale, e va fatto una volta sola:
 
 Tutto gira in locale: le carriere restano sul computer di chi gioca e non
 passano da nessun server.
+
+### Novità della 0.3.0
+
+Questa versione nasce da una carriera giocata davvero, alla ricerca di cosa
+non funzionava. Quello che è saltato fuori non era piccolo.
+
+- **Lo stipendio adesso lo prendi** 💶 — prima non veniva pagato mai: dopo
+  dieci settimane il saldo era identico. Ora ogni settimana arriva l'ingaggio,
+  ogni partita il bonus presenza, ogni rete il bonus gol, e il bonus alla firma
+  viene accreditato per davvero. Clicca il portafoglio per il registro dei
+  movimenti. **È questo che rende vere le trattative: prima trattavi un numero
+  che il gioco non usava.**
+- **Il club può dirti di no** 🤝 — il rinnovo non è più un pulsante. Il club si
+  siede solo se ha un motivo: il contratto che si avvicina alla scadenza,
+  oppure quello che stai facendo in campo. Non riapre un contratto firmato da
+  poco (16 settimane), e se lo mandi via alzandoti dal tavolo non ti ascolta
+  per 8 settimane — nemmeno tramite il procuratore. Uscire e rientrare non
+  restituisce più la pazienza spesa.
+- **Quanto ti paga dipende da cosa fai** — presenze, gol, forma ed età, non
+  solo l'abilità grezza. Chi non gioca non ha argomenti, per quanto forte sia.
+- **Il procuratore non stampa più soldi** — "tratta ingaggio" alzava lo
+  stipendio a ogni clic, all'infinito e senza mai un rifiuto. Ora apre lo
+  stesso tavolo di tutti e strappa una proposta di partenza migliore, una volta
+  sola.
+- **Stanchezza e morale sono vivi** 🫀 — prima la condizione restava 100 per
+  sempre: il recupero superava anche l'allenamento più duro e le partite non
+  stancavano. Novanta minuti ora si pagano, il recupero è proporzionale, e
+  allenarsi INTENSO ti costa il posto. Il morale segue risultati, voti e
+  panchine.
+- **Il rinnovo ha il suo momento** ✍️ — stessa scena della presentazione, ma
+  con le parole giuste: "ha firmato il rinnovo con il…", e fino a che anno
+  resti.
 
 ### Novità della 0.2.0
 
@@ -142,7 +174,7 @@ da dare a chi vuole giocare. Basta alzare `version` in `package.json` (è quella
 che finisce nel nome dei file) e creare il tag corrispondente:
 
 ```bash
-git tag -a v0.2.0 -m "Fuoriclasse 0.2.0" && git push origin main --follow-tags
+git tag -a v0.3.0 -m "Fuoriclasse 0.3.0" && git push origin main --follow-tags
 ```
 
 Cosa fa `npm run desktop:stage` (il passaggio prima dell'impacchettamento,
