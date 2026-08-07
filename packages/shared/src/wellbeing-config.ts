@@ -43,6 +43,12 @@ export const wellbeingConfigSchema = z.object({
     decay: z.number().min(0),
     injuryStress: z.number().min(0),
     intensityStress: z.record(z.string(), z.number()),
+    /**
+     * Share of accumulated stress shed each week, on top of the flat decay.
+     * Without it the hardest training intensity climbed to a hundred and
+     * stayed there, and morale with it — a permanent, unrecoverable slump.
+     */
+    sheddingRate: z.number().min(0).max(1),
   }),
   mentalHealth: z.object({
     stressInfluence: z.number().min(0).max(1),

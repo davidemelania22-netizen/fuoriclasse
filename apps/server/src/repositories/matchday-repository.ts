@@ -53,7 +53,17 @@ export interface MatchdayResultsPersistence {
   appearances: AppearancePersistence[];
   standings: StandingRow[];
   completeSeason: boolean;
-  formUpdates: { playerId: string; form: number }[];
+  /**
+   * Per-player state after the round, for everyone in the protagonist's
+   * league: form, and the legs. Both move for the whole division, not only
+   * for the protagonist — otherwise he is the only tired man on the pitch.
+   */
+  playerUpdates: {
+    playerId: string;
+    form: number;
+    fatigue: number;
+    condition: number;
+  }[];
 }
 
 export interface MatchdayRepository {

@@ -11,7 +11,7 @@ statistiche, cronaca, conseguenze).
 
 ## Scaricare e giocare
 
-Versione attuale: **0.3.0**.
+Versione attuale: **0.3.1**.
 
 Non serve né Node né il terminale: si scarica un file, doppio clic, installato.
 
@@ -19,8 +19,8 @@ Non serve né Node né il terminale: si scarica un file, doppio clic, installato
 
 | File                          | Per chi                          |
 | ----------------------------- | -------------------------------- |
-| `Fuoriclasse-0.3.0-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
-| `Fuoriclasse.Setup.0.3.0.exe` | Windows                          |
+| `Fuoriclasse-0.3.1-arm64.dmg` | Mac con chip Apple (M1/M2/M3/M4) |
+| `Fuoriclasse.Setup.0.3.1.exe` | Windows                          |
 
 L'app **non è firmata** (servirebbe un certificato Apple a pagamento), quindi la
 prima volta il sistema avvisa. È normale, e va fatto una volta sola:
@@ -32,6 +32,31 @@ prima volta il sistema avvisa. È normale, e va fatto una volta sola:
 
 Tutto gira in locale: le carriere restano sul computer di chi gioca e non
 passano da nessun server.
+
+### Novità della 0.3.1
+
+Tre correzioni nate da un banco di prova che gioca carriere intere e le
+misura. La prima misura diceva una cosa sola: **il protagonista non scendeva
+in campo praticamente mai**, 0-4% delle giornate.
+
+- **Si stanca tutta la squadra, non solo tu** — nella 0.3.0 eri l'unico a
+  stancarti: i compagni restavano a condizione 100 per sempre. E la condizione
+  conta nella scelta della formazione, quindi eri l'unico penalizzato, ogni
+  domenica. Ora vale per tutta la divisione, con le stesse regole: **i titolari
+  si logorano e chi è fresco li scavalca.** Il ricambio esiste davvero.
+- **Il prestito adesso ti fa giocare** — andavi in prestito e restavi in
+  tribuna lo stesso: il contratto resta al club madre, quindi chi ti prendeva
+  continuava a considerarti il "giovane di prospettiva" di un'altra squadra, e
+  la fiducia tornava giù in dieci settimane. Chi ti prende in prestito ti
+  valuta per quello che sei lì: uno che deve giocare. Da 1-3% a **38%** delle
+  partite, su un talento di 16 anni seguito per tre stagioni.
+- **Allenarsi al massimo non è più una condanna** — lo stress saliva senza mai
+  fermarsi e, passata la soglia, mangiava morale ogni settimana per il resto
+  della carriera. Ora si assesta: l'INTENSO costa finché lo fai, e si recupera.
+
+L'intensità dell'allenamento invece **non era da toccare**: misurata dà
++11 / +21,5 / +22 di crescita su tre stagioni, in linea con quello che
+promette. L'ho lasciata com'era.
 
 ### Novità della 0.3.0
 
@@ -174,7 +199,7 @@ da dare a chi vuole giocare. Basta alzare `version` in `package.json` (è quella
 che finisce nel nome dei file) e creare il tag corrispondente:
 
 ```bash
-git tag -a v0.3.0 -m "Fuoriclasse 0.3.0" && git push origin main --follow-tags
+git tag -a v0.3.1 -m "Fuoriclasse 0.3.1" && git push origin main --follow-tags
 ```
 
 Cosa fa `npm run desktop:stage` (il passaggio prima dell'impacchettamento,

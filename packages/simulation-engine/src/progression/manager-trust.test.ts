@@ -1,11 +1,36 @@
 import { describe, expect, it } from 'vitest';
 import {
+  effectiveRoleBaseline,
   roleBaseline,
   roleFromTrust,
   selectionBiasFromTrust,
   trustAfterMatch,
   trustWhenBenched,
 } from './manager-trust';
+
+describe('effectiveRoleBaseline', () => {
+  it('leaves a settled player judged by his contract', () => {
+    expect(effectiveRoleBaseline('KEY', false)).toBe(roleBaseline('KEY'));
+    expect(effectiveRoleBaseline('PROSPECT', false)).toBe(
+      roleBaseline('PROSPECT'),
+    );
+  });
+
+  it('judges a borrowed prospect as a first-team player', () => {
+    // A club borrows a young player to play him; being measured against the
+    // parent club's prospect role is what kept him on the bench on loan too.
+    expect(effectiveRoleBaseline('PROSPECT', true)).toBeGreaterThan(
+      roleBaseline('PROSPECT'),
+    );
+    expect(effectiveRoleBaseline('PROSPECT', true)).toBe(
+      roleBaseline('FIRST_TEAM'),
+    );
+  });
+
+  it('never demotes a star who goes out on loan', () => {
+    expect(effectiveRoleBaseline('KEY', true)).toBe(roleBaseline('KEY'));
+  });
+});
 
 describe('roleBaseline', () => {
   it('anchors higher trust for more important contractual roles', () => {

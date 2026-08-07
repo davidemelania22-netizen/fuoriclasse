@@ -69,3 +69,35 @@ export function matchAftermath(outcomes: readonly MatchOutcome[]): Aftermath {
 /** Condition is the visible face of fatigue; they never disagree. */
 export const conditionFromFatigue = (fatigue: number): number =>
   clamp(100 - 0.9 * fatigue, 10, 100);
+
+/**
+ * A squad player's legs after a week.
+ *
+ * Everyone in the league has to tire, not only the protagonist. When he was
+ * the only one, condition — which counts for a tenth of the selection score —
+ * was a handicap he alone carried: a teammate of identical ability sat on 100
+ * forever while he came back from ninety minutes on 72, and the manager
+ * quietly preferred the teammate. Every week.
+ *
+ * The numbers mirror the protagonist's own: a nominal week of work, the match
+ * itself, a flat recovery and a share of what has already built up. A player
+ * who plays every game settles tired; one who sits out comes back fresh, which
+ * is what makes a place in the side something you can lose and win back.
+ */
+const SQUAD_TRAINING_LOAD = 10;
+const SQUAD_RECOVERY = 19;
+const SQUAD_SHEDDING = 0.25;
+
+export function squadFatigueAfterWeek(
+  currentFatigue: number,
+  minutesPlayed: number,
+): number {
+  const match = (clamp(minutesPlayed, 0, 120) / 90) * FULL_MATCH_FATIGUE;
+  const next =
+    currentFatigue +
+    SQUAD_TRAINING_LOAD +
+    match -
+    SQUAD_RECOVERY -
+    currentFatigue * SQUAD_SHEDDING;
+  return clamp(next, 0, 100);
+}

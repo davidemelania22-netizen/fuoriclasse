@@ -1,5 +1,5 @@
 import {
-  roleBaseline,
+  effectiveRoleBaseline,
   roleFromTrust,
   sortStandings,
   trustAfterMatch,
@@ -65,8 +65,11 @@ export async function getManagerStatus(
   const data = await statusRepo.loadStatus(saveGameId);
   if (!data) return null;
 
-  const baseline = roleBaseline(data.squadRole);
   const profile = await profileRepo.getProfile(saveGameId);
+  const baseline = effectiveRoleBaseline(
+    data.squadRole,
+    profile?.activeLoan != null,
+  );
   const trust = profile?.managerTrust ?? baseline;
 
   const leagueSize = data.leagueReputations.length;
@@ -131,8 +134,11 @@ export async function updateManagerTrust(
   const squadRole = await deps.status.loadSquadRole(input.saveGameId);
   if (squadRole === null) return null; // unattached: no manager to trust
 
-  const baseline = roleBaseline(squadRole);
   const profile = await deps.profile.getProfile(input.saveGameId);
+  const baseline = effectiveRoleBaseline(
+    squadRole,
+    profile?.activeLoan != null,
+  );
   const before = profile?.managerTrust ?? baseline;
 
   let trust = before;

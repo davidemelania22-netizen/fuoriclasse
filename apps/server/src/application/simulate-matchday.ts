@@ -3,8 +3,10 @@ import {
   applyResult,
   clamp,
   createRandomSource,
+  conditionFromFatigue,
   formAfterMatch,
   formWhenIdle,
+  squadFatigueAfterWeek,
   resolveMatchPlan,
   simulateMatch,
   sortStandings,
@@ -342,6 +344,8 @@ export async function simulateDueMatchdays(
       let protagonistReport: MatchdayReport | null = null;
       // Ratings of everyone who actually played this round (protagonist league).
       const ratingByPlayer = new Map<string, number>();
+      // Minutes for everyone in the round: what each pair of legs paid.
+      const minutesByPlayer = new Map<string, number>();
 
       for (const fixture of round.fixtures) {
         const homePlayers = round.squads.get(fixture.homeClubId) ?? [];
@@ -405,6 +409,11 @@ export async function simulateDueMatchdays(
           );
           for (const appearance of result.appearances) {
             ratingByPlayer.set(appearance.playerId, appearance.rating);
+            minutesByPlayer.set(
+              appearance.playerId,
+              (minutesByPlayer.get(appearance.playerId) ?? 0) +
+                appearance.minutesPlayed,
+            );
           }
         }
 
@@ -501,9 +510,16 @@ export async function simulateDueMatchdays(
         }
       }
 
-      // Dynamic form for the protagonist's league: performers rise, benchwarmers
-      // drift back to baseline — so the fight for a starting spot is real.
-      const formUpdates: { playerId: string; form: number }[] = [];
+      // Form AND legs for the protagonist's whole league: performers rise,
+      // benchwarmers drift back, and whoever played ninety minutes comes back
+      // tired. Doing this for everyone is what keeps the fight for a starting
+      // spot honest — a rested reserve really can overtake a jaded starter.
+      const playerUpdates: {
+        playerId: string;
+        form: number;
+        fatigue: number;
+        condition: number;
+      }[] = [];
       if (isProtagonistRound) {
         const roundClubIds = new Set(
           round.fixtures.flatMap((f) => [f.homeClubId, f.awayClubId]),
@@ -515,7 +531,18 @@ export async function simulateDueMatchdays(
               rating !== undefined
                 ? formAfterMatch(player.form, rating)
                 : formWhenIdle(player.form);
-            formUpdates.push({ playerId: player.id, form: nextForm });
+            // The squad carries condition, not fatigue, so read it back out.
+            const fatigueBefore = Math.max(0, (100 - player.condition) / 0.9);
+            const nextFatigue = squadFatigueAfterWeek(
+              fatigueBefore,
+              minutesByPlayer.get(player.id) ?? 0,
+            );
+            playerUpdates.push({
+              playerId: player.id,
+              form: nextForm,
+              fatigue: Math.round(nextFatigue),
+              condition: Math.round(conditionFromFatigue(nextFatigue)),
+            });
           }
         }
       }
@@ -526,7 +553,7 @@ export async function simulateDueMatchdays(
         appearances: appearancePersistence,
         standings: sortStandings([...table.values()]),
         completeSeason: round.remainingAfterThisRound === 0,
-        formUpdates,
+        playerUpdates,
       });
 
       if (protagonistFixture && protagonistReport) {

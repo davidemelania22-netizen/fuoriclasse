@@ -31,6 +31,24 @@ export function roleBaseline(squadRole: string | null | undefined): number {
   return ROLE_BASELINE[squadRole ?? ''] ?? DEFAULT_BASELINE;
 }
 
+/**
+ * The anchor a player is actually judged against right now.
+ *
+ * A loan is a promise of minutes: a club borrows a young player precisely to
+ * play him. But the contract stays at the parent club, so the borrowed player
+ * kept being measured against his parent role — a prospect anchored at 22 —
+ * and the loan club's trust was dragged back down to it a week at a time. He
+ * would go out on loan and still never play, which defeats the entire point.
+ * While on loan the anchor is a first-team place.
+ */
+export function effectiveRoleBaseline(
+  squadRole: string | null | undefined,
+  onLoan: boolean,
+): number {
+  const contractual = roleBaseline(squadRole);
+  return onLoan ? Math.max(contractual, ROLE_BASELINE.FIRST_TEAM!) : contractual;
+}
+
 export interface MatchTrustInput {
   rating: number;
   goals: number;

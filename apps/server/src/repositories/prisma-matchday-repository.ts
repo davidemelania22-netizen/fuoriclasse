@@ -279,10 +279,14 @@ export class PrismaMatchdayRepository implements MatchdayRepository {
         });
       }
 
-      for (const update of data.formUpdates) {
+      for (const update of data.playerUpdates) {
         await tx.player.update({
           where: { id: update.playerId },
-          data: { form: update.form },
+          data: {
+            form: update.form,
+            fatigue: update.fatigue,
+            condition: update.condition,
+          },
         });
       }
 

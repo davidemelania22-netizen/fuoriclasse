@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   conditionFromFatigue,
   matchAftermath,
+  squadFatigueAfterWeek,
   type MatchOutcome,
 } from './match-aftermath';
 
@@ -66,6 +67,41 @@ describe('matchAftermath', () => {
 
   it('a quiet week changes nothing', () => {
     expect(matchAftermath([])).toEqual({ fatigue: 0, morale: 0 });
+  });
+});
+
+describe('squadFatigueAfterWeek', () => {
+  it('leaves a man who played tired and a man who sat fresh', () => {
+    expect(squadFatigueAfterWeek(0, 90)).toBeGreaterThan(0);
+    expect(squadFatigueAfterWeek(0, 0)).toBe(0);
+  });
+
+  it('settles instead of climbing forever', () => {
+    let fatigue = 0;
+    for (let week = 0; week < 60; week += 1) {
+      fatigue = squadFatigueAfterWeek(fatigue, 90);
+    }
+    // A regular starter is tired, not broken.
+    expect(fatigue).toBeGreaterThan(30);
+    expect(fatigue).toBeLessThan(55);
+  });
+
+  it('lets a rested player recover what a run of games cost him', () => {
+    let played = 0;
+    for (let week = 0; week < 20; week += 1)
+      played = squadFatigueAfterWeek(played, 90);
+    let resting = played;
+    for (let week = 0; week < 4; week += 1)
+      resting = squadFatigueAfterWeek(resting, 0);
+    expect(resting).toBeLessThan(played);
+  });
+
+  it('is the same deal the protagonist gets, so nobody is singled out', () => {
+    // The whole point: his teammates tire on the same terms he does.
+    expect(squadFatigueAfterWeek(40, 90)).toBeCloseTo(
+      40 + 10 + 19 - 19 - 40 * 0.25,
+      5,
+    );
   });
 });
 

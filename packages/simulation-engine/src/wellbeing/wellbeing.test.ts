@@ -63,6 +63,7 @@ const config: WellbeingConfig = {
     decay: 3,
     injuryStress: 4,
     intensityStress: { REST: -2, LIGHT: 0, NORMAL: 1, INTENSE: 4 },
+    sheddingRate: 0.0125,
   },
   mentalHealth: { stressInfluence: 0.6, recovery: 0.2 },
   relationship: {

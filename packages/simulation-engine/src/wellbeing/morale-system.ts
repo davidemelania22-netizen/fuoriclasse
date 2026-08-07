@@ -32,7 +32,8 @@ export function updateStress(
 ): number {
   const s = config.stress;
   const intensityStress = s.intensityStress[input.intensity] ?? 0;
-  let value = input.stress + intensityStress - s.decay;
+  let value =
+    input.stress + intensityStress - s.decay - input.stress * s.sheddingRate;
   if (input.injured) value += s.injuryStress;
   return clamp(value, 0, 100);
 }

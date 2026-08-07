@@ -73,6 +73,10 @@ export const DEFAULT_WELLBEING_CONFIG: WellbeingConfig = {
     decay: 3,
     injuryStress: 4,
     intensityStress: { REST: -2, LIGHT: 0, NORMAL: 1, INTENSE: 4 },
+    // Training flat out settles around 80: above the threshold, so it costs
+    // morale for as long as you keep it up, but it stops there instead of
+    // pinning at a hundred forever.
+    sheddingRate: 0.0125,
   },
   mentalHealth: {
     stressInfluence: 0.6,
